@@ -1,0 +1,144 @@
+<html>
+<head>
+<title>Настройки плагинов Combats.RU</title>
+</head>
+<body>
+<input type="checkbox" onclick="switchUnconfigurable()" CHECKED>&nbsp;Скрыть ненастраиваемые плагины<br/>
+<select id="index" onchange="getPluginGfg()"></select>
+<div id="props"></div>
+<script>
+var props=null;
+var plugin=null;
+var showUnconfigurable=false;
+
+function loadPluginsList() {
+  var select = document.getElementById('index');
+  select.options.length=0;
+  for(var i in parent.combats_plugins_manager.plugins_list) {
+    if (!showUnconfigurable && !('getProperties' in parent.combats_plugins_manager.plugins_list[i]))
+      continue;
+    var option = document.createElement('OPTION');
+    select.options.add(option);
+    option.value = i;
+    option.innerText = parent.combats_plugins_manager.plugins_list[i];
+    option.selected = (i==parent.combats_plugins_manager.lastConfiguredPlugin);
+  }
+}
+
+function switchUnconfigurable() {
+  showUnconfigurable=!showUnconfigurable;
+  loadPluginsList();
+}
+
+function disablePlugin(plugin_index) {
+  plugin.disable();
+  parent.combats_plugins_manager.plugins_disabled[plugin_index]=true;
+}
+
+function enablePlugin(plugin_index) {
+  plugin.enable();
+  parent.combats_plugins_manager.plugins_disabled[plugin_index]=false;
+}
+
+function getProps() {
+  var elements = document.forms[0].elements;
+  for(var i=0; i<props.length; i++) {
+    prop_type = typeof(props[i].value);
+    if (prop_type=="boolean") {
+      props[i].value = elements[i].checked;
+    } else if (prop_type=="int") {
+      props[i].value = parseInt(elements[i].value);
+    } else if (prop_type=="float") {
+      props[i].value = parseFloat(elements[i].value);
+    } else if (prop_type=="object" && !is_function(elements[i].value)) {
+      props[i].value.selected = elements[i].value;
+    } else if (prop_type!="function" && prop_type!="object") {
+      props[i].value = elements[i].value;
+    }
+  }
+}
+
+function setPluginGfg() {
+  getProps();
+  plugin.setProperties(props);
+}
+
+function invoke(i) {
+  getProps();
+  props[i].value.apply(plugin, [props]);
+}
+
+function is_function(value) {
+  return typeof(value)=="function" || (typeof(value)=="object" && (''+value).match(/^\s*(function)\s*([^\(\s]*\s*)?\(.*?\)/));
+}
+
+function getPluginGfg() {
+  var plugin_index = document.all["index"].value;
+  parent.combats_plugins_manager.lastConfiguredPlugin = plugin_index;
+  plugin = parent.combats_plugins_manager.plugins_list[plugin_index];
+  if (plugin==null) {
+    props = null;
+    document.all["props"].innerHTML = "";
+    return;
+  }
+  if ("getProperties" in plugin) {
+    props = plugin.getProperties();
+    var s="<form><table>";
+    for(var i=0; i<props.length; i++) {
+      if (is_function(props[i].value)) {
+        s += "<tr><td colspan=2><input type=button value=\""+props[i].name+"\" onclick=\"invoke("+i+")\">";
+      } else {
+        s += '<tr><td>'+props[i].name;
+        var style = '';
+        if ('style' in props[i])
+          style = props[i].style;
+        if (typeof(props[i].value)=="boolean") {
+          s += '<td><input type=checkbox style="'+style+'"'+(props[i].value?' CHECKED':'')+'>';
+        } else if (typeof(props[i].value)=="object") {
+          s += '<td><select>\n';
+          if ('length' in props[i].value) {
+            for (var j=0; j<props[i].value.length; j++) {
+              if (j in props[i].value)
+                s += '<option value="'+j+'"'+(j==props[i].value.selected?' SELECTED':'')+'>'+props[i].value[j]+'</option>\n';
+            }
+          }
+          s += '</select>';
+        } else {
+          try {
+            if ("type" in props[i]) {
+              if (props[i].type=="textarea") {
+                style = 'width:100%; height:7em;'+style;
+                s += '<td><textarea style="'+style+'">'+props[i].value+"</textarea>";
+              } else
+                throw new Exception();
+            } else
+              throw new Exception();
+          } catch(e) {
+            s += '<td><input type=text style="'+style+'" value="'+props[i].value+'">';
+          }
+        }
+      }
+    }
+    s+="</table></form>";
+    if ("setProperties" in plugin) {
+      s+="<input type=\"button\" value=\"Сохранить\" onclick=\"setPluginGfg()\">";
+    }
+    document.all["props"].innerHTML = s;
+  } else {
+    props = null;
+    document.all["props"].innerHTML = "<br><i>Плагин не имеет настраиваемых параметров</i>";
+  }
+  if (("disable" in plugin) && !parent.combats_plugins_manager.plugins_disabled[plugin_index]) {
+    document.all["props"].innerHTML = "<br><input type=\"button\" value=\"Отключить\" onclick=\"disablePlugin("+plugin_index+")\"><br>"+document.all["props"].innerHTML;
+  }
+  if (("enable" in plugin) && parent.combats_plugins_manager.plugins_disabled[plugin_index]) {
+    document.all["props"].innerHTML = "<br><input type=\"button\" value=\"Включить\" onclick=\"enablePlugin("+plugin_index+")\"><br>"+document.all["props"].innerHTML;
+  }
+}
+
+loadPluginsList();
+getPluginGfg()
+
+</script>
+</body>
+</html>
