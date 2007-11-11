@@ -1,0 +1,206 @@
+<script language="JavaScript">
+try {
+if (location.href.search(/^http\:\/\/(?:\w+city|dungeon)\.combats\.ru\/buttons\.pl\?battle=/)==0){
+  if ("combats_plugins_manager" in this) {
+    combats_plugins_manager.Configure();
+  } else {
+    var new_version = ("Framework" in top);
+    var $A = Array.from = function(iterable) {
+      if (!iterable) return [];
+      var results = [];
+      for (var i = 0, length = iterable.length; i < length; i++)
+        results.push(iterable[i]);
+      return results;
+    };
+
+    var create_object=function() {
+      this.lastConfiguredPlugin = -1;
+      this.security_id = %max_security_id;
+      this.base_folder = external.m2_plugin_folder( this.security_id, "Combats.RU" );
+    };
+
+    create_object.prototype = {
+      "events": {},
+      "plugins_list": {},
+      "plugins_disabled": {},
+      "silent": true,
+      "toString": function() {
+        return "Плагины Combats.RU";
+      },
+      "getProperties": function() {
+        return [
+          { name: "\"Тихие\" ошибки плагинов", value: this.silent },
+          { name: "Загрузить новый плагин", value: this.loadCustomPlugin }
+        ];
+      },
+      "setProperties": function(a) {
+        this.silent=a[0].value;
+      },
+      "attachEvent": function(event, method) {
+        if (!(event in this.events))
+          this.events[event] = [];
+        this.events[event][this.events[event].length] = method;
+      },
+      "detachEvent": function(event, method) {
+        if (event in this.events) {
+          for (var i=0; i<this.events[event].length; i++)
+            if (this.events[event][i] == method) {
+              this.events[event].splice(i,1);
+              break;
+            }
+        }
+      },
+      "fireEvent": function(event, eventObj) {
+        if (event in this.events) {
+          for (var i=0; i<this.events[event].length; i++)
+            this.events[event][i](eventObj);
+        }
+      },
+      "loadCustomPlugin": function() {
+        var pluginName=prompt("Введите название плагина (имя папки с плагином)","");
+        if (pluginName=="")
+          return;
+        this.loadPlugin(pluginName);
+      },
+      "StartCfgPanelDrag": function() {
+        if (window.event.srcElement.nodeName=='DIV' && !this.MoveCfgPanelMode) {
+          this.MoveCfgPanelMode=true; 
+          this.MoveCfgPanelY = window.event.offsetY; 
+          this.MoveCfgPanelX = window.event.offsetX
+//          alert(''+window.event.offsetX+','+window.event.offsetY+'\n'+window.event.clientX+','+window.event.clientY);
+        }
+      },
+      "MoveCfgPanel": function() {
+        if (this.CfgDiv && this.MoveCfgPanelMode) {
+//          if (window.event.type=='mouseout') alert();
+          this.CfgDiv.style.left = window.event.clientX-top.combats_plugins_manager.MoveCfgPanelX;
+          this.CfgDiv.style.top = window.event.clientY-top.combats_plugins_manager.MoveCfgPanelY;
+        }
+      },
+      "HideCfgPanel": function() {
+        if (this.CfgDiv)
+          document.body.removeChild(this.CfgDiv);
+        this.CfgDiv = null;
+        this.MoveCfgPanelMode=false; 
+      },
+      "Configure": function() {
+        if (this.CfgDiv) {
+//          this.HideCfgPanel();
+          return;
+        }
+        var l = (window.screen.width-400)/2;
+        var t = (window.screen.height-400)/2;
+        var w;
+        if (1) {
+          this.CfgDiv = document.createElement('<div>');
+          this.CfgDiv.style.left = l;
+          this.CfgDiv.style.top = t;
+          this.CfgDiv.style.width = '400px';
+          this.CfgDiv.style.height = '400px';
+          this.CfgDiv.style.position = 'absolute';
+          document.body.insertBefore(this.CfgDiv);
+          this.CfgDiv.innerHTML = '<div style="width:100%; background:navy; text-align:right" onmousemove="top.combats_plugins_manager.MoveCfgPanel()" onmouseout="top.combats_plugins_manager.MoveCfgPanel()" onmousedown="top.combats_plugins_manager.StartCfgPanelDrag()" onmouseup="top.combats_plugins_manager.MoveCfgPanelMode=false">\
+<span style="cursor:pointer; color:white" onclick="top.combats_plugins_manager.HideCfgPanel()">&nbsp;X&nbsp;</span></div>\
+<iframe style="width:100%; height:100%"></iframe>';
+          w = this.CfgDiv.childNodes[1].contentWindow;
+        } else {
+          w=window.open("about:blank", "_blank", "fullscreen=no,top="+t+"px,left="+l+"px,width=400px,height=400px,center=yes,location=no,toolbar=no");
+        }
+        w.document.write(external.readFile( this.security_id, "Combats.RU", "cfg.html"));
+      },
+      "get_binded_method": function() { // object, method, ...
+        var args = $A(arguments), object = args.shift(), __method = args.shift();
+        return function() {
+          return __method.apply(object, args.concat($A(arguments)));
+        }
+      },
+      "logError": function(plugin,e) {
+        var s = 'Ошибка в плагине "'+plugin.toString()+'"';
+        if (!this.silent) {
+          if (new_version) {
+            var messages = '';
+            for(var i in e)
+              messages += '&gt; ['+i+']: '+e[i]+'<BR>';
+            this.add_chat(messages);
+          } else {
+            var chat = top.frames["chat"];
+            chat.messages = '';
+            chat.am('<font class=sysdate>Внимание!</font> '+s);
+            for(var i in e)
+              chat.am('&gt; ['+i+']: '+e[i]);
+            chat.write_messages();
+          }
+        }
+      },
+      "loadPlugin": function(pluginName) {
+        var d = (new Date()).toTimeString().substr(0,5);
+        var s = external.readFile( this.security_id, "Combats.RU", pluginName+"\\plugin.js");
+        var errCount = 0;
+        if (s!=null && s.length>0)
+          try {
+            var obj = top.eval(s);
+            if (obj)
+              this.plugins_list[pluginName]=obj;
+          } catch(e) {
+            errCount++;
+            if (new_version) {
+              var messages = '<font class=date2>'+d+'</font> Ошибка инициализации плагина "'+pluginName+'"<BR>';
+              for(var i in e)
+                messages += '&gt; ['+i+']: '+e[i]+'<BR>';
+              top.Chat.am(messages);
+            } else {
+              top.frames["chat"].am('<font class=date2>'+d+'</font> Ошибка инициализации плагина "'+pluginName+'"');
+              for(var i in e)
+                top.frames["chat"].am('&gt; ['+i+']: '+e[i]);
+            }
+          }
+        return errCount;
+      },
+      getMainFrame: function() {
+        return top.frames[3]; // пока что так
+      },
+      add_chat: function(s) {
+        top.Chat.am(s);
+      },
+      Init: function() {
+        var sleep = !new_version && !("chat" in top.frames);
+        for(var i=0; i<top.frames.length; i++) {
+          sleep |= (top.frames[i].document.readyState!="complete");
+        }
+        if (sleep) {
+          setTimeout(this.get_binded_method(this,this.Init),500);
+          return;
+        }
+//        alert('frames: '+top.frames.length);
+        var combats_plugins = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini").split(/[\x0A\x0D]+/);
+        if (!new_version)
+          top.frames["chat"].messages = '';
+        var errCount=0;
+        var d = (new Date()).toLocaleTimeString().substr(0,5);
+        this.plugins_list['combats_plugins_manager']=this;
+        for(i=0;i<combats_plugins.length;i++) {
+          errCount += this.loadPlugin(combats_plugins[i]);
+        }
+        if (errCount>0) {
+          if (new_version)
+            top.Chat.am('<font class=date2>'+d+'</font> Всего ошибок: '+errCount);
+          else
+            top.frames["chat"].am('<font class=date2>'+d+'</font> Всего ошибок: '+errCount);
+        } else {
+          if (new_version)
+            top.Chat.am('<font class=date2>'+d+'</font> Плагины успешно инициализированы');
+          else
+            top.frames["chat"].am('<font class=date2>'+d+'</font> Плагины успешно инициализированы');
+        }
+        if (!new_version)
+          top.frames["chat"].write_messages();
+      }
+    };
+    combats_plugins_manager = new create_object();
+    setTimeout(combats_plugins_manager.get_binded_method(combats_plugins_manager,combats_plugins_manager.Init),1500);
+//    combats_plugins_manager.Init();
+  }
+}
+} catch (e) {
+}
+</script>
