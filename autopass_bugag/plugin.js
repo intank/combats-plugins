@@ -74,8 +74,6 @@ debugger;
           obj.click();
           break;
         }
-//        this.state = 0;
-//        break;
       case 2:
         this.state = 3;
         top.frames[3].location = '/portal.pl?path=o0&rnd='+Math.random();
@@ -87,7 +85,13 @@ debugger;
           break;
         }
         this.state = 4;
-        top.frames[3].location = '/main.pl?move_dialog=4&'+Math.random();
+        for(var i=0;i<top.frames[3].document.links.length;i++)
+          if (top.frames[3].document.links[i].search.match(/\?move_dialog=(?:3|4)/)) {
+            top.frames[3].location = top.frames[3].document.links[i].href;
+            break;
+          }
+//        this.state = 0;
+//        break;
         break;
       case 4:
         this.state = 5;
