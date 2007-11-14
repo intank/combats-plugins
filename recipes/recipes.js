@@ -262,7 +262,6 @@ if (opener.frames.length) {
   cells = opener.document.getElementsByTagName('A');
 }
 
-debugger;
 var show_type = '0';
 
 components_count=0;
