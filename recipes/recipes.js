@@ -262,6 +262,7 @@ if (opener.frames.length) {
   cells = opener.document.getElementsByTagName('A');
 }
 
+debugger;
 var show_type = '0';
 
 components_count=0;
@@ -289,12 +290,12 @@ for(i=0;i<cells.length;i++) {
   for(j=0;j<components.length;j++) {
     if (components[j].id==id) {
       components[j].count+=cnt;
-      components_count+=cnt;
       break;
     }
   }
+  components_count += cnt;
   if (j>=components.length)
-    components[components.length] = { 
+    components.push({ 
       id:id, 
       src:'http://img.combats.ru/i/items/'+id+'.gif', 
       count:cnt, 
@@ -302,30 +303,30 @@ for(i=0;i<cells.length;i++) {
       name:name, 
       is_material:is_material,
       is_rune:is_rune
-    };
+    });
 }
 
 for(j=0;j<components.length;j++)
   components[j].src='http://img.combats.ru/i/items/'+components[j].id+'.gif';
 
-if (components_count) {
-  components.sort(function(a,b) {if (a.name<b.name) return -1; else if (a.name>b.name) return 1; else return 0;});
+components.sort(function(a,b) {if (a.name<b.name) return -1; else if (a.name>b.name) return 1; else return 0;});
 
-  function HintHide() {
-    document.all['components'].contentWindow.document.all("hint").style.visibility = "hidden";
+function HintHide() {
+  document.all['components'].contentWindow.document.all("hint").style.visibility = "hidden";
+}
+
+function HintRecipes(id,e) {
+  var s='';
+  for(i=0;i<recipes.length;i++) {
+    for(k=0; k<recipes[i].comp.length; k+=2)
+      if(id==recipes[i].comp[k]) {
+        if (s)
+          s += ',<br>';
+        s += '<b>'+recipes[i].descr+'</b> ('+recipes[i].comp_str+')';
+        break;
+      }
   }
-
-  function HintRecipes(id,e) {
-    s='';
-    for(i=0;i<recipes.length;i++) {
-      for(k=0; k<recipes[i].comp.length; k+=2)
-        if(id==recipes[i].comp[k]) {
-          if (s)
-            s += ',<br>';
-          s += '<b>'+recipes[i].descr+'</b> ('+recipes[i].comp_str+')';
-          break;
-        }
-    }
+  if (s) {
     d = document.all['components'].contentWindow.document;
     hint = d.all("hint");
     hint.style.visibility = "visible";
@@ -333,142 +334,142 @@ if (components_count) {
     hint.style.left = e.clientX;
     hint.style.top = e.clientY+d.body.scrollTop;
   }
+}
 
-  function ShowComponents() {
-    document.all['components'].contentWindow.document.open();
-wrc=document.all['components'].contentWindow.document.writeln;
-    wrc('<html><body style="margin: 0; padding: 0;"><div id=\'hint\' style=\'position: absolute; z-index: 1; width: 80%; background: yellow; visibility: hidden;\'></div><table width=100%>');
+function ShowComponents() {
+  document.all['components'].contentWindow.document.open();
+
+  if (components_count) {
+    var s = '<html><body style="margin: 0; padding: 0;"><div id=\'hint\' style=\'position: absolute; z-index: 1; width: 80%; background: yellow; visibility: hidden;\'></div><table width=100%>';
     for(var i in components) {
       if(components[i].count && (show_type=='0' || show_type=='1' && components[i].is_material || show_type=='2' && components[i].is_rune))
-        wrc('<tr id="'+components[i].id+'"><td><img src="'+components[i].src+'" onmouseover="top.HintRecipes(\''+components[i].id+'\',window.event)" onmouseout="top.HintHide()"><td><b>'+components[i].name+'</b><td id="'+components[i].id+'_cnt">'+components[i].count);
+        s += '<tr id="'+components[i].id+'"><td><img src="'+components[i].src+'" onmouseover="top.HintRecipes(\''+components[i].id+'\',window.event)" onmouseout="top.HintHide()"><td><b>'+components[i].name+'</b><td id="'+components[i].id+'_cnt">'+components[i].count;
     }
-    wrc('</table></body></html>');
-    document.all['components'].contentWindow.document.close();
-  }
+    s += '</table></body></html>';
+  } else
+    s = '<font color=red>Материалы из подземелий, руны и другие предметы не найдены.</font><br>Убедитесь, что открыт правильный раздел Вашего инвентаря.';
 
-  function Accept(recipe,count) {
-    recipe=recipes[recipe];
-    if (0<recipe.possible) {
-      recipe.accepted++;
-      for(j=0; j<components.length; j++)
-        for(k=0; k<recipe.comp.length; k+=2)
-          if(components[j].id==recipe.comp[k]) {
-            components[j].used+=recipe.comp[k+1];
-            break;
-          }
-    }
-    Analyze();
-    ShowRecipes();
-    ShowAccepted();
-  }
+  document.all['components'].contentWindow.document.writeln(s);
+  document.all['components'].contentWindow.document.close();
+}
 
-  function Dismiss(recipe,count) {
-    recipe=recipes[recipe];
-    if (recipe.accepted>0) {
-      recipe.accepted--;
-      for(j=0; j<components.length; j++)
-        for(k=0; k<recipe.comp.length; k+=2)
-          if(components[j].id==recipe.comp[k]) {
-            components[j].used-=recipe.comp[k+1];
-            break;
-          }
-    }
-    Analyze();
-    ShowRecipes();
-    ShowAccepted();
-  }
-
-  function Analyze() {
-    for(var i in recipes) {
-      m = -1;
-      for(k=0; k<recipes[i].comp.length; k+=2) {
-        c = 0;
-        for(j=0; j<components.length; j++) {
-          if (recipes[i].comp[k]==components[j].id) {
-            c = Math.floor((components[j].count-components[j].used)/recipes[i].comp[k+1]);
-            break;
-          }
+function Accept(recipe,count) {
+  recipe=recipes[recipe];
+  if (0<recipe.possible) {
+    recipe.accepted++;
+    for(j=0; j<components.length; j++)
+      for(k=0; k<recipe.comp.length; k+=2)
+        if(components[j].id==recipe.comp[k]) {
+          components[j].used+=recipe.comp[k+1];
+          break;
         }
-        if (m<0)
-          m = c;
-        else
-          m = Math.min(m,c);
-      }
-      if(m>=0) {
-        recipes[i].possible = m;
-      }
-      if (!recipes[i].comp_str) {
-        s = '';
-        for(k=0; k<recipes[i].comp.length; k+=2) {
-          for(j=0; j<components.length; j++) {
-            if (recipes[i].comp[k]==components[j].id) {
-              if (s)
-                s += ', ';
-              if (components[j].count<recipes[i].comp[k+1])
-                s += '<font color=#FF3F00>'+components[j].name+'('+recipes[i].comp[k+1]+')</font>';
-              else
-                s += components[j].name+'('+recipes[i].comp[k+1]+')';
-              break;
-            }
-          }
-          if (j>=components.length) {
-            if (s)
-              s += ', ';
-            s += '<font color=#FF3F00>'+recipes[i].comp[k]+'('+recipes[i].comp[k+1]+')</font>';
-          }
-        }
-        recipes[i].comp_str = s;
-      }
-    }
   }
-
-  function ShowRecipes() {
-    t = 0;
-    if(document.all['recipes'].contentWindow.document.body)
-      t = document.all['recipes'].contentWindow.document.body.scrollTop;
-    document.all['recipes'].contentWindow.document.open();
-wrr=document.all['recipes'].contentWindow.document.writeln;
-    wrr('<html><body style="margin: 0; padding: 0;"><table width=100%>');
-    selected_location = parseInt(document.all['locations'].value);
-    for(var i in recipes) {
-      if((selected_location==0 || recipes[i].location==selected_location-1) && recipes[i].possible>0) {
-        wrr('<tr><td><img style="cursor: pointer;" src="http://img.combats.ru/i/items/'+recipes[i].name+'.gif" onclick="top.Accept(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+(recipes[i].possible));
-        wrr('<tr><td colspan=2 style="color: #888888">Требуется: '+recipes[i].comp_str+'<td>');
-      }
-    }
-    wrr('</table></body></html>');
-    document.all['recipes'].contentWindow.document.close();
-    document.all['recipes'].contentWindow.document.body.scrollTop = t;
-  }
-
-  function ShowAccepted() {
-    t = 0;
-    if(document.all['accepted'].contentWindow.document.body)
-      t = document.all['accepted'].contentWindow.document.body.scrollTop;
-    document.all['accepted'].contentWindow.document.open();
-wra=document.all['accepted'].contentWindow.document.writeln;
-
-    wra('<html><body style="margin: 0; padding: 0;"><table width=100%>');
-    for(i=0; i<recipes.length; i++) {
-      if(recipes[i].accepted>0) {
-        wra('<tr><td><img style="cursor: pointer;" src="http://img.combats.ru/i/items/'+recipes[i].name+'.gif" onclick="top.Dismiss(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+recipes[i].accepted);
-        wra('<tr><td colspan=2 style="color: #888888">Требуется: '+recipes[i].comp_str+'<td>');
-      }
-    }
-    wra('</table></body></html>');
-    document.all['accepted'].contentWindow.document.close();
-    document.all['accepted'].contentWindow.document.body.scrollTop = t;
-  }
-
   Analyze();
-  load_cfg();
-  ShowComponents();
   ShowRecipes();
   ShowAccepted();
-
-} else {
-  wrc('<font color=red>Материалы из подземелий не найдены.</font><br>Убедитесь, что открыт раздел "Прочее" Вашего инвентаря.');
 }
+
+function Dismiss(recipe,count) {
+  recipe=recipes[recipe];
+  if (recipe.accepted>0) {
+    recipe.accepted--;
+    for(j=0; j<components.length; j++)
+      for(k=0; k<recipe.comp.length; k+=2)
+        if(components[j].id==recipe.comp[k]) {
+          components[j].used-=recipe.comp[k+1];
+          break;
+        }
+  }
+  Analyze();
+  ShowRecipes();
+  ShowAccepted();
+}
+
+function Analyze() {
+  for(var i in recipes) {
+    m = -1;
+    for(k=0; k<recipes[i].comp.length; k+=2) {
+      c = 0;
+      for(j=0; j<components.length; j++) {
+        if (recipes[i].comp[k]==components[j].id) {
+          c = Math.floor((components[j].count-components[j].used)/recipes[i].comp[k+1]);
+          break;
+        }
+      }
+      if (m<0)
+        m = c;
+      else
+        m = Math.min(m,c);
+    }
+    if(m>=0) {
+      recipes[i].possible = m;
+    }
+    if (!recipes[i].comp_str) {
+      s = '';
+      for(k=0; k<recipes[i].comp.length; k+=2) {
+        for(j=0; j<components.length; j++) {
+          if (recipes[i].comp[k]==components[j].id) {
+            if (s)
+              s += ', ';
+            if (components[j].count<recipes[i].comp[k+1])
+              s += '<font color=#FF3F00>'+components[j].name+'('+recipes[i].comp[k+1]+')</font>';
+            else
+              s += components[j].name+'('+recipes[i].comp[k+1]+')';
+            break;
+          }
+        }
+        if (j>=components.length) {
+          if (s)
+            s += ', ';
+          s += '<font color=#FF3F00>'+recipes[i].comp[k]+'('+recipes[i].comp[k+1]+')</font>';
+        }
+      }
+      recipes[i].comp_str = s;
+    }
+  }
+}
+
+function ShowRecipes() {
+  t = 0;
+  if(document.all['recipes'].contentWindow.document.body)
+    t = document.all['recipes'].contentWindow.document.body.scrollTop;
+  document.all['recipes'].contentWindow.document.open();
+  var s = '<html><body style="margin: 0; padding: 0;"><table width=100%>';
+  selected_location = parseInt(document.all['locations'].value);
+  for(var i in recipes) {
+    if((selected_location==0 || recipes[i].location==selected_location-1) && recipes[i].possible>0) {
+      s += '<tr><td><img style="cursor: pointer;" src="http://img.combats.ru/i/items/'+recipes[i].name+'.gif" onclick="top.Accept(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+(recipes[i].possible);
+      s += '<tr><td colspan=2 style="color: #888888">Требуется: '+recipes[i].comp_str+'<td>';
+    }
+  }
+  s += '</table></body></html>';
+  document.all['recipes'].contentWindow.document.writeln(s);
+  document.all['recipes'].contentWindow.document.body.scrollTop = t;
+}
+
+function ShowAccepted() {
+  t = 0;
+  if(document.all['accepted'].contentWindow.document.body)
+    t = document.all['accepted'].contentWindow.document.body.scrollTop;
+  document.all['accepted'].contentWindow.document.open();
+  var s = '<html><body style="margin: 0; padding: 0;"><table width=100%>';
+  for(i=0; i<recipes.length; i++) {
+    if(recipes[i].accepted>0) {
+      s += '<tr><td><img style="cursor: pointer;" src="http://img.combats.ru/i/items/'+recipes[i].name+'.gif" onclick="top.Dismiss(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+recipes[i].accepted;
+      s += '<tr><td colspan=2 style="color: #888888">Требуется: '+recipes[i].comp_str+'<td>';
+    }
+  }
+  s += '</table></body></html>';
+  document.all['accepted'].contentWindow.document.writeln(s);
+  document.all['accepted'].contentWindow.document.close();
+  document.all['accepted'].contentWindow.document.body.scrollTop = t;
+}
+
+Analyze();
+load_cfg();
+ShowComponents();
+ShowRecipes();
+ShowAccepted();
 
 function save(sect,key,val){external.m2_writeIni(security_id,"Combats.RU","recipes\\underground.ini",sect,key,val);}
 function load(sect,key,def_val){return external.m2_readIni(security_id,"Combats.RU","recipes\\underground.ini",sect,key,def_val);}
