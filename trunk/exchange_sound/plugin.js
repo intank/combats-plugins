@@ -1,5 +1,8 @@
 (function() {
   plugin_exchange_sound = function() {
+    this.autoAccept = (this.load('autoAccept','false')=='true');
+    this.autoCommit = (this.load('autoCommit','false')=='true');
+    this.loadBlackList();
     top.combats_plugins_manager.attachEvent('exchange.confirm',
       top.combats_plugins_manager.get_binded_method(this,this.exchangeConfirm));
     top.combats_plugins_manager.attachEvent('exchange.confirmDlg',
@@ -9,18 +12,60 @@
   }
 
   plugin_exchange_sound.prototype = {
-    autoAccept: true,
-    autoCommit: true,
+    autoAccept: false,
+    autoCommit: false,
     toString: function() {
       return "Звуковое уведомление о приглашении в передачи";
     },
     getProperties: function() {
       return [
         { name:"Автоматически подтверждать приглашение", value: this.autoAccept },
-        { name:"Автоматически выходить из передач", value: this.autoCommit }
+        { name:"Автоматически выходить из передач", value: this.autoCommit },
+        { name:"Добавить в чёрный список", value:'' },
+        { name:"Добавить", value:this.addBlackList }
       ];
     },
+    setProperties: function(a) {
+      this.autoAccept=a[0].value;
+      this.autoCommit=a[1].value;
+      this.save('autoAccept',this.autoAccept.toString());
+      this.save('autoCommit',this.autoCommit.toString());
+    },
+    load: function(key,def_val){
+      return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","exchange_sound\\settings.ini",top.getCookie('battle'),key,def_val);
+    },
+    save: function(key,val){
+      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","exchange_sound\\settings.ini",top.getCookie('battle'),key,val);
+    },
+    addBlackList: function(a) {
+      this.addPersToBlackList(a[2].value);
+    },
+    loadBlackList: function() {
+      var blacklist = this.load('BlackList','');
+      this.blacklist = {};
+      if (blacklist!='') {
+        blacklist = blacklist.split(';');
+        for(var i=0; i<blacklist.length; i++) {
+          this.blacklist[blacklist[i]] = true;
+        }
+      }
+    },
+    saveBlackList: function() {
+      var blacklist = [];
+      for (var name in this.blacklist) {
+        blacklist.push(name);
+      }
+      blacklist = blacklist.join(';');
+      this.save('BlackList',blacklist);
+    },
+    addPersToBlackList: function(a) {
+      this.blacklist[a] = true;
+      this.saveBlackList();
+    },
     exchangeCompleted: function() {
+      if (!this.autoCommit)
+        return;
+
       setTimeout(
         function() {
           try {
@@ -37,15 +82,26 @@
         100
       );
     },
-    setProperties: function(a) {
-      this.autoAccept=a[0].value;
-    },
     exchangeConfirm: function( ){
       this.snotify(1,'nocheck');
     },
-    exchangeConfirmDlg: function( ){
-      if (this.autoAccept)
-        setTimeout('top.Window.oConfirm.oOk.click()',0);
+    sendAutoResponse: function(message) {
+      if (!this.sender)
+        this.sender = combats_plugins_manager.plugins_list['chat_sender'];
+      if (this.sender)
+        this.sender.send(message);
+    },
+    exchangeConfirmDlg: function( eventObj ){
+      if (this.autoAccept) {
+        var match = eventObj.oRoot.text.match(/"(.+)" хочет совершить с вами сделку/);
+        var name = match?match[1]:'';
+        if (this.blacklist[name]) {
+          setTimeout('top.Window.oConfirm.oCancel.click()',0);
+          this.sendAutoResponse('private ['+name+'] Ну нет у меня сейчас желания меняться! Заходите в понедельник');
+        } else {
+          setTimeout('top.Window.oConfirm.oOk.click()',0);
+        }
+      }
     },
     snotify: function( sid, chk ) {
       var volume=top.frames['bottom'].soundvol;
