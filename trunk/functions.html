@@ -88,14 +88,14 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon)\.combats\.ru\/buttons\.
 //          this.HideCfgPanel();
           return;
         }
-        var l = (window.screen.width-400)/2;
+        var l = (window.screen.width-600)/2;
         var t = (window.screen.height-400)/2;
         var w;
         if (1) {
           this.CfgDiv = document.createElement('<div>');
           this.CfgDiv.style.left = l;
           this.CfgDiv.style.top = t;
-          this.CfgDiv.style.width = '400px';
+          this.CfgDiv.style.width = '600px';
           this.CfgDiv.style.height = '400px';
           this.CfgDiv.style.position = 'absolute';
           document.body.insertBefore(this.CfgDiv);
