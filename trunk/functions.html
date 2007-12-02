@@ -1,6 +1,6 @@
 <script language="JavaScript">
 try {
-if (location.href.search(/^http\:\/\/(?:\w+city|dungeon)\.combats\.ru\/buttons\.pl\?battle=/)==0){
+if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru\/buttons\.pl\?battle=/)==0){
   if ("combats_plugins_manager" in this) {
     combats_plugins_manager.Configure();
   } else {
@@ -165,7 +165,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon)\.combats\.ru\/buttons\.
       Init: function() {
         var sleep = !new_version && !("chat" in top.frames);
         for(var i=0; i<top.frames.length; i++) {
-          sleep |= (top.frames[i].document.readyState!="complete");
+          sleep |= (top.frames[i].document.readyState!="complete" && top.frames[i].document.readyState!="interactive");
         }
         if (sleep) {
           setTimeout(this.get_binded_method(this,this.Init),500);
