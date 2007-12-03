@@ -50,7 +50,7 @@
         }
       );
       if (this.markFilterId!='')
-        filterPlugin.removeFilter(this.clearFilterId);
+        filterPlugin.removeFilter(this.markFilterId);
       this.markFilterId = filterPlugin.addFilter(
         { filter:this.markRegexp,
           handler:this.mark
