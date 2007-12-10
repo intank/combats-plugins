@@ -166,6 +166,7 @@ var recipes = [
   {name:'clip80', descr:'Серьги Кровавой Луны', comp:['mater28',2], location:0, possible:0, accepted:0},
   {name:'boots22', descr:'Ботинки Кровавой Луны', comp:['mater28',1,'mater5',5], location:0, possible:0, accepted:0},
   {name:'belt36', descr:'Пояс Кровавой Луны', comp:['mater28',1,'mater5',4], location:0, possible:0, accepted:0},
+//!!!  {name:'leg12', descr:'Поножи Кровавой Луны', comp:['mater28',1,'mater5',5], location:0, possible:0, accepted:0},
   
   {name:'knife71', descr:'Кинжал Паука', comp:['mater30',1,'mater12',12], location:0, possible:0, accepted:0},
   {name:'axe87', descr:'Топор Паука', comp:['mater18',9,'mater12',8], location:0, possible:0, accepted:0},
@@ -181,6 +182,7 @@ var recipes = [
   {name:'sword102', descr:'Меч Паука', comp:['mater30',1,'mater12',12], location:0, possible:0, accepted:0},
   {name:'naruchi78', descr:'Перчатки Паука', comp:['mater30',1,'mater12',3], location:0, possible:0, accepted:0},
   {name:'armor105', descr:'Броня Паука', comp:['mater22',1,'mater12',8], location:0, possible:0, accepted:0},
+//!!!  {name:'leg13', descr:'Поножи Паука', comp:['mater30',1,'mater12',5], location:0, possible:0, accepted:0},
 
   {name:'axe89', descr:'Топор Забытых Времен', comp:['mater19',9,'mater6',8], location:0, possible:0, accepted:0},
   {name:'clip81', descr:'Серьги Забытых Времен', comp:['mater25',2], location:0, possible:0, accepted:0},
@@ -197,6 +199,7 @@ var recipes = [
   {name:'sword104', descr:'Меч Забытых Времен', comp:['mater25',1,'mater6',12], location:0, possible:0, accepted:0},
   {name:'armor107', descr:'Броня Забытых Времен', comp:['mater31',1,'mater6',8], location:0, possible:0, accepted:0},
   {name:'shield84', descr:'Щит Забытых Времен', comp:['mater25',1,'mater19',3], location:0, possible:0, accepted:0},
+//!!!  {name:'leg11', descr:'Поножи Забытых Времен', comp:['mater25',1,'mater6',5], location:0, possible:0, accepted:0},
 
   {name:'ring129', descr:'Кольцо Скорпиона', comp:['mater30',1], location:0, possible:0, accepted:0},
   {name:'axe90', descr:'Топор Скорпиона', comp:['mater16',9,'mater3',8], location:0, possible:0, accepted:0},
@@ -212,6 +215,7 @@ var recipes = [
   {name:'shield86', descr:'Щит Скорпиона', comp:['mater30',1,'mater16',3], location:0, possible:0, accepted:0},
   {name:'clip90', descr:'Серьги Скорпиона', comp:['mater30',2], location:0, possible:0, accepted:0},
   {name:'amulet98', descr:'Амулет Скорпиона', comp:['mater30',2], location:0, possible:0, accepted:0},
+//!!!  {name:'leg16', descr:'Поножи Скорпиона', comp:['mater30',1,'mater3',5], location:0, possible:0, accepted:0},
 
   {name:'ring128', descr:'Кольцо Злодеяний', comp:['mater29',1], location:0, possible:0, accepted:0},
   {name:'knife76', descr:'Кинжал Злодеяний', comp:['mater29',1,'mater10',12], location:0, possible:0, accepted:0},
@@ -225,6 +229,7 @@ var recipes = [
   {name:'shield85', descr:'Щит Злодеяний', comp:['mater29',1,'mater14',3], location:0, possible:0, accepted:0},
   {name:'clip89', descr:'Серьги Злодеяний', comp:['mater29',2], location:0, possible:0, accepted:0},
   {name:'amulet97', descr:'Амулет Злодеяний', comp:['mater29',2], location:0, possible:0, accepted:0},
+//!!!  {name:'leg17', descr:'Поножи Злодеяний', comp:['mater29',1,'mater10',5], location:0, possible:0, accepted:0},
 
   {name:'knife74_du2', descr:'Кинжал Утреннего Солнца', comp:['mater27',1,'mater2',11,'mater2',1], location:0, possible:0, accepted:0},
   {name:'axe90_du2', descr:'Топор Утреннего Солнца', comp:['mater16',9,'mater2',8], location:0, possible:0, accepted:0},
@@ -240,6 +245,7 @@ var recipes = [
   {name:'clip82_du2', descr:'Серьги Утреннего Солнца', comp:['mater27',2], location:0, possible:0, accepted:0},
   {name:'amulet83_du2', descr:'Ожерелье Утреннего Солнца', comp:['mater27',2], location:0, possible:0, accepted:0},
   {name:'ring119_du2', descr:'Кольцо Утреннего Солнца', comp:['mater27',1], location:0, possible:0, accepted:0},
+//!!!  {name:'leg14', descr:'Поножи Утреннего Солнца', comp:['mater27',1,'mater2',5], location:0, possible:0, accepted:0},
 
   {name:'belt39', descr:'Пояс Решимости', comp:['mater26',1,'mater1',4], location:0, possible:0, accepted:0},
   {name:'roba51', descr:'Мантия Решимости', comp:['mater24',1,'mater1',8], location:0, possible:0, accepted:0},
@@ -247,7 +253,8 @@ var recipes = [
   {name:'helmet83', descr:'Маска Решимости', comp:['mater17',5,'mater1',6], location:0, possible:0, accepted:0},
   {name:'staff52', descr:'Посох Решимости', comp:['mater24',1,'mater17',2], location:0, possible:0, accepted:0},
   {name:'naruchi84', descr:'Перчатки Решимости', comp:['mater26',1,'mater1',6], location:0, possible:0, accepted:0},
-  {name:'boots25', descr:'Сапоги Решимости', comp:['mater26',1,'mater1',5], location:0, possible:0, accepted:0}
+  {name:'boots25', descr:'Сапоги Решимости', comp:['mater26',1,'mater1',5], location:0, possible:0, accepted:0},
+  {name:'leg15', descr:'Штаны Решимости', comp:['mater26',1,'mater1',5], location:0, possible:0, accepted:0}
 
   
 //  {name:'', descr:'', comp:['mater',0,'mater',0,'mater',0,'mater',0,'mater',0], location:4, possible:0, accepted:0},
