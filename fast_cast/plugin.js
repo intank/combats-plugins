@@ -15,13 +15,26 @@
     onUnload: function() {
       top.fast_cast.div="";
     },
-    this.toString: function() {
+    toString: function() {
       return "Быстрые заклинания";
     },
     getProperties: function() {
       return [];
     },
-    plugin_fast_cast.prototype.setProperties = function(a) {
+    setProperties: function(a) {
+    },
+    queryName: function(spellName,spellId) {
+      top.Window.Prompt(
+        function(a){
+          if (a) {
+            this.castSpell({spellName:spellName,spellId:spellId,target:a});
+          }
+        },
+        this,
+        'Для каста заклинания необходимо выбрать цель. Введите ник или щёлкните по нику в чате',
+        '',
+        'Кастуем "<b>'+spellName+'</b>"'
+      );
     },
     castSpell: function(params, step) {
       if (!step) {
@@ -58,7 +71,10 @@
             }
           }
           if (!result) {
-            this.sendAutoResponse('private ['+this.Healing.partner+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
+            this.sendAutoResponse('private ['+params.target+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
+            this.inProgress = false;
+            if (this.castQueue.length>0)
+              this.castSpell(this.castQueue.shift());
           }
           break;
         case 2:
@@ -66,17 +82,47 @@
           var doc = combats_plugins_manager.getMainFrame().document;
           var castResult = doc.getElementsByTagName('TABLE')[0].cells[1].firstChild;
           if (castResult.nodeName=='FONT' && castResult.currentStyle.color=='red') {
-            this.sendAutoResponse('private ['+this.Healing.partner+','+this.Healing.patient+'] '+castResult.innerText+' (автоответ)');
+            this.sendAutoResponse('private ['+params.target+'] '+castResult.innerText+' (автоответ)');
           } else {
-            this.sendAutoResponse('private ['+this.Healing.partner+'] По каким-то причинам результат каста нераспознан :chtoza: (автоответ)');
+            this.sendAutoResponse('private ['+params.target+'] По каким-то причинам результат каста нераспознан :chtoza: (автоответ)');
           }
           this.inProgress = false;
           if (this.castQueue.length>0)
-            castSpell(this.castQueue.shift());
+            this.castSpell(this.castQueue.shift());
           break;
         }
     },
     init: function() {
+      top.combats_plugins_manager.plugins_list['top_tray'].addButton({
+        'button': {
+          'style': {
+            'width': "20px",
+            'height': "20px",
+            'padding': "2px",
+            'background': "#505050"
+            },
+          'onclick': combats_plugins_manager.get_binded_method(
+            this, 
+            this.queryName, 
+            'Жажда Жизни +4',
+            'spell_powerHPup4')
+          },
+        'img': {
+          'style': {
+            'width': "16px",
+            'height': "16px",
+            'filter': "Glow(color=#DDDDDD,Strength=3,Enabled=0)"
+            },
+          'onmouseout': function() {
+              this.filters.Glow.Enabled=0;
+            },
+          'onmouseover': function() {
+              this.filters.Glow.Enabled=1;
+            },
+          'src': "file:///"+combats_plugins_manager.base_folder+"dress/icon.gif",
+          'alt': "Быстрые заклинания"
+          }
+        });
     }
   };
 
