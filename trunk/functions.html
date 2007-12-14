@@ -163,15 +163,19 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
         top.Chat.am(s);
       },
       Init: function() {
-        var sleep = !new_version && !("chat" in top.frames);
-        for(var i=0; i<top.frames.length; i++) {
-          sleep |= (top.frames[i].document.readyState!="complete" && top.frames[i].document.readyState!="interactive");
-        }
-        if (sleep) {
+        try {
+          var sleep = !new_version;
+          for(var i=0; i<top.frames.length; i++) {
+            sleep |= (top.frames[i].document.readyState!="complete" && top.frames[i].document.readyState!="interactive");
+          }
+          if (sleep) {
+            throw new Exception('Page is not ready');
+          }
+        } catch(e) {
           setTimeout(this.get_binded_method(this,this.Init),500);
           return;
         }
-//        alert('frames: '+top.frames.length);
+
         var combats_plugins = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini").split(/[\x0A\x0D]+/);
         if (!new_version)
           top.frames["chat"].messages = '';
