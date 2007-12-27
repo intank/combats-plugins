@@ -34,7 +34,6 @@
       this.save('glassComplect',this.glassComplect);
     },
     bugagClick: function() {
-debugger;
       if (this.glassComplect!='') {
         this.state = 2;
         top.frames[3].location = 'http://'+top.location.host+'/main.pl?skmp='+this.glassComplect+'&tmp='+Math.random();
@@ -90,8 +89,6 @@ debugger;
             top.frames[3].location = top.frames[3].document.links[i].href;
             break;
           }
-//        this.state = 0;
-//        break;
         break;
       case 4:
         this.state = 5;
