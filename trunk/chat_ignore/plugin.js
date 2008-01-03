@@ -27,10 +27,10 @@
       }
     },
     load: function(key,def_val){
-      return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","chat_hilight\\settings.ini",top.getCookie('battle'),key,def_val);
+      return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","chat_ignore\\settings.ini",top.getCookie('battle'),key,def_val);
     },
     save: function(key,val){
-      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","chat_hilight\\settings.ini",top.getCookie('battle'),key,val);
+      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","chat_ignore\\settings.ini",top.getCookie('battle'),key,val);
     },
     loadFilters: function() {
       var filterPlugin = combats_plugins_manager.plugins_list['chat_filter'];
