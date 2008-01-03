@@ -36,8 +36,17 @@
         'Кастуем "<b>'+spellName+'</b>"'
       );
     },
+    sendAutoResponse: function(message) {
+      if (!this.sender)
+        this.sender = combats_plugins_manager.plugins_list['chat_sender'];
+      if (this.sender)
+        this.sender.send(message);
+    },
     castSpell: function(params, step) {
       if (!step) {
+        if (params.a==top.mylogin) {
+          return;
+        }
         if (!this.inProgress) {
           this.inProgress = true;
           this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,1);
@@ -82,7 +91,11 @@
           var doc = combats_plugins_manager.getMainFrame().document;
           var castResult = doc.getElementsByTagName('TABLE')[0].cells[1].firstChild;
           if (castResult.nodeName=='FONT' && castResult.currentStyle.color=='red') {
-            this.sendAutoResponse('private ['+params.target+'] '+castResult.innerText+' (автоответ)');
+            var congratulations = '';
+            if (castResult.innerText.search('Успешно')>-1) {
+//              congratulations = ' :superng: С Новым годом!';
+            }
+            this.sendAutoResponse('private ['+params.target+'] '+castResult.innerText+' (автоответ)'+congratulations);
           } else {
             this.sendAutoResponse('private ['+params.target+'] По каким-то причинам результат каста нераспознан :chtoza: (автоответ)');
           }
@@ -96,7 +109,7 @@
       top.combats_plugins_manager.plugins_list['top_tray'].addButton({
         'button': {
           'style': {
-            'width': "20px",
+            'width': "32px",
             'height': "20px",
             'padding': "2px",
             'background': "#505050"
@@ -109,8 +122,11 @@
           },
         'img': {
           'style': {
-            'width': "16px",
-            'height': "16px",
+            'width': "33px",
+            'height': "24px",
+            'left': "-2px",
+            'top': "-1px",
+            'position': "relative",
             'filter': "Glow(color=#DDDDDD,Strength=3,Enabled=0)"
             },
           'onmouseout': function() {
@@ -119,7 +135,7 @@
           'onmouseover': function() {
               this.filters.Glow.Enabled=1;
             },
-          'src': "file:///"+combats_plugins_manager.base_folder+"dress/icon.gif",
+          'src': "file:///"+combats_plugins_manager.base_folder+"fast_cast/mag_.gif",
           'alt': "Быстрые заклинания"
           }
         });
