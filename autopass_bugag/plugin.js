@@ -48,10 +48,14 @@
         if (top.frames[3].location.pathname!='/portal.pl')
           return;
         try {
-          var bugag=top.frames[3].document.getElementById('mo_dialog:emc_bugag_prewelcome');
+          var d = top.frames[3].document;
+          var bugag=d.getElementById('mo_dialog:emc_bugag_prewelcome');
           if (!bugag)
             return;
           bugag.onclick = combats_plugins_manager.get_binded_method(this,this.bugagClick);
+          var arr_H4 = d.getElementsByTagName('H4');
+          var button = d.createElement('<input type="button" value="Показать параметры" onclick="top.cht(\'/main.pl?attack=[]\')"/>');
+          d.body.insertBefore(button,arr_H4[0]);
         } catch (e) {
           combats_plugins_manager.logError(this,e);
         }
