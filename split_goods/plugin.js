@@ -1,0 +1,109 @@
+(function() {
+  function plugin_split_goods() {
+  }
+
+  plugin_split_goods.prototype = {
+    toString: function() {
+      return "Деление товара на пачки";
+    },
+
+    getProperties: function() {
+      var Table = this.findBag();
+      this.goods = {};
+      var goodsArray = [];
+      if (Table) {
+        for(var i=0; i<Table.rows.length; i++) {
+          var children = Table.rows[i].cells[0].children;
+          var match;
+          if (children[0].tagName=="SPAN" && children[children.length-2].tagName=="A" && (match=children[children.length-2].href.match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'(.*?)\s*\(x\d+\)'\)/))) {
+            if (!(match[1] in this.goods)) {
+              this.goods[match[1]] = goodsArray.push(match[2])-1;
+            }
+          }
+        }
+      }
+      goodsArray.selected = 0;
+
+      return [
+        { name:"Разделяемый товар", value: goodsArray },
+        { name:"Размер пачки", value: 5 },
+        { name:"Начать разделение", value: this.start }
+      ];
+    },
+
+    findBag: function() {
+      var comments = combats_plugins_manager.getMainFrame().document.getElementsByTagName('!');
+      for(var i=0; i<comments.length; i++) {
+        if (comments[i].outerHTML=="<!--Рюкзак-->") {
+          var Table = comments[i].nextSibling;
+          while (Table && Table.tagName!="TABLE") {
+            Table = Table.nextSibling;
+          }
+          return Table;
+        }
+      }
+    },
+
+    start: function(a) {
+      if (this['debugger']) debugger;
+      this.selectedArticle = '';
+      for(var i in this.goods) {
+        if (this.goods[i]==a[0].value.selected) {
+          this.selectedArticle = i;
+          break;
+        }
+      }
+      if (this.selectedArticle=='') 
+        return alert('Нечего делить');
+      this.packSize = parseFloat(a[1].value);
+      if (this.packSize<1)
+        return alert('Нехорошо делить на 0');
+
+      this.onloadHandlerObject = combats_plugins_manager.get_binded_method(this,this.onloadHandler);
+      top.combats_plugins_manager.attachEvent("mainframe.load", this.onloadHandlerObject);
+      this.onloadHandler();
+//      with (combats_plugins_manager.getMainFrame()) {
+//        location=location.href;
+//      }
+    },
+
+    onloadHandler: function() {
+      try {
+        var stopFlag = true;
+        var Table = this.findBag();
+        if (Table) {
+          for(var i=0; i<Table.rows.length; i++) {
+            var children = Table.rows[i].cells[0].children;
+            var match;
+            if (children[0].tagName=="SPAN" 
+                && children[children.length-2].tagName=="A" 
+                && (match=children[children.length-2].href.match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'.*?\s*\(x(\d+)\)'\)/))
+                && match[1]==this.selectedArticle
+                && parseFloat(match[2])>this.packSize) {
+              var stopFlag = false;
+              children[children.length-2].click();
+              setTimeout(
+                combats_plugins_manager.get_binded_method(
+                  this,
+                  function() {
+                    var form = combats_plugins_manager.getMainFrame().document.slform;
+                    form.quant.value = this.packSize;
+                    form.submit();
+                  }
+                ),
+                0
+              );
+            }
+          }
+        }
+        if (stopFlag) {
+          top.combats_plugins_manager.detachEvent("mainframe.load",this.onloadHandlerObject);
+        }
+      } catch (e) {
+        combats_plugins_manager.logError(this,e);
+      }
+    }
+  };
+
+  return new plugin_split_goods();
+})()
