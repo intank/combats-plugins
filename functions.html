@@ -52,8 +52,15 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
       },
       "fireEvent": function(event, eventObj) {
         if (event in this.events) {
-          for (var i=0; i<this.events[event].length; i++)
-            this.events[event][i](eventObj);
+          var i=0;
+          try {
+            for ( ; i<this.events[event].length; i++)
+              this.events[event][i](eventObj);
+          } catch(e) {
+            e.event = event;
+            e.index = i;
+            this.logError('fireEvent',e);
+          }
         }
       },
       "loadCustomPlugin": function() {

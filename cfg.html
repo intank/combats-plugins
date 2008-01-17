@@ -86,14 +86,14 @@ function getPluginGfg() {
     var s="<form><table>";
     for(var i=0; i<props.length; i++) {
       if (is_function(props[i].value)) {
-        s += "<tr><td colspan=2><input type=button value=\""+props[i].name+"\" onclick=\"invoke("+i+")\">";
+        s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\">";
       } else {
         s += '<tr><td>'+props[i].name;
         var style = '';
         if ('style' in props[i])
           style = props[i].style;
         if (typeof(props[i].value)=="boolean") {
-          s += '<td><input type=checkbox style="'+style+'"'+(props[i].value?' CHECKED':'')+'>';
+          s += '<td><input type=checkbox style="'+style.replace(/"/g,'&quot;')+'"'+(props[i].value?' CHECKED':'')+'>';
         } else if (typeof(props[i].value)=="object") {
           s += '<td><select>\n';
           if ('length' in props[i].value) {
@@ -108,13 +108,13 @@ function getPluginGfg() {
             if ("type" in props[i]) {
               if (props[i].type=="textarea") {
                 style = 'width:100%; height:7em;'+style;
-                s += '<td><textarea style="'+style+'">'+props[i].value+"</textarea>";
+                s += '<td><textarea style="'+style.replace(/"/g,'&quot;')+'">'+props[i].value+"</textarea>";
               } else
                 throw new Exception();
             } else
               throw new Exception();
           } catch(e) {
-            s += '<td><input type=text style="'+style+'" value="'+props[i].value+'">';
+            s += '<td><input type=text style="'+style.replace(/"/g,'&quot;')+'" value="'+props[i].value.toString().replace(/"/g,'&quot;')+'">';
           }
         }
       }

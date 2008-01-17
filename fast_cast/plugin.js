@@ -42,6 +42,27 @@
       if (this.sender)
         this.sender.send(message);
     },
+    findSpell: function(params) {
+      var doc = combats_plugins_manager.getMainFrame().document;
+      for (var i=0; i<doc.images.length; i++) {
+        if (doc.images[i].src=='http://img.combats.ru/i/items/'+params.spellId+'.gif') {
+          var obj = doc.images[i];
+          while(obj && obj.tagName!='A')
+            obj = obj.nextSibling;
+          if (obj && (obj.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)) && match[2]==params.spellName) {
+            return obj;
+          }
+        }
+      }
+      return null;
+    },
+    doCast: function(link, params) {
+      var doc = link.document;
+      var match=obj.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)
+      doc.parentWindow.eval(match[1]);
+      doc.forms['slform'].elements['param'].value = params.target;
+      doc.forms['slform'].submit();
+    },
     castSpell: function(params, step) {
       if (!step) {
         if (params.a==top.mylogin) {
@@ -49,37 +70,29 @@
         }
         if (!this.inProgress) {
           this.inProgress = true;
-          this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,1);
-          combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
-          combats_plugins_manager.getMainFrame().location = '/main.pl?edit=2&'+Math.random();
+          var link;
+          if (link=this.findSpell(params)) {
+            this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
+            combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
+            this.doCast(link, params);
+          } else {
+            this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,1);
+            combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
+            combats_plugins_manager.getMainFrame().location = '/main.pl?edit=2&'+Math.random();
+          }
         } else {
           this.castQueue.push(params);
         }
       } else switch (step) {
         case 1:
-//          debugger;
+          if (this['debugger']) debugger;
           combats_plugins_manager.detachEvent('mainframe.load',this.mainframeload_handler);
-          var doc = combats_plugins_manager.getMainFrame().document;
-          var result = false;
-          for (var i=0; i<doc.images.length; i++) {
-            if (doc.images[i].src=='http://img.combats.ru/i/items/'+params.spellId+'.gif') {
-              var obj = doc.images[i];
-              while(obj && obj.tagName!='A')
-                obj = obj.nextSibling;
-              if (obj && (match=obj.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)) && match[2]==params.spellName) {
-                doc.parentWindow.eval(match[1]);
-                doc.forms['slform'].elements['param'].value = params.target;
-
-                this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
-                combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
-                
-                doc.forms['slform'].submit();
-                result = true;
-                break;
-              }
-            }
-          }
-          if (!result) {
+          var link;
+          if (link=this.findSpell(params)) {
+            this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
+            combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
+            this.doCast(link, params);
+          } else {
             this.sendAutoResponse('private ['+params.target+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
             this.inProgress = false;
             if (this.castQueue.length>0)
