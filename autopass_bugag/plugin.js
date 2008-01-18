@@ -5,6 +5,7 @@
       "mainframe.load",
       combats_plugins_manager.get_binded_method(this,this.onloadHandler)
     );
+    this.onloadHandler();
   };
 
   plugin_autopass_bugag.prototype = {
