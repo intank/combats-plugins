@@ -33,7 +33,7 @@
 		top.frames[0].Libraries['User.Exchange.Transaction'].oWindow.Self, [ oError ]
 	);
 	var eventObj = { error: Sender.Node( oError ) };
-	top.combats_plugins_manager.fireEvent('exchange.transactionError',eventObj);
+	  top.combats_plugins_manager.fireEvent('exchange.transactionError',eventObj);
     },
     new_User_Exchange_Transaction_TransactionLoad: function( oRoot ) {
 
@@ -129,7 +129,7 @@
     },
     mainframeLoad: function() {
       var location = combats_plugins_manager.getMainFrame().location;
-      if (location.pathname=='/exchange.pl' && location.search.match(/(^|&)status=completed?(&|$)/)) {
+      if (location.pathname=='/exchange.pl' && /(?:^|&)status=completed?(?:&|$)/.test(location.search)) {
         top.combats_plugins_manager.fireEvent('exchange.completed',{});
       }
     },
