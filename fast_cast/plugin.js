@@ -58,7 +58,7 @@
     },
     doCast: function(link, params) {
       var doc = link.document;
-      var match=obj.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)
+      var match=link.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)
       doc.parentWindow.eval(match[1]);
       doc.forms['slform'].elements['param'].value = params.target;
       doc.forms['slform'].submit();
