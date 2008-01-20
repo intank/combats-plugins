@@ -44,12 +44,13 @@
     },
     findSpell: function(params) {
       var doc = combats_plugins_manager.getMainFrame().document;
+      var match;
       for (var i=0; i<doc.images.length; i++) {
-        if (doc.images[i].src=='http://img.combats.ru/i/items/'+params.spellId+'.gif') {
-          var obj = doc.images[i];
+        var obj = doc.images[i];
+        if (obj.src=='http://img.combats.ru/i/items/'+params.spellId+'.gif') {
           while(obj && obj.tagName!='A')
             obj = obj.nextSibling;
-          if (obj && (obj.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)) && match[2]==params.spellName) {
+          if (obj && (match = obj.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)) && match[2]==params.spellName) {
             return obj;
           }
         }
