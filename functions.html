@@ -143,7 +143,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
         var d = (new Date()).toTimeString().substr(0,5);
         var s = external.readFile( this.security_id, "Combats.RU", pluginName+"\\plugin.js");
         var errCount = 0;
-        if (s!=null && s.length>0)
+        if (s!=null && s.length>0) {
           try {
             var obj = top.eval(s);
             if (obj)
@@ -161,6 +161,9 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
                 top.frames["chat"].am('&gt; ['+i+']: '+e[i]);
             }
           }
+        } else {
+          top.Chat.am('<font class=date2>'+d+'</font> Плагин "'+pluginName+'" не загружен: файл "plugin.js" не найден или пуст');
+        }
         return errCount;
       },
       getMainFrame: function() {
@@ -183,14 +186,23 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
           return;
         }
 
-        var combats_plugins = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini").split(/[\x0A\x0D]+/);
+        var d = (new Date()).toLocaleTimeString();
+        var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
+        if (!s) {
+          s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini.sample");
+          external.writeFile( this.security_id, "Combats.RU", "combats_plugins.ini", s);
+          this.add_chat('<font class=date2>'+d+'</font> Первый запуск менеджера. Использованы настройки плагинов "по умолчанию"');
+        }
+        var combats_plugins = s.split(/[\x0A\x0D]+/);
         if (!new_version)
           top.frames["chat"].messages = '';
         var errCount=0;
-        var d = (new Date()).toLocaleTimeString().substr(0,5);
         this.plugins_list['combats_plugins_manager']=this;
         for(i=0;i<combats_plugins.length;i++) {
-          errCount += this.loadPlugin(combats_plugins[i]);
+          s = combats_plugins[i].replace(/^\s*(.*?)\s*(?:[#;].*)?$/,'$1');
+          if (s) {
+            errCount += this.loadPlugin(s);
+          }
         }
         if (errCount>0) {
           if (new_version)
@@ -209,7 +221,6 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
     };
     combats_plugins_manager = new create_object();
     setTimeout(combats_plugins_manager.get_binded_method(combats_plugins_manager,combats_plugins_manager.Init),1500);
-//    combats_plugins_manager.Init();
   }
 }
 } catch (e) {
