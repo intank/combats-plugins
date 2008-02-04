@@ -30,9 +30,11 @@
         return;
       var match;
       for(var i in this.filters) {
-        match = eventObj.mess.match(this.filters[i].filter);
-        if (match)
-          this.filters[i].handler(match,eventObj);
+        if (this.filters[i].filter.source) {
+          match = eventObj.mess.match(this.filters[i].filter);
+          if (match)
+            this.filters[i].handler(match,eventObj);
+        }
       }
     }
   };
