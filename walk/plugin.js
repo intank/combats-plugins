@@ -5,10 +5,12 @@
     this.mat_click=false;
     this.ignoreWall=false;
     this.autoPilot=true;
+	this.autoAttack=false; //------------- Added by Solt
     this.steptimer=null;
     this.forced=false;
     this.skip_quest=false;
     this.usedObjects=new Object();
+	this.sys_msg = ''; //------------- Added by Solt
     this.init();
   }
 
@@ -120,9 +122,20 @@
     "onloadHandler": function() {
       try {
         var d=top.frames[3].document;
+		var doc_inner=d.body.innerHTML.toString(); // ----------- Added by Solt
+		var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
+		var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
+		
+		getElement=d.getElementById;
         if(d.location.pathname.search(/^\/dungeon\d*\.pl/)!=0)
           return;
         tables = d.getElementsByTagName('TABLE');
+
+		if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
+			top.Chat.am(this.sys_msg + '<i>'+Red_str[1]+'<i>');
+			this.sys_msg='';
+		}
+
         if (tables.length<2 || tables[0].cells.length<2 
           || tables[0].cells[1].getElementsByTagName('A').length!=1 || tables[0].cells[1].getElementsByTagName('A')[0].href.search(/\?out=/)<0) 
           return;
@@ -150,8 +163,50 @@
     <input type="checkbox" id="mat_click" onclick="this.mat_click=this.checked"'+(this.mat_click?' CHECKED':'')+'>&nbsp;Собирать ингридиенты<br>\
     <input type="checkbox" id="ignoreWall" onclick="if(this.ignoreWall=this.checked)document.all.autoPilot.checked=this.autoPilot=false"'+(this.ignoreWall?' CHECKED':'')+'>&nbsp;Игнорировать препятствия<br>\
     <input type="checkbox" id="autoPilot" onclick="if(this.autoPilot=this.checked)document.all.ignoreWall.checked=this.ignoreWall=false"'+(this.autoPilot?' CHECKED':'')+'>&nbsp;Автонавигация<br>\
+    <input type="checkbox" id="autoAttack" onclick="this.autoAttack=this.checked"'+(this.autoAttack?' CHECKED':'')+'>&nbsp;Автонападение<br>\
     </table>';
+			
+		tab='<table border=0 cellspacing=8 cellpadding=0 id="Radar_table">';
+		for (var i=0; i<7; i++){
+			tab+='<tr>';
+			for (var j=0; j<7; j++)
+				//tab+='<td width="13" height="12" class="MyOwn">&nbsp;</td>';
+				tab+='<td class="MyOwn" style="width: 7px; height: 7px;"></td>';
+			tab+='</tr>';
+		}
+		tab+='</table>';
+		
+		d.getElementById('DungMap').innerHTML += '<DIV id="Radar" style="position: absolute; width: 120px; height: 120px; filter: Alpha(Opacity=40);">'+tab+'</DIV>';
+		
+		R_div=d.getElementById('Radar');
+		R_t=d.getElementById('Radar_table');
+		
+		R_div.style.left=R_div.previousSibling.style.posLeft-56;
+		R_div.style.top=R_div.previousSibling.style.posTop-53;
 
+		arrLayers=top.frames[3].arrLayers;
+		for(var y in arrLayers)
+			for(var x in arrLayers[y])
+				for(var rl in arrLayers[y][x])
+					for(var o in arrLayers[y][x][rl])
+						for(var i in arrLayers[y][x][rl][o]){
+							var Obj_X=parseInt(rl=='r'? x:-x);
+							var Obj_Y=parseFloat(y);
+								if(top.frames[3].nMyDirection & 2){ //если направление 3 или 7, поворачиваем координаты направо
+									tmp=Obj_X;
+									Obj_X=Obj_Y;
+									Obj_Y=-tmp;
+								}
+								if(top.frames[3].nMyDirection & 4){ //если 5 или 7 разворачиваем на 180гр
+									Obj_X=-Obj_X;
+									Obj_Y=-Obj_Y;
+								}
+								R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor=(o=='arrObjects' ? 'Green':'Red');
+								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=arrLayers[y][x][rl][o][i].name+'\n';
+							
+						}
+		
+		
         for (var i=1; i<8; i+=2)
           d.all['i'+i].onclick = top.combats_plugins_manager.get_binded_method(this,this.setDirection, i);
 
@@ -160,38 +215,52 @@
         d.all['mat_click'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.mat_click=top.frames[3].document.all['mat_click'].checked;});
         d.all['ignoreWall'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.mat_click=top.frames[3].document.all['ignoreWall'].checked;});
         d.all['autoPilot'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.mat_click=top.frames[3].document.all['autoPilot'].checked;});
-
+        d.all['autoAttack'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.autoAttack=top.frames[3].document.all['autoAttack'].checked;});
+		
         if (this.Direction) {
           img=d.all("i"+this.Direction);
           img.src=img.src.replace(/\.gif$/,"b.gif");
         } else
           d.all("td_stop").style.backgroundColor="red";
 
-    // ---------- try ----------
+		  
+// ---------- try drop ----------
         for(i=0;i<d.links.length;i++) {
           link=d.links(i);
           if (link.href.search(/dungeon\d*\.pl\?get=/)>=0 && (this.mat_click || (link.children(0).src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest))) {
+
             top.frames[3].location = link.href;
             return;
           }
         }
+		
 
-        getElement=d.getElementById;
-        o=getElement("lv2o");
-        if (!o) o=getElement("lv1o");
-        if (this.en_click && o) {
-          onclickStr=o.onclick.toString();
-          if (matches=onclickStr.match(/dungeon_obj\('(\d+)'\)/)) {
-            if (!(matches[1] in this.usedObjects)) {
-              this.usedObjects[matches[1]]=true;
-              o.click();
-              return;
-            }
-          } else {
-            o.click();
-            return;
-          }
-        }
+//-------------------------- Определение объектов в innerHTML ------Added by Solt -------------
+		if (this.en_click || this.autoAttack) {
+			Objects_behind=doc_inner.match(/ShowAll\( "1_0l", \[(.*)\]/); // ------------ Объекты спереди
+			Objects_left=doc_inner.match(/ShowAll\( "0_1l", \[(.*)\]/);   // ------------ слева
+			Objects_right=doc_inner.match(/ShowAll\( "0_1r", \[(.*)\]/);  // ------------ справа
+			
+			Objects_all=(Objects_behind?","+Objects_behind[1]:"")+(Objects_left?","+Objects_left[1]:"")+(Objects_right?","+Objects_right[1]:"");
+			eval ("Obj_ar=[{}"+Objects_all+"]"); //------------ Загоняем все объекто-юниты в массив
+			if( Obj_ar.length>1 ){
+				for(i=1;i<Obj_ar.length;i++){
+					if( (Obj_ar[i].object) && !(Obj_ar[i].id in this.usedObjects) && this.en_click){ //-------Кликать на объекты
+						this.usedObjects[Obj_ar[i].id]=true;
+						if(top.ChatSys) //------------ Добавить к логу на что кликали (если включены системки)
+							this.sys_msg='<font class=date2>'+cur_time+'</font> Кликнули объект <b>'+Obj_ar[i].name+'</b>, ';
+						top.frames[3].location=loc+"?useobj="+Obj_ar[i].id;
+						return;
+					}else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)){//-- Нападать если нет стены
+						if( Obj_ar[i].action && Obj_ar[i].action.search(/attack/)>=0){
+							top.frames[3].location=loc+"?attack="+Obj_ar[i].id;
+							return;
+						}
+					}
+				}
+			}
+		}
+
         if (this.autoPilot) {
           if (this.Direction && !getElement("m"+this.Direction)) {
             if (getElement("m1")) {
@@ -212,10 +281,11 @@
         if (mtime<0)
           mtime = 0;
         if(!this.forced || this.steptimer==null || mtime==0) {
-          if (getElement("m"+this.Direction) && (this.Direction!=1 || !("l2op1" in d.all) || d.all["l2op1"].childNodes.length>1 ))
-            this.StartStepTimer(mtime);
-        }
+          if (getElement("m"+this.Direction) && (this.Direction!=1 || !("l2op1" in d.all) || d.all["l2op1"].childNodes.length>1 )){
 
+            this.StartStepTimer(mtime);
+		  }
+        }
         d.parentWindow.attachEvent("onbeforeunload",top.combats_plugins_manager.get_binded_method(this,this.onunloadHandler));
       } catch (e) {
         e.Function = 'onLoadHandler';
