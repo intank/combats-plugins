@@ -125,8 +125,7 @@
 		var doc_inner=d.body.innerHTML.toString(); // ----------- Added by Solt
 		var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
 		var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
-		
-		getElement=d.getElementById;
+		var Obj_ar=new Array();
         if(d.location.pathname.search(/^\/dungeon\d*\.pl/)!=0)
           return;
         tables = d.getElementsByTagName('TABLE');
@@ -165,7 +164,8 @@
     <input type="checkbox" id="autoPilot" onclick="if(this.autoPilot=this.checked)document.all.ignoreWall.checked=this.ignoreWall=false"'+(this.autoPilot?' CHECKED':'')+'>&nbsp;Автонавигация<br>\
     <input type="checkbox" id="autoAttack" onclick="this.autoAttack=this.checked"'+(this.autoAttack?' CHECKED':'')+'>&nbsp;Автонападение<br>\
     </table>';
-			
+
+//---------- Создание пустого радара 		
 		tab='<table border=0 cellspacing=8 cellpadding=0 id="Radar_table">';
 		for (var i=0; i<7; i++){
 			tab+='<tr>';
@@ -175,21 +175,20 @@
 			tab+='</tr>';
 		}
 		tab+='</table>';
-		
 		d.getElementById('DungMap').innerHTML += '<DIV id="Radar" style="position: absolute; width: 120px; height: 120px; filter: Alpha(Opacity=40);">'+tab+'</DIV>';
-		
 		R_div=d.getElementById('Radar');
 		R_t=d.getElementById('Radar_table');
-		
 		R_div.style.left=R_div.previousSibling.style.posLeft-56;
 		R_div.style.top=R_div.previousSibling.style.posTop-53;
-
-		arrLayers=top.frames[3].arrLayers;
+		
+//---------- Обработка объектов (автокликанье, автонападение, прорисовка радара)
+		arrLayers=top.frames[3].arrLayers; //----- Зарываемся в массив объектов+юнитов
 		for(var y in arrLayers)
 			for(var x in arrLayers[y])
 				for(var rl in arrLayers[y][x])
 					for(var o in arrLayers[y][x][rl])
 						for(var i in arrLayers[y][x][rl][o]){
+							var Obj=arrLayers[y][x][rl][o][i];
 							var Obj_X=parseInt(rl=='r'? x:-x);
 							var Obj_Y=parseFloat(y);
 								if(top.frames[3].nMyDirection & 2){ //если направление 3 или 7, поворачиваем координаты направо
@@ -202,8 +201,22 @@
 									Obj_Y=-Obj_Y;
 								}
 								R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor=(o=='arrObjects' ? 'Green':'Red');
-								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=arrLayers[y][x][rl][o][i].name+'\n';
-							
+								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=Obj.name+'\n';
+								if((x==0 && y==1) || (y==0 && x==1)){ //------- если спереди или с боков, загоняем в массив.
+									Obj_ar.push(Obj);
+									if( o=='arrObjects' && !(Obj.id in this.usedObjects) && this.en_click){ //-------Кликать на объекты
+										this.usedObjects[Obj.id]=true;
+										if(top.ChatSys) //------------ Добавить к логу на что кликали (если включены системки)
+											this.sys_msg='<font class=date2>'+cur_time+'</font> Кликнули объект <b>'+Obj.name+'</b>, ';
+										top.frames[3].location=loc+"?useobj="+Obj.id;
+										return;
+									}else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)){//-- Нападать если нет стены
+										if(Obj.action && Obj.action.search(/attack/)>=0){
+											top.frames[3].location=loc+"?attack="+Obj.id;
+											return;
+										}
+									}
+								}
 						}
 		
 		
@@ -228,39 +241,12 @@
         for(i=0;i<d.links.length;i++) {
           link=d.links(i);
           if (link.href.search(/dungeon\d*\.pl\?get=/)>=0 && (this.mat_click || (link.children(0).src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest))) {
-
             top.frames[3].location = link.href;
             return;
           }
         }
 		
-
-//-------------------------- Определение объектов в innerHTML ------Added by Solt -------------
-		if (this.en_click || this.autoAttack) {
-			Objects_behind=doc_inner.match(/ShowAll\( "1_0l", \[(.*)\]/); // ------------ Объекты спереди
-			Objects_left=doc_inner.match(/ShowAll\( "0_1l", \[(.*)\]/);   // ------------ слева
-			Objects_right=doc_inner.match(/ShowAll\( "0_1r", \[(.*)\]/);  // ------------ справа
-			
-			Objects_all=(Objects_behind?","+Objects_behind[1]:"")+(Objects_left?","+Objects_left[1]:"")+(Objects_right?","+Objects_right[1]:"");
-			eval ("Obj_ar=[{}"+Objects_all+"]"); //------------ Загоняем все объекто-юниты в массив
-			if( Obj_ar.length>1 ){
-				for(i=1;i<Obj_ar.length;i++){
-					if( (Obj_ar[i].object) && !(Obj_ar[i].id in this.usedObjects) && this.en_click){ //-------Кликать на объекты
-						this.usedObjects[Obj_ar[i].id]=true;
-						if(top.ChatSys) //------------ Добавить к логу на что кликали (если включены системки)
-							this.sys_msg='<font class=date2>'+cur_time+'</font> Кликнули объект <b>'+Obj_ar[i].name+'</b>, ';
-						top.frames[3].location=loc+"?useobj="+Obj_ar[i].id;
-						return;
-					}else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)){//-- Нападать если нет стены
-						if( Obj_ar[i].action && Obj_ar[i].action.search(/attack/)>=0){
-							top.frames[3].location=loc+"?attack="+Obj_ar[i].id;
-							return;
-						}
-					}
-				}
-			}
-		}
-
+		getElement=d.getElementById;
         if (this.autoPilot) {
           if (this.Direction && !getElement("m"+this.Direction)) {
             if (getElement("m1")) {
