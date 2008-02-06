@@ -170,16 +170,18 @@
 		for (var i=0; i<7; i++){
 			tab+='<tr>';
 			for (var j=0; j<7; j++)
-				//tab+='<td width="13" height="12" class="MyOwn">&nbsp;</td>';
-				tab+='<td class="MyOwn" style="width: 7px; height: 7px;"></td>';
+				tab+='<td style="width: 7px; height: 7px;"></td>';
 			tab+='</tr>';
 		}
 		tab+='</table>';
-		d.getElementById('DungMap').innerHTML += '<DIV id="Radar" style="position: absolute; width: 120px; height: 120px; filter: Alpha(Opacity=40);">'+tab+'</DIV>';
+		t= d.createElement('<DIV id="Radar" style="position: absolute; width: 120px; height: 120px; filter: Alpha(Opacity=40);"></DIV>');
+		l_m=d.all.DungMap.getElementsByTagName('button')[d.all.DungMap.getElementsByTagName('button').length-1];
+		l_m.parentNode.insertBefore(t,l_m.nextSibling);
+		d.all.Radar.innerHTML=tab;
 		R_div=d.getElementById('Radar');
 		R_t=d.getElementById('Radar_table');
-		R_div.style.left=R_div.previousSibling.style.posLeft-56;
-		R_div.style.top=R_div.previousSibling.style.posTop-53;
+		R_div.style.left=5;
+		R_div.style.top=8;
 		
 //---------- Обработка объектов (автокликанье, автонападение, прорисовка радара)
 		arrLayers=top.frames[3].arrLayers; //----- Зарываемся в массив объектов+юнитов
@@ -200,8 +202,11 @@
 									Obj_X=-Obj_X;
 									Obj_Y=-Obj_Y;
 								}
-								R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor=(o=='arrObjects' ? 'Green':'Red');
-								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=Obj.name+'\n';
+								if(R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor!='red')
+									R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor=(o=='arrObjects' ? 'green':'red');
+								if(R_t.rows[-Obj_Y+3].cells[Obj_X+3].title!="")
+									R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+="\n";
+								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=Obj.name;
 								if((x==0 && y==1) || (y==0 && x==1)){ //------- если спереди или с боков, загоняем в массив.
 									Obj_ar.push(Obj);
 									if( o=='arrObjects' && !(Obj.id in this.usedObjects) && this.en_click){ //-------Кликать на объекты
@@ -284,6 +289,7 @@
         'mainframe.load',
         top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
       this.clearUsedObjects();
+	  
     }
   };
     
