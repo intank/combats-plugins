@@ -4,6 +4,7 @@
   }
 
   plugin_chat_log.prototype = {
+    writeLogTimer: null,
     toString: function() {
       return "Ћог чата";
     },
@@ -54,6 +55,11 @@
         'onmessage',
         combats_plugins_manager.get_binded_method(this,this.store));
     },
+    writeLog: function() {
+      clearTimeout(this.writeLogTimer);
+      this.writeLogTimer = null;
+      external.writeFile(combats_plugins_manager.security_id,'Combats.RU',this.filename,this.mess);
+    },
     store: function(eventObj) {
       if (eventObj.mess=='')
         return;
@@ -68,7 +74,9 @@
         this.mess = this.getHeadFile();
       }
       this.mess += eventObj.mess+"<br/>\n";
-      external.writeFile(combats_plugins_manager.security_id,'Combats.RU',this.filename,this.mess);
+      if (this.writeLogTimer)
+        clearTimeout(this.writeLogTimer);
+      this.writeLogTimer = setTimeout(combats_plugins_manager.get_binded_method(this,this.writeLog), 3000);
     }
   };
 

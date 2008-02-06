@@ -72,10 +72,10 @@
         if (this.removeDuplicates) {
           if (!eventObj.mess.match(/<font\s+class="?date"?>.*?<\/font>\s+(?:\[<SPAN>.*?<\/SPAN>\]|<i><SPAN>.*?<\/SPAN>)/))
             return;
-          var mess = eventObj.mess.replace(/( |&nbsp;|-|&shy;|<font class="?date"?[^>]*>\d+:\d+<\/font>\s*|^\s+|\:[\S]+?\:|<.*?>|\s+$|&quot;|"|'|\s+(?=\s)|\\|&#\d+;)/ig,'');
+          var mess = eventObj.mess.replace(/( |&nbsp;|­|&shy;|<font class="?date"?[^>]*>\d+:\d+<\/font>\s*|^\s+|\:[\S]+?\:|<.*?>|\s+$|&quot;|"|'|\s+(?=\s)|\\|&#\d+;)/ig,'');
           var chatElement = top.Chat.Class.GetTab('oChat').Frame();
           for (var i=0; i<chatElement.childNodes.length; i++) {
-            if (chatElement.childNodes[i].innerHTML.replace(/( |&nbsp;|-|&shy;|<font class="?date"?[^>]*>\d+:\d+<\/font>\s*|^\s+|\:[\S]+?\:|<.*?>|\s+$|&quot;|"|'|\s+(?=\s)|\\|&#\d+;)/ig,'')==mess) {
+            if (chatElement.childNodes[i].innerHTML.replace(/( |&nbsp;|­|&shy;|<font class="?date"?[^>]*>\d+:\d+<\/font>\s*|^\s+|\:[\S]+?\:|<.*?>|\s+$|&quot;|"|'|\s+(?=\s)|\\|&#\d+;)/ig,'')==mess) {
               if (chatElement.childNodes[0].firstChild.tagName=='FONT') {
                 var s = chatElement.childNodes[i].firstChild.title;
                 var ss = chatElement.childNodes[i].firstChild.innerHTML;

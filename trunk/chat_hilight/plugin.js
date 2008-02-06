@@ -16,8 +16,8 @@
     },
     getProperties: function() {
       return [
-        { name: "RexExp удаления", value: this.clearRegexp.source },
-        { name: "RexExp выделения", value: this.markRegexp.source }
+        { name: "RexExp удаления", value: this.clearRegexp.source, style:"width:100%"  },
+        { name: "RexExp выделения", value: this.markRegexp.source, style:"width:100%" }
       ];
     },
     setProperties: function(a) {
