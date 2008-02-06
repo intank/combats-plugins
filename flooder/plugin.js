@@ -15,6 +15,7 @@
       else
         break;
     } while (true);
+    this.mode=parseInt(this.load(location.host,"mode","0"));
     if(isNaN(this.period=parseInt(this.load(location.host,"Timeout","200"))))
       this.period=200;
     else if(this.period<15)
@@ -28,9 +29,18 @@
   };
 
   plugin_flooder.prototype = {
+    mode: 0,
     getProperties: function() {
       return [
         { name: "Фраза", value: this.phrases.join('\n'), type:"textarea"},
+        { name: "Режим", 
+          value: {
+            'length': 2,
+            0: 'Одна случайная фраза', 
+            1: 'Все фразы подряд', 
+            'selected': this.mode
+          } 
+        },
         { name: "Отправить сейчас", value: this.exec },
         { name: "Период", value: this.period },
         { name: "Активен", value: this.active }
@@ -38,11 +48,13 @@
     },
     setProperties: function(a) {
       this.phrases = a[0].value.split('\r\n');
-      this.period=a[2].value;
-      this.active=a[3].value;
+      this.mode=parseInt(a[1].value.selected);
+      this.period=a[3].value;
+      this.active=a[4].value;
       for(var i=0; i<this.phrases.length; i++) {
         this.save(location.host,"msg"+i,this.phrases[i]);
       }
+      this.save(location.host,"mode",""+this.mode);
       this.save(location.host,"Timeout",""+this.period);
       if (this.timer!=null)
         clearTimeout(this.timer);
@@ -68,10 +80,21 @@
         clearTimeout(this.timer);
         this.timer = null;
       }
-      var i=this.phrases.length-1-Math.floor(Math.sqrt(Math.random()*Math.pow(this.phrases.length,2)));
-      this.sender.send(
-        this.phrases[i],
-        this.active?combats_plugins_manager.get_binded_method(this,this.enableFlood):null);
+      switch (this.mode) {
+      case 0:
+        var i=this.phrases.length-1-Math.floor(Math.sqrt(Math.random()*Math.pow(this.phrases.length,2)));
+        this.sender.send(
+          this.phrases[i],
+          this.active?combats_plugins_manager.get_binded_method(this,this.enableFlood):null);
+        break;
+      case 1:
+        for(var i=0; i<this.phrases.length; i++) {
+          this.sender.send(
+            this.phrases[i],
+            (this.active && i==0)?combats_plugins_manager.get_binded_method(this,this.enableFlood):null);
+        }
+        break;
+      }
       return true;
     }
   };
