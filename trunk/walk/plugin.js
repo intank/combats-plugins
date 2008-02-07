@@ -5,7 +5,10 @@
     this.mat_click=false;
     this.ignoreWall=false;
     this.autoPilot=true;
-	this.autoAttack=false; //------------- Added by Solt
+	this.autoAttack=false;
+	this.showUnits=true;
+	this.showObjects=false;
+	this.minHP=parseInt(95);
     this.steptimer=null;
     this.forced=false;
     this.skip_quest=false;
@@ -15,18 +18,25 @@
   }
 
   plugin_walk.prototype = {
+    "minHP": 95,
     "toString": function() {
       return "Бродилка по пещере";
     },
 
     "getProperties": function() {
       return [
-        { name: "\"Опережающий\" таймер", value: this.forced }
+        { name: "\"Опережающий\" таймер", value: this.forced },
+		{ name: "Отображать монстров на радаре", value: this.showUnits },
+		{ name: "Отображать объекты на радаре", value: this.showObjects },
+		{ name: "Минимум HP для автонападения", value: this.minHP }
       ];
     },
 
     "setProperties": function(a) {
       this.forced=a[0].value;
+	  this.showUnits=a[1].value;
+	  this.showObjects=a[2].value;
+	  this.minHP=a[3].value;
     },
 
     "setDirection": function(a) {
@@ -203,7 +213,10 @@
 									Obj_Y=-Obj_Y;
 								}
 								if(R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor!='red')
-									R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor=(o=='arrObjects' ? 'green':'red');
+									if(o=='arrObjects' || (Obj.HP) )
+										R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor=(this.showObjects ? 'green':'');
+									else
+										R_t.rows[-Obj_Y+3].cells[Obj_X+3].style.backgroundColor=(this.showUnits ? 'red':'');
 								if(R_t.rows[-Obj_Y+3].cells[Obj_X+3].title!="")
 									R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+="\n";
 								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=Obj.name;
@@ -216,7 +229,7 @@
 										top.frames[3].location=loc+"?useobj="+Obj.id;
 										return;
 									}else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)){//-- Нападать если нет стены
-										if(Obj.action && Obj.action.search(/attack/)>=0){
+										if(Obj.action && Obj.action.search(/attack/)>=0 && (100*top.tkHP/top.maxHP)>this.minHP){
 											top.frames[3].location=loc+"?attack="+Obj.id;
 											return;
 										}
