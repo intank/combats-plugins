@@ -146,8 +146,10 @@
 		}
 
         if (tables.length<2 || tables[0].cells.length<2 
-          || tables[0].cells[1].getElementsByTagName('A').length!=1 || tables[0].cells[1].getElementsByTagName('A')[0].href.search(/\?out=/)<0) 
+          || tables[0].cells[1].getElementsByTagName('A').length!=1 
+		  || tables[0].cells[1].getElementsByTagName('A')[0].href.search(/\?out=/)<0) {
           return;
+		}
 
         if (tables[0].rows(1).cells(0).innerText.search('У вас слишком много таких объектов')>=0) {
           this.skip_quest = true;
@@ -155,10 +157,12 @@
 
         if (tables[0].rows(1).cells(0).innerText.search('Не хватает места')>=0) {
           this.skip_quest = true;
+		  this.skip_mat_click = true;
           setTimeout(top.combats_plugins_manager.get_binded_method(
             this,
             function(){
               alert('Наведите порядок в рюкзаке');
+			  this.skip_mat_click = false;
               this.skip_quest = false;
             }),0);
         }
@@ -244,8 +248,8 @@
         d.all['td_stop'].onclick = top.combats_plugins_manager.get_binded_method(this,this.stop_it);
         d.all['en_click'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.en_click=top.frames[3].document.all['en_click'].checked;});
         d.all['mat_click'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.mat_click=top.frames[3].document.all['mat_click'].checked;});
-        d.all['ignoreWall'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.mat_click=top.frames[3].document.all['ignoreWall'].checked;});
-        d.all['autoPilot'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.mat_click=top.frames[3].document.all['autoPilot'].checked;});
+        d.all['ignoreWall'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.ignoreWall=top.frames[3].document.all['ignoreWall'].checked;});
+        d.all['autoPilot'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.autoPilot=top.frames[3].document.all['autoPilot'].checked;});
         d.all['autoAttack'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.autoAttack=top.frames[3].document.all['autoAttack'].checked;});
 		
         if (this.Direction) {
@@ -258,7 +262,7 @@
 // ---------- try drop ----------
         for(i=0;i<d.links.length;i++) {
           link=d.links(i);
-          if (link.href.search(/dungeon\d*\.pl\?get=/)>=0 && (this.mat_click || (link.children(0).src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest))) {
+          if (link.href.search(/dungeon\d*\.pl\?get=/)>=0 && (this.mat_click && !this.skip_mat_click || (link.children(0).src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest))) {
             top.frames[3].location = link.href;
             return;
           }
