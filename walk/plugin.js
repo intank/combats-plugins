@@ -6,29 +6,38 @@
     this.ignoreWall=false;
     this.autoPilot=true;
 	this.autoAttack=false;
-	this.showUnits=true;
-	this.showObjects=false;
-	this.minHP=parseInt(95);
     this.steptimer=null;
     this.forced=false;
+	this.showUnits=true;
+	this.showObjects=true;
+	this.minHP = 95;
+	this.excludedObjects='';
     this.skip_quest=false;
     this.usedObjects=new Object();
-	this.sys_msg = ''; //------------- Added by Solt
+	this.sys_msg = '';
+	this.Coordinates=new Array();
     this.init();
   }
 
   plugin_walk.prototype = {
-    "minHP": 95,
     "toString": function() {
       return "Бродилка по пещере";
     },
-
+	
+    "load": function(key,def_val){
+	  return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","walk\\walk.ini",top.getCookie('battle'),key,def_val);
+    },
+    "save": function(key,val){
+      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","walk\\walk.ini",top.getCookie('battle'),key,val);
+    },
     "getProperties": function() {
+	
       return [
         { name: "\"Опережающий\" таймер", value: this.forced },
 		{ name: "Отображать монстров на радаре", value: this.showUnits },
 		{ name: "Отображать объекты на радаре", value: this.showObjects },
-		{ name: "Минимум HP для автонападения", value: this.minHP }
+		{ name: "Минимум HP для автонападения", value: this.minHP},
+		{ name: "Список исключенных <br>из автокликера объектов", value: this.excludedObjects, type:"textarea"}
       ];
     },
 
@@ -37,6 +46,13 @@
 	  this.showUnits=a[1].value;
 	  this.showObjects=a[2].value;
 	  this.minHP=a[3].value;
+	  this.excludedObjects=a[4].value;
+
+	  this.save('forced',this.forced?"yes":"no");
+	  this.save('showUnits',this.showUnits?"yes":"no");
+	  this.save('showObjects',this.showObjects?"yes":"no");
+	  this.save('minHP',this.minHP);
+	  this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,", "));
     },
 
     "setDirection": function(a) {
@@ -166,19 +182,6 @@
               this.skip_quest = false;
             }),0);
         }
-
-        tables[0].rows(1).cells(0).innerHTML += '<table><tr><td><table>\
-    <tr><td><td><img id="i1" src="http://img.combats.ru/i/move/navigatin_52.gif" style="cursor:pointer"><td>\
-    <tr><td><img id="i7" src="http://img.combats.ru/i/move/navigatin_59.gif" style="cursor:pointer" onclick="this.setDirection(7)"><td id="td_stop" style="background-color:black;"><td><img id="i3" src="http://img.combats.ru/i/move/navigatin_62.gif" style="cursor:pointer" onclick="this.setDirection(3)">\
-    <tr><td><td><img id="i5" src="http://img.combats.ru/i/move/navigatin_67.gif" style="cursor:pointer" onclick="this.setDirection(5)"><td></table>\
-    <td>\
-    <input type="checkbox" id="en_click"'+(this.en_click?' CHECKED':'')+'>&nbsp;Кликать по объектам<br>\
-    <input type="checkbox" id="mat_click" onclick="this.mat_click=this.checked"'+(this.mat_click?' CHECKED':'')+'>&nbsp;Собирать ингридиенты<br>\
-    <input type="checkbox" id="ignoreWall" onclick="if(this.ignoreWall=this.checked)document.all.autoPilot.checked=this.autoPilot=false"'+(this.ignoreWall?' CHECKED':'')+'>&nbsp;Игнорировать препятствия<br>\
-    <input type="checkbox" id="autoPilot" onclick="if(this.autoPilot=this.checked)document.all.ignoreWall.checked=this.ignoreWall=false"'+(this.autoPilot?' CHECKED':'')+'>&nbsp;Автонавигация<br>\
-    <input type="checkbox" id="autoAttack" onclick="this.autoAttack=this.checked"'+(this.autoAttack?' CHECKED':'')+'>&nbsp;Автонападение<br>\
-    </table>';
-
 //---------- Создание пустого радара 		
 		tab='<table border=0 cellspacing=8 cellpadding=0 id="Radar_table">';
 		for (var i=0; i<7; i++){
@@ -226,21 +229,60 @@
 								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=Obj.name;
 								if((x==0 && y==1) || (y==0 && x==1)){ //------- если спереди или с боков, загоняем в массив.
 									Obj_ar.push(Obj);
-									if( o=='arrObjects' && !(Obj.id in this.usedObjects) && this.en_click){ //-------Кликать на объекты
+									if( o=='arrObjects' && !(Obj.id in this.usedObjects) && this.en_click && this.excludedObjects.indexOf(Obj.name)==-1){ //-------Кликать на объекты
 										this.usedObjects[Obj.id]=true;
 										if(top.ChatSys) //------------ Добавить к логу на что кликали (если включены системки)
 											this.sys_msg='<font class=date2>'+cur_time+'</font> Кликнули объект <b>'+Obj.name+'</b>, ';
 										top.frames[3].location=loc+"?useobj="+Obj.id;
 										return;
 									}else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)){//-- Нападать если нет стены
-										if(Obj.action && Obj.action.search(/attack/)>=0 && (100*top.tkHP/top.maxHP)>this.minHP){
-											top.frames[3].location=loc+"?attack="+Obj.id;
-											return;
+										if(Obj.action && Obj.action.search(/attack/)>=0){
+											if( (100*top.tkHP/top.maxHP)>this.minHP){
+												top.frames[3].location=loc+"?attack="+Obj.id;
+												return;
+											}else{
+												//setTimeout("top.frames[3].location.reload()",180000*(top.maxHP-top.tkHP)/(top.speed*top.maxHP)*1000);//обновить когда будет 100% HP
+												setTimeout("top.frames[3].location.reload()",180000*(top.maxHP*this.minHP/100-top.tkHP)/(top.speed*top.maxHP)*1000);//обновить когда будет minHP HP
+											}
 										}
 									}
 								}
 						}
+	
+
+        tables[0].rows(1).cells(0).innerHTML += '<table><tr><td><table>\
+    <tr><td><td><img id="i1" src="http://img.combats.ru/i/move/navigatin_52.gif" style="cursor:pointer"><td>\
+    <tr><td><img id="i7" src="http://img.combats.ru/i/move/navigatin_59.gif" style="cursor:pointer" onclick="this.setDirection(7)"><td id="td_stop" style="background-color:black;"><td><img id="i3" src="http://img.combats.ru/i/move/navigatin_62.gif" style="cursor:pointer" onclick="this.setDirection(3)">\
+    <tr><td><td><img id="i5" src="http://img.combats.ru/i/move/navigatin_67.gif" style="cursor:pointer" onclick="this.setDirection(5)"><td></table>\
+    <td>\
+    <input type="checkbox" id="en_click"'+(this.en_click?' CHECKED':'')+'>&nbsp;Кликать по объектам<br>\
+    <input type="checkbox" id="mat_click" onclick="this.mat_click=this.checked"'+(this.mat_click?' CHECKED':'')+'>&nbsp;Собирать ингридиенты<br>\
+    <input type="checkbox" id="ignoreWall" onclick="if(this.ignoreWall=this.checked)document.all.autoPilot.checked=this.autoPilot=false"'+(this.ignoreWall?' CHECKED':'')+'>&nbsp;Игнорировать препятствия<br>\
+    <input type="checkbox" id="autoPilot" onclick="if(this.autoPilot=this.checked)document.all.ignoreWall.checked=this.ignoreWall=false"'+(this.autoPilot?' CHECKED':'')+'>&nbsp;Автонавигация<br>\
+    <input type="checkbox" id="autoAttack" onclick="this.autoAttack=this.checked"'+(this.autoAttack?' CHECKED':'')+'>&nbsp;Автонападение<br>\
+    </table>';
+
+		maxT=1800/top.speed*100;
+		T=Math.floor(maxT/top.maxHP*100);
 		
+		//alert(dT+' '+T);
+		d.getElementsByTagName('table')[2].rows[0].cells[0].innerHTML+="(100HP/"+T+"сек.)"
+		//top.Chat.am(t);
+
+//---------Вычисление своих координат
+		if(arrMap=top.frames[3].arrMap){
+			map_i=parseInt(0); 
+			for(y=0;y<8;y++){
+				for(x=0;x<8;x++){
+					map_i*=2;
+					map_i+=(arrMap[y][x] ? 1:0);
+				}
+			}
+			//top.Chat.am(map_i.toString(10));
+			if(this.Coordinates[map_i])
+				d.getElementsByTagName('table')[4].rows[0].cells[0].innerHTML+="<br>"+"x:"+this.Coordinates[map_i].x+" y:"+this.Coordinates[map_i].y;
+		}
+			
 		
         for (var i=1; i<8; i+=2)
           d.all['i'+i].onclick = top.combats_plugins_manager.get_binded_method(this,this.setDirection, i);
@@ -306,7 +348,18 @@
         'mainframe.load',
         top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
       this.clearUsedObjects();
-	  
+	  if(!top.ChatSys) top.bottom.sw_sys(); //--------------- Включаем системки
+	  t = external.readFile(top.combats_plugins_manager.security_id,"Combats.RU","walk\\coordinates.ini"); //загрузка индексов координат
+	  s=t.split(/[\x0A\x0D]+/);
+	  for(i in s){
+	  	t=s[i].split(" ");
+	  	this.Coordinates[t[0]]={x:t[1],y:t[2]};
+	  }
+	  this.forced=(this.load('forced','no')=='yes');
+	  this.showUnits=(this.load('showUnits','yes')=='yes');
+	  this.showObjects=(this.load('showObjects','yes')=='yes');
+	  this.minHP=parseInt(this.load('minHP','95'));
+	  this.excludedObjects=this.load('exclude','').replace(/,\s+/g, "\n");
     }
   };
     
