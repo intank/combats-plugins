@@ -52,7 +52,7 @@
 	  this.save('showUnits',this.showUnits?"yes":"no");
 	  this.save('showObjects',this.showObjects?"yes":"no");
 	  this.save('minHP',this.minHP);
-	  this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,", "));
+	  this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,";"));
     },
 
     "setDirection": function(a) {
@@ -62,7 +62,7 @@
         }
         this.Direction=a;
         img=top.frames[3].document.all("i"+this.Direction);
-        img.src=img.src.replace(/\.gif$/,"b.gif");
+        img.src=img.src.replace(/b?\.gif$/,"b.gif");
         top.frames[3].document.all("td_stop").style.backgroundColor="black";
         if (this.ignoreWall || top.frames[3].document.getElementById("m"+this.Direction) && this.steptimer==null) {
           var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
@@ -70,6 +70,7 @@
             mtime = 0;
           this.StartStepTimer(mtime);
         }
+		this.setCurrentSettings();
     },
 
     "StartStepTimer": function(sec) {
@@ -94,6 +95,7 @@
           clearTimeout(this.steptimer);
           this.steptimer=null;
         }
+		this.setCurrentSettings();
     },
       
     "do_step": function() {
@@ -145,17 +147,35 @@
       this.skip_quest = false;
     },
 
+    "setCurrentSettings": function() {
+        this.en_click=top.frames[3].document.all['en_click'].checked;
+		this.mat_click=top.frames[3].document.all['mat_click'].checked;
+        this.ignoreWall=top.frames[3].document.all['ignoreWall'].checked;
+        this.autoPilot=top.frames[3].document.all['autoPilot'].checked;
+        this.autoAttack=top.frames[3].document.all['autoAttack'].checked;
+		
+        t=this.Direction;
+		t=this.en_click ? (t | 8):(t & 247);
+		t=this.mat_click ? (t | 16):(t & 239);
+		t=this.ignoreWall ? (t | 32):(t & 223);
+		t=this.autoPilot ? (t | 64):(t & 191);
+		t=this.autoAttack ? (t | 128):(t & 127);
+		
+		//alert(t.toString(2));
+		document.cookie = "walkSettings=" + t + ";";
+    },
+
     "onloadHandler": function() {
       try {
         var d=top.frames[3].document;
+        if(d.location.pathname.search(/^\/dungeon\d*\.pl/)!=0)
+          return;
 		var doc_inner=d.body.innerHTML.toString(); // ----------- Added by Solt
 		var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
 		var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
-		var Obj_ar=new Array();
-        if(d.location.pathname.search(/^\/dungeon\d*\.pl/)!=0)
-          return;
         tables = d.getElementsByTagName('TABLE');
-
+	    if(!top.ChatSys) top.bottom.sw_sys(); //--------------- Включаем системки
+		
 		if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
 			top.Chat.am(this.sys_msg + '<i>'+Red_str[1]+'<i>');
 			this.sys_msg='';
@@ -182,6 +202,16 @@
               this.skip_quest = false;
             }),0);
         }
+		  
+// ---------- try drop ----------
+        for(i=0;i<d.links.length;i++) {
+          link=d.links(i);
+          if (link.href.search(/dungeon\d*\.pl\?get=/)>=0 && (this.mat_click && !this.skip_mat_click || (link.children(0).src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest))) {
+            top.frames[3].location = link.href;
+            return;
+          }
+        }
+
 //---------- Создание пустого радара 		
 		tab='<table border=0 cellspacing=8 cellpadding=0 id="Radar_table">';
 		for (var i=0; i<7; i++){
@@ -215,7 +245,7 @@
 									Obj_X=Obj_Y;
 									Obj_Y=-tmp;
 								}
-								if(top.frames[3].nMyDirection & 4){ //если 5 или 7 разворачиваем на 180гр
+								if(top.frames[3].nMyDirection & 4){ //если 5 или 7, координаты разворачиваем на 180гр
 									Obj_X=-Obj_X;
 									Obj_Y=-Obj_Y;
 								}
@@ -227,8 +257,8 @@
 								if(R_t.rows[-Obj_Y+3].cells[Obj_X+3].title!="")
 									R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+="\n";
 								R_t.rows[-Obj_Y+3].cells[Obj_X+3].title+=Obj.name;
-								if((x==0 && y==1) || (y==0 && x==1)){ //------- если спереди или с боков, загоняем в массив.
-									Obj_ar.push(Obj);
+								
+								if((x==0 && y==1) || (y==0 && x==1)){ //---------------- если спереди или с боков, кликаем.
 									if( o=='arrObjects' && !(Obj.id in this.usedObjects) && this.en_click && this.excludedObjects.indexOf(Obj.name)==-1){ //-------Кликать на объекты
 										this.usedObjects[Obj.id]=true;
 										if(top.ChatSys) //------------ Добавить к логу на что кликали (если включены системки)
@@ -259,7 +289,7 @@
     <input type="checkbox" id="mat_click" onclick="this.mat_click=this.checked"'+(this.mat_click?' CHECKED':'')+'>&nbsp;Собирать ингридиенты<br>\
     <input type="checkbox" id="ignoreWall" onclick="if(this.ignoreWall=this.checked)document.all.autoPilot.checked=this.autoPilot=false"'+(this.ignoreWall?' CHECKED':'')+'>&nbsp;Игнорировать препятствия<br>\
     <input type="checkbox" id="autoPilot" onclick="if(this.autoPilot=this.checked)document.all.ignoreWall.checked=this.ignoreWall=false"'+(this.autoPilot?' CHECKED':'')+'>&nbsp;Автонавигация<br>\
-    <input type="checkbox" id="autoAttack" onclick="this.autoAttack=this.checked"'+(this.autoAttack?' CHECKED':'')+'>&nbsp;Автонападение<br>\
+    <input type="checkbox" id="autoAttack" onclick="this.autoAttack=this.checked;"'+(this.autoAttack?' CHECKED':'')+'>&nbsp;Автонападение<br>\
     </table>';
 
 		maxT=1800/top.speed*100;
@@ -288,11 +318,11 @@
           d.all['i'+i].onclick = top.combats_plugins_manager.get_binded_method(this,this.setDirection, i);
 
         d.all['td_stop'].onclick = top.combats_plugins_manager.get_binded_method(this,this.stop_it);
-        d.all['en_click'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.en_click=top.frames[3].document.all['en_click'].checked;});
-        d.all['mat_click'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.mat_click=top.frames[3].document.all['mat_click'].checked;});
-        d.all['ignoreWall'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.ignoreWall=top.frames[3].document.all['ignoreWall'].checked;});
-        d.all['autoPilot'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.autoPilot=top.frames[3].document.all['autoPilot'].checked;});
-        d.all['autoAttack'].onclick = top.combats_plugins_manager.get_binded_method(this,function(){this.autoAttack=top.frames[3].document.all['autoAttack'].checked;});
+        d.all['en_click'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
+        d.all['mat_click'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
+        d.all['ignoreWall'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
+        d.all['autoPilot'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
+        d.all['autoAttack'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
 		
         if (this.Direction) {
           img=d.all("i"+this.Direction);
@@ -300,15 +330,6 @@
         } else
           d.all("td_stop").style.backgroundColor="red";
 
-		  
-// ---------- try drop ----------
-        for(i=0;i<d.links.length;i++) {
-          link=d.links(i);
-          if (link.href.search(/dungeon\d*\.pl\?get=/)>=0 && (this.mat_click && !this.skip_mat_click || (link.children(0).src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest))) {
-            top.frames[3].location = link.href;
-            return;
-          }
-        }
 		
 		getElement=d.getElementById;
         if (this.autoPilot) {
@@ -348,7 +369,7 @@
         'mainframe.load',
         top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
       this.clearUsedObjects();
-	  if(!top.ChatSys) top.bottom.sw_sys(); //--------------- Включаем системки
+
 	  t = external.readFile(top.combats_plugins_manager.security_id,"Combats.RU","walk\\coordinates.ini"); //загрузка индексов координат
 	  s=t.split(/[\x0A\x0D]+/);
 	  for(i in s){
@@ -359,7 +380,19 @@
 	  this.showUnits=(this.load('showUnits','yes')=='yes');
 	  this.showObjects=(this.load('showObjects','yes')=='yes');
 	  this.minHP=parseInt(this.load('minHP','95'));
-	  this.excludedObjects=this.load('exclude','').replace(/,\s+/g, "\n");
+	  this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
+
+	  if( /walkSettings=(\d+)/.test( document.cookie ) ){
+		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );
+		
+	  	this.en_click=((t & 8)>0);
+	  	this.mat_click=((t & 16)>0);
+      	this.ignoreWall=((t & 32)>0);
+      	this.autoPilot=((t & 64)>0);
+      	this.autoAttack=((t & 128)>0);
+		
+		this.Direction=(t & 7);
+	  }
     }
   };
     
