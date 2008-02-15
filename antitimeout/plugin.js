@@ -20,10 +20,10 @@
 	}
 	
 	plugin_antitimeout.prototype.setProperties = function(a) {
-		this.autotime=a[0].value;
-		this.minTime=a[1].value;
-		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"autotime",this.autotime);
-		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"refresh",this.minTime);
+		this.autotime=parseInt(a[0].value);
+		this.minTime=parseInt(a[1].value);
+		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"autotime",""+this.autotime);
+		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"refresh",""+this.minTime);
 	}
 	
 	plugin_antitimeout.prototype.clearKickTimer = function() {
@@ -46,9 +46,9 @@
 			oBattle=top.Battle.oBattle;
 			this.timeAttack+=this.minTime;
 
-			//top.Chat.am('<b>----------------Kick try</b>');
+			//top.Chat.am('Checking..................'+this.timeAttack);
 			if(top.Battle.oBattle.bGameOver){ //---------------- Гейм оувер
-				//top.Chat.am('Game over');
+				top.Chat.am('Game over');
 				top.Battle.End(top.Battle.oBattle.sLocation);
 				return;
 			}
@@ -70,33 +70,59 @@
 			for(i=0;i<this.MethodPriority.length;i++){
 				id=this.MethodPriority[i].id;
 				Res=this.MethodPriority[i].Res;
-				
+				//top.Chat.am(i+'-'+id);
 				CheckRes=true;
 				for(j in Res){
 					if(j=='enemy'){                                //-------------Обработка врага
-						CheckRes=false;
+						CheckEnemy=false;
+						//top.Chat.am(j+'-'+Res[j]);
 						en=Res[j].split(/\s*\|\s*/);
+						//top.Chat.am(en);
 						for(k in en){
+							//top.Chat.am(k+'-'+en[k]);
 							en_a=en[k].match(/([А-я ]*)(\[\s*(\d+)\s*\])?/);
 							enName=en_a[1].replace(/(.*?)\s+/, "$1");
 							enLevel=en_a[3] ? en_a[3] : 0;
+							//top.Chat.am("Name '"+enName+"', Level '"+enLevel+"', ");
 							
 							if(enName && enLevel)
-								CheckRes=(oBattle.arrUsers[oBattle.sEnemy].sName.indexOf(enName)>=0 && oBattle.arrUsers[oBattle.sEnemy].nLevel==enLevel) ? true:CheckRes;
+								CheckEnemy=(oBattle.arrUsers[oBattle.sEnemy].sName.indexOf(enName)>=0 && oBattle.arrUsers[oBattle.sEnemy].nLevel==enLevel) ? true:CheckEnemy;
 							else if(enName)
-								CheckRes=(oBattle.arrUsers[oBattle.sEnemy].sName.indexOf(enName)>=0) ? true:CheckRes;
+								CheckEnemy=(oBattle.arrUsers[oBattle.sEnemy].sName.indexOf(enName)>=0) ? true:CheckEnemy;
 							else
-								CheckRes=(oBattle.arrUsers[oBattle.sEnemy].nLevel==enLevel) ? true:CheckRes;
+								CheckEnemy=(oBattle.arrUsers[oBattle.sEnemy].nLevel==enLevel) ? true:CheckEnemy;
 
+							//top.Chat.am("name+level find :"+CheckEnemy);
+						}
+						CheckRes=CheckEnemy ? CheckRes:false;
+					}else if(j=='my_effect'){                             //-----------------------обработка своих эффектов
+						//top.Chat.am(Res[j]);
+						CheckEffect=false;
+						if(Res[j].indexOf('-')>=0)
+							CheckEffect=true;
+						myEff=Res[j].split(/\s*\|\s*/);
+						for(k in oBattle.arrUsers){
+							if(oBattle.arrUsers[k].sName==oBattle.sMyLogin){
+								me=oBattle.arrUsers[k];
+								break;
+							}
 						}
 						
+						for(k in me.arrEffects){
+							CheckEffect=(Res[j].indexOf(me.arrEffects[k].sID)>=0) ? true:CheckEffect;
+							CheckEffect=(Res[j].indexOf('-'+me.arrEffects[k].sID)>=0) ? false:CheckEffect;
+							//top.Chat.am(k+'-'+me.arrEffects[k].sID+'-'+CheckEffect);
+						}
+						CheckRes=CheckEffect ? CheckRes:false;
 					}else{                             //-----------------------обработка тактик для приема
 						currRes=parseInt(oBattle.arrRes[j].innerHTML);
+						//top.Chat.am(j+'-'+Res[j]+'?'+currRes);
 						CheckRes=( (currRes>=parseInt(Res[j])) ? CheckRes : false);
 					}
 				}
 				
 				if(CheckRes && typeof(top.Battle.oBattle.arrMethods[id])=='object' && top.Battle.oBattle.arrMethods[id].oMethod.bEnable){
+					top.Chat.am('<b>'+oBattle.arrMethods[id].oMethod.sText+'</b>');
 					oBattle.ApplyMethod(top.Battle.oBattle.arrMethods[id].oMethod);
 					this.setKickTimer(this.minTime*1000);
 					return;
@@ -104,8 +130,9 @@
 				
 			}
 			
+			//top.Chat.am("T="+this.timeAttack);
 			if(this.timeAttack>=this.autotime){ //------------ Наносим удар если пора
-				//top.Chat.am('<b>Attack</b>');
+				top.Chat.am('<b>Attack</b>');
 				oBattle.Attack();
 				this.timeAttack=0;
 			}
@@ -126,7 +153,7 @@
 				if(!(top.Battle.oBattle.Class.Settings() & 1)) top.Battle.oBattle.Class.Settings(1); // ----------Упрощенный бой
 				if(!(top.Battle.oBattle.Class.Settings() & 8)) top.Battle.oBattle.Class.Settings(8); // ---------Не сбрасывать выбор
 			}			
-
+			//top.Chat.am('reload');
 			if (this.autotime>0)
 				this.setKickTimer(this.minTime*1000);
 			else
@@ -150,8 +177,7 @@
 		
 		for(i=1;i<=20;i++){ // считывание приемов
 			t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"Method"+i,"");
-			
-			if(a=t.match(/(\S+?)\s+(.*)\s*;.*/)){ // ----- отделяем прием от параметров
+			if(a=t.match(/(\S+)\s*([^;]*).*/)){ // ----- отделяем прием от параметров
 				var Method=new Object();
 				Method['id']= a[1];
 				if(a[2]){
@@ -162,8 +188,10 @@
 						Method['Res'][c[0]]=c[1];
 					}
 				}
-				this.MethodPriority.push(Method);
+				if(Method['id'])
+					this.MethodPriority.push(Method);
 			}
+			
 		}
 		
 		
