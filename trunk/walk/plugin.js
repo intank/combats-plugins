@@ -15,7 +15,7 @@
     this.skip_quest=false;
     this.usedObjects=new Object();
 	this.sys_msg = '';
-	this.Coordinates=new Array();
+	//this.Coordinates=new Array();
     this.init();
   }
 
@@ -298,7 +298,7 @@
 		//alert(dT+' '+T);
 		d.getElementsByTagName('table')[2].rows[0].cells[0].innerHTML+="(100HP/"+T+"сек.)"
 		//top.Chat.am(t);
-
+/*
 //---------Вычисление своих координат
 		if(arrMap=top.frames[3].arrMap){
 			map_i=parseInt(0); 
@@ -312,7 +312,7 @@
 			if(this.Coordinates[map_i])
 				d.getElementsByTagName('table')[4].rows[0].cells[0].innerHTML+="<br>"+"x:"+this.Coordinates[map_i].x+" y:"+this.Coordinates[map_i].y;
 		}
-			
+*/			
 		
         for (var i=1; i<8; i+=2)
           d.all['i'+i].onclick = top.combats_plugins_manager.get_binded_method(this,this.setDirection, i);
@@ -369,19 +369,21 @@
         'mainframe.load',
         top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
       this.clearUsedObjects();
-
-	  t = external.readFile(top.combats_plugins_manager.security_id,"Combats.RU","walk\\coordinates.ini"); //загрузка индексов координат
-	  s=t.split(/[\x0A\x0D]+/);
-	  for(i in s){
-	  	t=s[i].split(" ");
-	  	this.Coordinates[t[0]]={x:t[1],y:t[2]};
+	  /*
+	  if(t = external.readFile(top.combats_plugins_manager.security_id,"Combats.RU","walk\\coordinates.ini")){ //загрузка индексов координат
+	  	s=t.split(/[\x0A\x0D]+/);
+	  	for(i in s){
+	  		top.Chat.am("3");
+	  		t=s[i].split(" ");
+	  		this.Coordinates[t[0]]={x:t[1],y:t[2]};
+	  	}
 	  }
+	  */
 	  this.forced=(this.load('forced','no')=='yes');
 	  this.showUnits=(this.load('showUnits','yes')=='yes');
 	  this.showObjects=(this.load('showObjects','yes')=='yes');
 	  this.minHP=parseInt(this.load('minHP','95'));
 	  this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
-
 	  if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );
 		
