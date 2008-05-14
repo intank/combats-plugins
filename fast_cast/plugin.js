@@ -4,6 +4,14 @@
   }
 
   plugin_fast_cast.prototype = {
+    knownSpells: [
+      { item:'spell_powerHPup5', name:'Жажда Жизни +5', filter:'5' },
+      { item:'spell_powerHPup4', name:'Жажда Жизни +4', filter:'4', requirements: {'Интеллект: ':70} },
+      { item:'spell_powerup10', name:'Сокрушение', filter:'Сокрушение', requirements: {'Интеллект: ':15} },
+      { item:'spell_stat_intel', name:'Холодный Разум', filter:'Холодный Разум', requirements: {'Интеллект: ':70} },
+      { item:'cure_g1', name:'Цепь Исцеления', filter:'Цепь Исцеления' },
+      { item:'d_blat-6', name:'Пропуск Забытых', filter:'Пропуск Забытых', requirements: {'Интеллект: ':5} }
+    ],
     inProgress: false,
     castQueue: [],
     load: function(key,def_val){
@@ -23,17 +31,47 @@
     },
     setProperties: function(a) {
     },
-    queryName: function(spellName,spellId) {
+    selectCast: function() {
+      if (this.menu) {
+        this.menu.parentNode.removeChild(this.menu);
+        this.menu = null;
+        return;
+      }
+      this.menu = top.document.createElement('div');
+      var s = '';
+      for(var i=0; i<this.knownSpells.length; i++) {
+        s += '<tr><td style="width:100%; height: 40px; padding-left:50px; background: center left url(http://img.combats.ru/i/items/'+this.knownSpells[i].item+'.gif) no-repeat; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.knownSpells[i].name+'</td></tr>';
+      }
+      this.menu.innerHTML = '<table style="border: 2px solid black; width: 100%">'+s+'</table>';
+      this.menu.style.cssText = 'position: absolute; z-index: 5; left: '+(window.event.clientX-window.event.offsetX)+'px; top: '+(window.event.clientY-window.event.offsetY+30)+'px; width: 200px; height: auto; background: #C7C7C7';
+      top.document.body.insertBefore(this.menu);
+      this.menu.attachEvent(
+        'onclick',
+        combats_plugins_manager.get_binded_method(
+          this, 
+          function() {
+            if (this['debugger']) debugger;
+            var i = window.event.srcElement.parentNode.rowIndex;
+            if (typeof(i)=='number') {
+              this.queryName(i);
+              this.menu.parentNode.removeChild(this.menu);
+              this.menu = null;
+            }
+          }
+        )
+      );
+    },
+    queryName: function(i) {
       top.Window.Prompt(
         function(a){
           if (a) {
-            this.castSpell({spellName:spellName,spellId:spellId,target:a});
+            this.castSpell({spellName:this.knownSpells[i].name,spellId:this.knownSpells[i].item,filter:this.knownSpells[i].filter,requirements:this.knownSpells[i].requirements,target:a});
           }
         },
         this,
         'Для каста заклинания необходимо выбрать цель. Введите ник или щёлкните по нику в чате',
         '',
-        'Кастуем "<b>'+spellName+'</b>"'
+        'Кастуем "<b>'+this.knownSpells[i].name+'</b>"'
       );
     },
     sendAutoResponse: function(message) {
@@ -57,6 +95,29 @@
       }
       return null;
     },
+    matchStats: function(params) {
+      if (!params.requirements)
+        return true;
+      var result = true;
+      var doc = combats_plugins_manager.getMainFrame().document;
+      var scripts = doc.getElementsByTagName('script');
+      for(var i=0; i<scripts.length; i++) {
+        var match = scripts[i].innerHTML.match(/DrawBar\('Характеристики', 'stat', (\d+), '', ''\)/);
+        if (match && (parseInt(match[1])&1)==1) {
+          var obj = scripts[i].nextSibling;
+          while(obj.nodeName!='SCRIPT') {
+            if (obj.nodeName=='#text') {
+              if ((obj.nodeValue in params.requirements) && parseInt(obj.nextSibling.innerText)<params.requirements[obj.nodeValue]) {
+                result = false;
+                break;
+              }
+            }
+            obj = obj.nextSibling;
+          }
+        }
+      }
+      return result;
+    },
     doCast: function(link, params) {
       var doc = link.document;
       var match=link.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)
@@ -65,39 +126,63 @@
       doc.forms['slform'].submit();
     },
     castSpell: function(params, step) {
+      try {
+        if (combats_plugins_manager.getMainFrame().location.pathname=='/exchange.pl') {
+          if (!this.exchangeDetected) {
+            this.sendAutoResponse('private ['+params.target+'] Я сейчас в передачах. Освобожусь - кастану, ожидайте (автоответ)');
+            this.exchangeDetected = true;
+            var centerElements = combats_plugins_manager.getMainFrame().document.getElementsByTagName('center');
+            if (centerElements.length==0 || centerElements[0].innerText=='Передача предметов/кредитов другому игроку') {
+              setTimeout(function(){top.cht('/main.pl');}, 0);
+            }
+          }
+          throw new Exception('');
+        }
+      } catch(e) {
+        setTimeout(combats_plugins_manager.get_binded_method(this,this.castSpell,params,step), 1000);
+        return;
+      }
+      this.exchangeDetected = false;
       if (!step) {
-        if (params.a==top.mylogin) {
+        if (params.target==top.mylogin) {
           return;
         }
         if (!this.inProgress) {
           this.inProgress = true;
           var link;
           if (link=this.findSpell(params)) {
-            this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
-            combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
-            this.doCast(link, params);
+            if (this.matchStats(params)) {
+              this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
+              combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
+              this.doCast(link, params);
+            } else {
+              alert('Наденьте правильный комплект!');
+              this.nextCast();
+            }
           } else {
             this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,1);
             combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
-            combats_plugins_manager.getMainFrame().location = '/main.pl?edit=2&'+Math.random();
+            top.cht('/main.pl?edit=5&filter='+params.filter+'&'+Math.random());
           }
         } else {
           this.castQueue.push(params);
         }
       } else switch (step) {
         case 1:
-          if (this['debugger']) debugger;
           combats_plugins_manager.detachEvent('mainframe.load',this.mainframeload_handler);
           var link;
           if (link=this.findSpell(params)) {
-            this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
-            combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
-            this.doCast(link, params);
+            if (this.matchStats(params)) {
+              this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
+              combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
+              this.doCast(link, params);
+            } else {
+              alert('Наденьте правильный комплект!');
+              this.nextCast();
+            }
           } else {
             this.sendAutoResponse('private ['+params.target+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
-            this.inProgress = false;
-            if (this.castQueue.length>0)
-              this.castSpell(this.castQueue.shift());
+            this.nextCast();
           }
           break;
         case 2:
@@ -111,13 +196,24 @@
             }
             this.sendAutoResponse('private ['+params.target+'] '+castResult.innerText+' (автоответ)'+congratulations);
           } else {
-            this.sendAutoResponse('private ['+params.target+'] По каким-то причинам результат каста нераспознан :chtoza: (автоответ)');
+            this.sendAutoResponse('private ['+params.target+'] По каким-то причинам результат каста не распознан :chtoza: (автоответ)');
           }
-          this.inProgress = false;
-          if (this.castQueue.length>0)
-            this.castSpell(this.castQueue.shift());
+          this.nextCast();
           break;
         }
+    },
+    nextCast: function() {
+      setTimeout(
+        combats_plugins_manager.get_binded_method(
+          this,
+          function() {
+            this.inProgress = false;
+            if (this.castQueue.length>0)
+              this.castSpell(this.castQueue.shift());
+          }
+        ),
+        0
+      );
     },
     init: function() {
       top.combats_plugins_manager.plugins_list['top_tray'].addButton({
@@ -130,9 +226,7 @@
             },
           'onclick': combats_plugins_manager.get_binded_method(
             this, 
-            this.queryName, 
-            'Жажда Жизни +4',
-            'spell_powerHPup4')
+            this.selectCast)
           },
         'img': {
           'style': {

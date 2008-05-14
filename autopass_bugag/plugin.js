@@ -50,13 +50,14 @@
           return;
         try {
           var d = top.frames[3].document;
+          var arr_H4 = d.getElementsByTagName('H4');
+          var button = d.createElement('<input type="button" value="Показать параметры" onclick="top.cht(\'/main.pl?attack=[]\')"/>');
+          d.body.insertBefore(button,arr_H4[0]);
+
           var bugag=d.getElementById('mo_dialog:emc_bugag_prewelcome');
           if (!bugag)
             return;
           bugag.onclick = combats_plugins_manager.get_binded_method(this,this.bugagClick);
-          var arr_H4 = d.getElementsByTagName('H4');
-          var button = d.createElement('<input type="button" value="Показать параметры" onclick="top.cht(\'/main.pl?attack=[]\')"/>');
-          d.body.insertBefore(button,arr_H4[0]);
         } catch (e) {
           combats_plugins_manager.logError(this,e);
         }
@@ -107,7 +108,7 @@
     }
   };
   
-  if (top.location.host=='emeraldscity.combats.ru')
+  if (top.location.host=='emeraldscity.combats.ru' || top.location.host=='dungeon.combats.ru')
     return new plugin_autopass_bugag();
   else
     return null;

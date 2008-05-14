@@ -158,6 +158,7 @@
 				this.setKickTimer(this.minTime*1000);
 			else
 				this.kickTimer = null;
+			
 			top.frames[3].attachEvent( "onbeforeunload", top.combats_plugins_manager.get_binded_method(this,this.clearKickTimer));
   
 		}catch(e){

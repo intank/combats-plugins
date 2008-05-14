@@ -187,19 +187,33 @@
           return;
 		}
 
-        if (tables[0].rows(1).cells(0).innerText.search('У вас слишком много таких объектов')>=0) {
+	var redText = tables[0].rows(1).cells(0).innerText;
+        if (redText.search('У вас слишком много таких объектов')>=0) {
           this.skip_quest = true;
-        }
-
-        if (tables[0].rows(1).cells(0).innerText.search('Не хватает места')>=0) {
+	  this.skip_mat_click = true;
+          setTimeout(top.combats_plugins_manager.get_binded_method(
+            this,
+            function(){
+	      this.skip_mat_click = false;
+            }),0);
+        } else
+        if (redText.search('Не хватает места')>=0) {
           this.skip_quest = true;
-		  this.skip_mat_click = true;
+	  this.skip_mat_click = true;
           setTimeout(top.combats_plugins_manager.get_binded_method(
             this,
             function(){
               alert('Наведите порядок в рюкзаке');
-			  this.skip_mat_click = false;
+	      this.skip_mat_click = false;
               this.skip_quest = false;
+            }),0);
+        } else
+        if (redText.search('если за 5 минут его не подберут, он может стать вашим...')>=0) {
+	  this.skip_mat_click = true;
+          setTimeout(top.combats_plugins_manager.get_binded_method(
+            this,
+            function(){
+	      this.skip_mat_click = false;
             }),0);
         }
 		  
@@ -211,7 +225,6 @@
             return;
           }
         }
-
 //---------- Создание пустого радара 		
 		tab='<table border=0 cellspacing=8 cellpadding=0 id="Radar_table">';
 		for (var i=0; i<7; i++){
