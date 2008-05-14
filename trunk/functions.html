@@ -4,7 +4,6 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
   if ("combats_plugins_manager" in this) {
     combats_plugins_manager.Configure();
   } else {
-    var new_version = ("Framework" in top);
     var $A = Array.from = function(iterable) {
       if (!iterable) return [];
       var results = [];
@@ -69,20 +68,31 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
           return;
         this.loadPlugin(pluginName);
       },
+
       "StartCfgPanelDrag": function() {
-        if (window.event.srcElement.nodeName=='DIV' && !this.MoveCfgPanelMode) {
-          this.MoveCfgPanelMode=true; 
-          this.MoveCfgPanelY = window.event.offsetY; 
-          this.MoveCfgPanelX = window.event.offsetX
-//          alert(''+window.event.offsetX+','+window.event.offsetY+'\n'+window.event.clientX+','+window.event.clientY);
+        if (window.event.srcElement.nodeName=='DIV' && !this.DragInfo) {
+          var e = window.event;
+          this.DragInfo = {
+            MoveCfgPanelX: this.CfgDiv.offsetLeft,
+            MoveCfgPanelY: this.CfgDiv.offsetTop,
+	    MouseLeft: e.clientX-this.CfgDiv.offsetLeft,
+	    MouseTop: e.clientY-this.CfgDiv.offsetTop
+	  }
+          document.attachEvent('onmousemove',this.DragCfgPanel);
+          this.CfgDiv.style.cursor="move";
         }
       },
-      "MoveCfgPanel": function() {
-        if (this.CfgDiv && this.MoveCfgPanelMode) {
-//          if (window.event.type=='mouseout') alert();
-          this.CfgDiv.style.left = window.event.clientX-top.combats_plugins_manager.MoveCfgPanelX;
-          this.CfgDiv.style.top = window.event.clientY-top.combats_plugins_manager.MoveCfgPanelY;
+      "DragCfgPanel": function() {
+        if (top.combats_plugins_manager.DragInfo) {
+          var e = window.event;
+          top.combats_plugins_manager.CfgDiv.style.left = e.clientX-top.combats_plugins_manager.DragInfo.MouseLeft+"px";
+          top.combats_plugins_manager.CfgDiv.style.top = e.clientY-top.combats_plugins_manager.DragInfo.MouseTop+"px";
         }
+      },
+      "StopCfgPanelDrag": function() {
+        this.DragInfo=null;
+        document.detachEvent('onmousemove',this.DragCfgPanel);
+        this.CfgDiv.style.cursor="auto";
       },
       "HideCfgPanel": function() {
         if (this.CfgDiv)
@@ -91,56 +101,47 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
         this.MoveCfgPanelMode=false; 
       },
       "Configure": function() {
-        if (this.CfgDiv) {
-//          this.HideCfgPanel();
-          return;
-        }
-        var l = (window.screen.width-600)/2;
-        var t = (window.screen.height-400)/2;
-        var w;
-        if (1) {
+        if (!this.CfgDiv) {
+          var w;
           this.CfgDiv = document.createElement('<div>');
-          this.CfgDiv.style.left = l;
-          this.CfgDiv.style.top = t;
           this.CfgDiv.style.width = '600px';
           this.CfgDiv.style.height = '400px';
           this.CfgDiv.style.position = 'absolute';
           document.body.insertBefore(this.CfgDiv);
-          this.CfgDiv.innerHTML = '<div style="width:100%; background:navy; text-align:right" onmousemove="top.combats_plugins_manager.MoveCfgPanel()" onmouseout="top.combats_plugins_manager.MoveCfgPanel()" onmousedown="top.combats_plugins_manager.StartCfgPanelDrag()" onmouseup="top.combats_plugins_manager.MoveCfgPanelMode=false">\
+          this.CfgDiv.innerHTML = '<div style="width:100%; background:navy; text-align:right" oonmousemove="top.combats_plugins_manager.MoveCfgPanel()" oonmouseout="top.combats_plugins_manager.MoveCfgPanel()" onmousedown="top.combats_plugins_manager.StartCfgPanelDrag()" onmouseup="top.combats_plugins_manager.StopCfgPanelDrag()">\
 <span style="cursor:pointer; color:white" onclick="top.combats_plugins_manager.HideCfgPanel()">&nbsp;X&nbsp;</span></div>\
 <iframe style="width:100%; height:100%"></iframe>';
           w = this.CfgDiv.childNodes[1].contentWindow;
-        } else {
-          w=window.open("about:blank", "_blank", "fullscreen=no,top="+t+"px,left="+l+"px,width=400px,height=400px,center=yes,location=no,toolbar=no");
+          w.document.write(external.readFile( this.security_id, "Combats.RU", "cfg.html"));
         }
-        w.document.write(external.readFile( this.security_id, "Combats.RU", "cfg.html"));
+        this.CfgDiv.style.left = (window.screen.width-600)/2;
+        this.CfgDiv.style.top = (window.screen.height-400)/2;
       },
+
       "get_binded_method": function() { // object, method, ...
         var args = $A(arguments), object = args.shift(), __method = args.shift();
         return function() {
           return __method.apply(object, args.concat($A(arguments)));
         }
       },
+      "addLog": function(message) {
+        var s = external.readFile( this.security_id, "Combats.RU", "Combats.RU.log" );
+        if (!s)
+          s = '';
+        s += message+"\n";
+        external.writeFile( this.security_id, "Combats.RU", "Combats.RU.log", s );
+      },
       "logError": function(plugin,e) {
-        var s = 'Ошибка в плагине "'+plugin.toString()+'"';
+        var messages = 'Ошибка в плагине "'+plugin.toString()+'"<BR>';
+        for(var i in e)
+          messages += "&gt; ["+i+"]: "+e[i]+"<BR>";
         if (!this.silent) {
-          if (new_version) {
-            var messages = '';
-            for(var i in e)
-              messages += '&gt; ['+i+']: '+e[i]+'<BR>';
-            this.add_chat(messages);
-          } else {
-            var chat = top.frames["chat"];
-            chat.messages = '';
-            chat.am('<font class=sysdate>Внимание!</font> '+s);
-            for(var i in e)
-              chat.am('&gt; ['+i+']: '+e[i]);
-            chat.write_messages();
-          }
+          this.add_chat(messages);
         }
+        this.addLog(messages);
       },
       "loadPlugin": function(pluginName) {
-        var d = (new Date()).toTimeString().substr(0,5);
+        var d = (new Date()).toLocaleTimeString();
         var s = external.readFile( this.security_id, "Combats.RU", pluginName+"\\plugin.js");
         var errCount = 0;
         if (s!=null && s.length>0) {
@@ -150,19 +151,16 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
               this.plugins_list[pluginName]=obj;
           } catch(e) {
             errCount++;
-            if (new_version) {
-              var messages = '<font class=date2>'+d+'</font> Ошибка инициализации плагина "'+pluginName+'"<BR>';
-              for(var i in e)
-                messages += '&gt; ['+i+']: '+e[i]+'<BR>';
-              top.Chat.am(messages);
-            } else {
-              top.frames["chat"].am('<font class=date2>'+d+'</font> Ошибка инициализации плагина "'+pluginName+'"');
-              for(var i in e)
-                top.frames["chat"].am('&gt; ['+i+']: '+e[i]);
-            }
+            var messages = '<font class=date2>'+d+'</font> Ошибка инициализации плагина "'+pluginName+'"<BR>';
+            for(var i in e)
+              messages += '&gt; ['+i+']: '+e[i]+'<BR>';
+            this.add_chat(messages);
+            this.addLog(messages);
           }
         } else {
-          top.Chat.am('<font class=date2>'+d+'</font> Плагин "'+pluginName+'" не загружен: файл "plugin.js" не найден или пуст');
+          var messages = '<font class=date2>'+d+'</font> Плагин "'+pluginName+'" не загружен: файл "plugin.js" не найден или пуст';
+          this.add_chat(messages);
+          this.addLog(messages);
         }
         return errCount;
       },
@@ -174,7 +172,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
       },
       Init: function() {
         try {
-          var sleep = !new_version;
+          var sleep = false;
           for(var i=0; i<top.frames.length; i++) {
             sleep |= (top.frames[i].document.readyState!="complete" && top.frames[i].document.readyState!="interactive");
           }
@@ -187,15 +185,31 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
         }
 
         var d = (new Date()).toLocaleTimeString();
-        var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
-        if (!s) {
-          s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini.sample");
-          external.writeFile( this.security_id, "Combats.RU", "combats_plugins.ini", s);
-          this.add_chat('<font class=date2>'+d+'</font> Первый запуск менеджера. Использованы настройки плагинов "по умолчанию"');
+        var s;
+        if (true) {
+          s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
+          if (!s) {
+            s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini.sample");
+            external.writeFile( this.security_id, "Combats.RU", "combats_plugins.ini", s);
+            this.add_chat('<font class=date2>'+d+'</font> Первый запуск менеджера. Использованы настройки плагинов "по умолчанию"');
+          }
+          var combats_plugins = s.split(/[\x0A\x0D]+/);
+        } else {
+	  var combats_plugins = [];
+	  var configuration = new ActiveXObject("Microsoft.XMLDOM");
+	  configuration.loadXML(external.readFile(this.security_id, "Combats.RU", 'config.xml'));
+	  if (configuration.parseError.errorCode != 0) {
+	    var myErr = configuration.parseError;
+	    alert("Ошибка конфигурации:\n" + myErr.reason);
+	  } else {
+	    var root = configuration.documentElement;
+	    this.user = root.selectSingleNode('user[@name="'+top.mylogin+'"]');
+	    var plugins_names = this.user.selectNodes('profile[@name=//@loadprofile]/loadplugin/@name');
+	    for(i=0;i<plugins_names.length;i++)
+	      combats_plugins.push(plugins_names[i].nodeValue);
+	  }
         }
-        var combats_plugins = s.split(/[\x0A\x0D]+/);
-        if (!new_version)
-          top.frames["chat"].messages = '';
+
         var errCount=0;
         this.plugins_list['combats_plugins_manager']=this;
         for(i=0;i<combats_plugins.length;i++) {
@@ -205,18 +219,10 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
           }
         }
         if (errCount>0) {
-          if (new_version)
-            top.Chat.am('<font class=date2>'+d+'</font> Всего ошибок: '+errCount);
-          else
-            top.frames["chat"].am('<font class=date2>'+d+'</font> Всего ошибок: '+errCount);
+          this.add_chat('<font class=date2>'+d+'</font> Всего ошибок: '+errCount);
         } else {
-          if (new_version)
-            top.Chat.am('<font class=date2>'+d+'</font> Плагины успешно инициализированы');
-          else
-            top.frames["chat"].am('<font class=date2>'+d+'</font> Плагины успешно инициализированы');
+          this.add_chat('<font class=date2>'+d+'</font> Плагины успешно инициализированы');
         }
-        if (!new_version)
-          top.frames["chat"].write_messages();
       }
     };
     combats_plugins_manager = new create_object();

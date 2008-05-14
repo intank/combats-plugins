@@ -21,23 +21,23 @@
     },
     getProperties: function() {
       return [
+        { name: "Активен", value: this.active },
         { name: "Стандартный ответ", value: this.standardResponse, type:"textarea"},
         { name: "Стандартный запрос", value: this.standardQuery},
         { name: "Расширенный ответ", value: this.autoResponse, type:"textarea"},
         { name: "Тайм-аут беседы (с)", value: this.conversation_timeout },
         { name: "Тайм-аут отсутствия (с)", value: this.afk_timeout },
-        { name: "Игнорировать групповые сообщения", value: this.ignore_multi },
-        { name: "Активен", value: this.active }
+        { name: "Игнорировать групповые сообщения", value: this.ignore_multi }
       ];
     },
     setProperties: function(a) {
-      this.standardResponse = a[0].value;
-      this.standardQuery = a[1].value;
-      this.autoResponse = a[2].value;
-      this.conversation_timeout = a[3].value;
-      this.afk_timeout = a[4].value;
-      this.ignore_multi = a[5].value;
-      this.active = a[6].value;
+      this.active = a[0].value;
+      this.standardResponse = a[1].value;
+      this.standardQuery = a[2].value;
+      this.autoResponse = a[3].value;
+      this.conversation_timeout = a[4].value;
+      this.afk_timeout = a[5].value;
+      this.ignore_multi = a[6].value;
       
       this.save('standardResponse',this.enQuoteText(this.standardResponse));
       this.save('standardQuery',this.standardQuery);
@@ -46,7 +46,9 @@
       this.save('afk_timeout',this.afk_timeout);
       this.save('ignore_multi',this.ignore_multi);
       
-      this.arrStandardQuery = this.standardQuery.toUpperCase().split(/\s*[,;]\s*/);
+      this.arrStandardQuery = this.standardQuery.toUpperCase().trim().split(/\s*[,;]\s*/);
+      if (this.arrStandardQuery.length==1 && this.arrStandardQuery[0]=='')
+        this.arrStandardQuery = [];
     },
     load: function(key,def_val){
       return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","auto_answerer\\settings.ini",top.getCookie('battle'),key,def_val);
@@ -64,6 +66,9 @@
       this.lastMyActivity = (new Date()).getTime();
       top.document.body.attachEvent(
         'onmousemove',
+        combats_plugins_manager.get_binded_method(this,this.mouseMove));
+      combats_plugins_manager.attachEvent(
+        'mainframe.load',
         combats_plugins_manager.get_binded_method(this,this.mouseMove));
       this.standardResponse = this.deQuoteText(this.load('standardResponse','отсутствую (автоответ)'));
       this.standardQuery = this.load('standardQuery','info');
