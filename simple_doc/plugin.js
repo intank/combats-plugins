@@ -149,19 +149,19 @@
       }
     },
     heal: function(step) {
-      if (!step) {
-        if (combats_plugins_manager.getMainFrame().location.pathname=='/exchange.pl') {
-          if (!this.exchangeDetected) {
-            this.sendAutoResponse('private ['+this.Healing.partner+'] Я сейчас в передачах. Освобожусь - кастану, ожидайте (автоответ)');
-            this.exchangeDetected = true;
-            var centerElements = combats_plugins_manager.getMainFrame().document.getElementsByTagName('center');
-            if (centerElements.length==0 || centerElements[0].innerText=='Передача предметов/кредитов другому игроку') {
-              setTimeout(function(){combats_plugins_manager.getMainFrame().location='/main.pl';}, 0);
-            }
-          }
-          setTimeout(combats_plugins_manager.get_binded_method(this,this.heal), 5000);
-          return;
+      if (combats_plugins_manager.getMainFrame().location.pathname=='/exchange.pl') {
+        if (!this.exchangeDetected) {
+          this.sendAutoResponse('private ['+this.Healing.partner+'] Я сейчас в передачах. Освобожусь - кастану, ожидайте (автоответ)');
+          this.exchangeDetected = true;
         }
+        var centerElements = combats_plugins_manager.getMainFrame().document.getElementsByTagName('center');
+        if (centerElements.length==0 || centerElements[0].innerText=='Передача предметов/кредитов другому игроку') {
+          setTimeout(function(){combats_plugins_manager.getMainFrame().location='/main.pl';}, 0);
+        }
+        setTimeout(combats_plugins_manager.get_binded_method(this,this.heal), 5000);
+        return;
+      }
+      if (!step) {
         this.onuserinfo_handler = combats_plugins_manager.get_binded_method(this,this.onuserinfo);
         combats_plugins_manager.attachEvent('onuserinfo',this.onuserinfo_handler);
         this.userinfoTimer = setTimeout(
@@ -246,8 +246,10 @@ if (this['debugger']) debugger;
       if (!this.Active)
         return;
       var mess = eventObj.mess.replace(/<.*?>/g,''); // .replace(/<(\S+).*?>(.*?)<\/\1>/,'$2');
+//      var match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*.*?исцеления для &quot;(.*?)&quot; \(исцеление (легких|средних|тяжелых) травм\s*/);
       var match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*Вы создали цепь исцеления для &quot;(.*?)&quot; \(исцеление (легких|средних|тяжелых) травм\), у остальных лекарей есть 5 минут, чтобы завершить заклинание\s*/);
       if (!match) {
+//        match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*.*?исцеления для &quot;(.*?)&quot;\s*/);
         match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*Вы присоединились к цепи исцеления для &quot;(.*?)&quot;\s*/);
         if (match)
           match[4] = 'неизвестного типа';
