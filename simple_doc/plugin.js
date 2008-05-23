@@ -5,6 +5,7 @@
     top.combats_plugins_manager.attachEvent('onmessage',
       top.combats_plugins_manager.get_binded_method(this,this.onmessage));
     this.oppositeAlign = this.load('oppositeAlign','0');
+    this.fullSysMessage = this.load('fullSysMessage','true').toLowerCase()=='true';
   };
 
   plugin_simple_doc.prototype = {
@@ -20,6 +21,7 @@
     oppositeAlign: 1,
     allowNoTarget: false,
     minLevel: 9,
+    fullSysMessage: true,
     toString: function() {
       return "Простой лекарь";
     },
@@ -36,7 +38,8 @@
           } 
         },
         { name:"Доверять безадресным цепям", value:this.allowNoTarget },
-        { name:"Чёрный список", value:'' }
+        { name:"Чёрный список", value:this.load('BlackList','')||'' },
+        { name:"Реагировать на неполные системки", value:!this.fullSysMessage }
       ];
     },
     load: function(key,def_val){
@@ -50,6 +53,10 @@
       this.oppositeAlign=a[1].value.selected;
       this.allowNoTarget=a[2].value;
       this.save('oppositeAlign',this.oppositeAlign);
+      this.save('BlackList',a[3].value);
+      this.fullSysMessage = !a[4].value;
+      this.save('fullSysMessage',this.fullSysMessage);
+      this.loadBlackList();
     },
     addBlackList: function(a) {
       this.addPersToBlackList(a[3].value);
@@ -195,7 +202,7 @@ if (this['debugger']) debugger;
               do {
                 obj = obj.nextSibling;
               } while(obj && obj.tagName!='A')
-              if (obj && (match=obj.href.match(/^javascript\:(magicklogin\('Цепь Исцеления', .*\))$/))) {
+              if (obj && (match=decodeURI(obj.href).match(/^javascript\:(magicklogin\('Цепь Исцеления', .*\))$/))) {
                 doc.parentWindow.eval(match[1]);
                 doc.forms['slform'].elements['param'].value = this.Healing.patient;
 
@@ -246,11 +253,16 @@ if (this['debugger']) debugger;
       if (!this.Active)
         return;
       var mess = eventObj.mess.replace(/<.*?>/g,''); // .replace(/<(\S+).*?>(.*?)<\/\1>/,'$2');
-//      var match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*.*?исцеления для &quot;(.*?)&quot; \(исцеление (легких|средних|тяжелых) травм\s*/);
-      var match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*Вы создали цепь исцеления для &quot;(.*?)&quot; \(исцеление (легких|средних|тяжелых) травм\), у остальных лекарей есть 5 минут, чтобы завершить заклинание\s*/);
+      var match;
+      if (this.fullSysMessage)
+        match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*Вы создали цепь исцеления для &quot;(.*?)&quot; \(исцеление (легких|средних|тяжелых) травм\), у остальных лекарей есть 5 минут, чтобы завершить заклинание\s*/);
+      else
+        match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*.*?исцеления для &quot;(.*?)&quot; \(исцеление (легких|средних|тяжелых) травм\s*/);
       if (!match) {
-//        match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*.*?исцеления для &quot;(.*?)&quot;\s*/);
-        match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*Вы присоединились к цепи исцеления для &quot;(.*?)&quot;\s*/);
+        if (this.fullSysMessage)
+          match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*Вы присоединились к цепи исцеления для &quot;(.*?)&quot;\s*/);
+        else
+          match = mess.match(/[\d\:]+\s+\[(.*?)\]\s+(?:(?:private|to)\s+\[\s*(.*?)\s*\])?\s*.*?исцеления для &quot;(.*?)&quot;\s*/);
         if (match)
           match[4] = 'неизвестного типа';
       }
