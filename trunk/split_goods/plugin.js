@@ -15,7 +15,7 @@
         for(var i=0; i<Table.rows.length; i++) {
           var children = Table.rows[i].cells[0].children;
           var match;
-          if (children[0].tagName=="SPAN" && children[children.length-2].tagName=="A" && (match=children[children.length-2].href.match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'(.*?)\s*\(x\d+\)'\)/))) {
+          if (children[0].tagName=="SPAN" && children[children.length-2].tagName=="A" && (match=decodeURI(children[children.length-2].href).match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'(.*?)\s*\(x\d+\)'\)/))) {
             if (!(match[1] in this.goods)) {
               this.goods[match[1]] = goodsArray.push(match[2])-1;
             }
@@ -77,7 +77,7 @@
             var match;
             if (children[0].tagName=="SPAN" 
                 && children[children.length-2].tagName=="A" 
-                && (match=children[children.length-2].href.match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'.*?\s*\(x(\d+)\)'\)/))
+                && (match=decodeURI(children[children.length-2].href).match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'.*?\s*\(x(\d+)\)'\)/))
                 && match[1]==this.selectedArticle
                 && parseFloat(match[2])>this.packSize) {
               var stopFlag = false;
@@ -95,6 +95,8 @@
               );
             }
           }
+        } else {
+          alert('Откройте инвентарь!');
         }
         if (stopFlag) {
           top.combats_plugins_manager.detachEvent("mainframe.load",this.onloadHandlerObject);

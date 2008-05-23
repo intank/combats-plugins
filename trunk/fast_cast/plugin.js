@@ -4,6 +4,7 @@
   }
 
   plugin_fast_cast.prototype = {
+    cast_myself: false,
     knownSpells: [
       { item:'spell_powerHPup5', name:'Жажда Жизни +5', filter:'5' },
       { item:'spell_powerHPup4', name:'Жажда Жизни +4', filter:'4', requirements: {'Интеллект: ':70} },
@@ -27,9 +28,10 @@
       return "Быстрые заклинания";
     },
     getProperties: function() {
-      return [];
+      return [{'name':'Разрешить кастовать на себя', 'value':this.cast_myself}];
     },
     setProperties: function(a) {
+      this.cast_myself = a[0].value;
     },
     selectCast: function() {
       if (this.menu) {
@@ -88,7 +90,7 @@
         if (obj.src=='http://img.combats.ru/i/items/'+params.spellId+'.gif') {
           while(obj && obj.tagName!='A')
             obj = obj.nextSibling;
-          if (obj && (match = obj.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)) && match[2]==params.spellName) {
+          if (obj && (match = decodeURI(obj.href).match(/^javascript\:(magicklogin\('(.*?)',\s*.*\))$/)) && match[2]==params.spellName) {
             return obj;
           }
         }
@@ -120,7 +122,7 @@
     },
     doCast: function(link, params) {
       var doc = link.document;
-      var match=link.href.match(/^javascript\:(magicklogin\('(.*?)', .*\))$/)
+      var match=decodeURI(link.href).match(/^javascript\:(magicklogin\('(.*?)',\s*.*\))$/)
       doc.parentWindow.eval(match[1]);
       doc.forms['slform'].elements['param'].value = params.target;
       doc.forms['slform'].submit();
@@ -144,7 +146,7 @@
       }
       this.exchangeDetected = false;
       if (!step) {
-        if (params.target==top.mylogin) {
+        if (!this.cast_myself && params.target==top.mylogin) {
           return;
         }
         if (!this.inProgress) {

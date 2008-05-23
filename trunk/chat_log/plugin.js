@@ -15,7 +15,14 @@
       external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","chat_log\\chat_log.ini",top.getCookie('battle'),key,val);
     },
     getHeadFile: function(){
-      return external.readFile(combats_plugins_manager.security_id,'Combats.RU','chat_log/default.html');
+      return this.getFile('chat_log/default.html');
+    },
+    getFile: function(filename) {
+      var s = external.readFile(combats_plugins_manager.security_id,'Combats.RU',filename);
+      while (s && !s.slice(-1).charCodeAt(0)) {
+        s = s.slice(0,-1);
+      }
+      return s?s:'';
     },
     joinFiles: function() {
       var date = this.lastCreatedFile;
@@ -23,7 +30,7 @@
       for(var i=0; i<24; i++) {
         date.setHours(i);
         var filename = this.createFilename(date);
-        var mess = external.readFile(combats_plugins_manager.security_id,'Combats.RU',filename);
+        var mess = this.getFile(filename);
         if (mess) {
           var pos = mess.indexOf('<body>');
           if (pos>=0)
@@ -47,7 +54,7 @@
       this.save('lastCreatedFile',this.lastCreatedFile.toString());
 
       this.filename = this.createFilename();
-      this.mess = external.readFile(combats_plugins_manager.security_id,'Combats.RU',this.filename);
+      this.mess = this.getFile(this.filename);
       if (typeof(this.mess)=='undefined' || this.mess=='')
         this.mess = this.getHeadFile();
 

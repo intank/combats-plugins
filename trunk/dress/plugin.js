@@ -192,6 +192,10 @@
         if (match != null) {
           top.setHP(parseFloat(match[1]),parseFloat(match[2]),parseFloat(match[3]));
         }
+        match = dress.oReq.responseText.match(/top\.setMana\(([0-9\.]+),([0-9\.]+),([0-9\.]+)\)/);
+        if (match != null) {
+          top.setMana(parseFloat(match[1]),parseFloat(match[2]),parseFloat(match[3]));
+        }
         d = top.frames[3].document;
 
         if (top.dress.div in d.all) {
