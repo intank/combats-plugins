@@ -46,7 +46,7 @@ plugin_battle_ench.prototype = {
     this.DisplayWeaponsAndLevels(oLayer);
   },
   onloadHandler: function() {
-    if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.ru\/battle\d?\.pl/)!=0) {
+    if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/battle\d?\.pl/)!=0) {
       if (this.newData && this.autosave)
         this.saveData();
       return;
@@ -59,7 +59,7 @@ plugin_battle_ench.prototype = {
       if (cell!=null && cell.childNodes.length<5) {
         cell.insertBefore(
           d.createElement(
-            "<IMG src='http://img.combats.ru/i/misc/ico_change.gif' \
+            "<IMG src='http://img.combats.com/i/misc/ico_change.gif' \
               alt=\"Сменить противника (плагин)\" width=16 height=19 \
               onclick=\"findlogin('Смена противника','battle.pl', 'skip', '', '' ,'"+elements["myid"].outerHTML.replace('"','\\"').replace("'","\\'")+"', 1)\" \
               style='cursor:hand'>"),
@@ -102,17 +102,17 @@ plugin_battle_ench.prototype = {
         var weapon1 = pers.cells[0].childNodes[0].cells[2].childNodes[0].src; // оружие 1
         var weapon2 = pers.cells[2].childNodes[0].cells[4].childNodes[0].src; // оружие 2
 
-  // http://img.combats.ru/i/items/w3.gif - нет первого оружия
-  // http://img.combats.ru/i/items/w10.gif - нет второго оружия
-  // http://img.combats.ru/i/items/wb.gif - двуручка
+  // http://img.combats.com/i/items/w3.gif - нет первого оружия
+  // http://img.combats.com/i/items/w10.gif - нет второго оружия
+  // http://img.combats.com/i/items/wb.gif - двуручка
 
         var weapon_type = 0;
-        if (weapon2=='http://img.combats.ru/i/items/wb.gif')
+        if (weapon2.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/wb\.gif/))
           weapon_type = 5; // двуручка
         else {
-          if (weapon1!='http://img.combats.ru/i/items/w3.gif')
+          if (!weapon1.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/w3\.gif/))
             weapon_type += 1; // пушка
-          if (weapon2!='http://img.combats.ru/i/items/w10.gif') {
+          if (!weapon2.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/w10\.gif/)) {
             weapon_type += 2; // щит или вторая пушка
             if (weapon2.indexOf('shield')<0)
               weapon_type = 4; // вторая пушка

@@ -67,7 +67,7 @@
         var images = top.frames[3].document.images;
         var obj = null;
         for(var i=0; i<images.length; i++) {
-          if (images[i].src.match(/http\:\/\/img\.combats\.ru\/i\/items\/glasses(?:1|2)\.gif/)) {
+          if (images[i].src.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/glasses(?:1|2)\.gif/)) {
             var obj = images[i];
             while(obj && obj.nodeName!='A') {
               obj = obj.nextSibling;
@@ -108,7 +108,7 @@
     }
   };
   
-  if (top.location.host=='emeraldscity.combats.ru' || top.location.host=='dungeon.combats.ru')
+  if (/^(?:emeraldscity|dungeon)\.combats\.(?:com|ru)$/.test(top.location.host))
     return new plugin_autopass_bugag();
   else
     return null;

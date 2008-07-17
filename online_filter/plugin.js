@@ -49,7 +49,7 @@
             isClaner = false;
             injured = false;
             level = 0;
-          } else if (obj.href.match(/^http\:\/\/capitalcity\.combats\.ru\/encicl\/klan\//)) {
+          } else if (obj.href.match(/^http\:\/\/capitalcity\.combats\.(?:com|ru)\/encicl\/klan\//)) {
             isClaner = true;
           }
         } else if (obj.nodeName=='#text') {
@@ -58,7 +58,7 @@
             level = parseInt(match[1]);
           }
         } else if (obj.nodeName=='IMG') {
-          if (obj.src=='http://img.combats.ru/i/travma2.gif')
+          if (obj.src.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/travma2\.gif/))
             injured = true;
         } else if (obj.nodeName=='BR') {
           if (level<this.minLevel || this.injuried && !injured || this.claner && !isClaner) {

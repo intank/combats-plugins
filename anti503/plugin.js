@@ -37,11 +37,11 @@
     },
 
     onloadHandler: function() {
-      if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.ru\//)!=0)
+      if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\//)!=0)
         return;
       try {
         var d=top.frames[3].document;
-        if (d.title=="[503] Service Unavailable" || d.title=="[504] Gateway Timeout" || d.title.search('Server Error')>=0) {
+        if (d.title=="[503] Service Unavailable" || d.title=="[504] Gateway Timeout" || d.title=="[502] Bad Gateway" || d.title.search('Server Error')>=0) {
           this.timer = top.setTimeout(this.refresh,1000*this.timeOut);
           d.parentWindow.attachEvent(
             "onbeforeunload", 

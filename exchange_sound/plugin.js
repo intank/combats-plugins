@@ -63,6 +63,11 @@
       this.saveBlackList();
     },
     exchangeCompleted: function() {
+      var match=combats_plugins_manager.getMainFrame().document.body.innerHTML.match(/<TD .*?>Вы получили от\s*<SCRIPT>drwfl\("(.*?)",.*?\)<\/SCRIPT>\s*.*?\: (.*?) кр\.<\/TD>/mi);
+      if (match) {
+        combats_plugins_manager.add_chat('Получено '+match[2]+' кр. от <SPAN>'+match[1]+'</SPAN>');
+      }
+
       if (!this.autoCommit)
         return;
 
@@ -91,15 +96,29 @@
       if (this.sender)
         this.sender.send(message);
     },
+    confirmClick: function(Ok) {
+      try {
+        if (Ok)
+          top.Window.oConfirm.oOk.click();
+        else
+          top.Window.oConfirm.oCancel.click();
+      } catch(e) {
+        combats_plugins_manager.logError(this,e);
+      }
+    },
     exchangeConfirmDlg: function( eventObj ){
       if (this.autoAccept) {
-        var match = eventObj.oRoot.text.match(/"(.+)" хочет совершить с вами сделку/);
-        var name = match?match[1]:'';
-        if (this.blacklist[name]) {
-          setTimeout('top.Window.oConfirm.oCancel.click()',0);
-          this.sendAutoResponse('private ['+name+'] Ну нет у меня сейчас желания меняться! Заходите в понедельник');
-        } else {
-          setTimeout('top.Window.oConfirm.oOk.click()',0);
+        try {
+          var match = eventObj.oRoot.text.match(/"(.+)" хочет совершить с вами сделку/);
+          var name = match?match[1]:'';
+          if (name in this.blacklist) {
+            setTimeout(combats_plugins_manager.get_binded_method(this, this.confirmClick, false),0);
+            this.sendAutoResponse('private ['+name+'] Ну нет у меня сейчас желания меняться! Заходите в понедельник');
+          } else {
+            setTimeout(combats_plugins_manager.get_binded_method(this, this.confirmClick, true),0);
+          }
+        } catch(e) {
+          combats_plugins_manager.logError(this,e);
         }
       }
     },

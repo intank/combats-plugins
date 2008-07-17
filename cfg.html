@@ -82,8 +82,9 @@ function getPluginGfg() {
     return;
   }
   if ("getProperties" in plugin) {
+  debugger;
     props = plugin.getProperties();
-    var s="<form><table>";
+    var s="<form onsubmit=\"return false\"><table>";
     for(var i=0; i<props.length; i++) {
       if (is_function(props[i].value)) {
         s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\">";

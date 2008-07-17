@@ -1,6 +1,6 @@
 <script language="JavaScript">
 try {
-if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru\/buttons\.pl\?battle=/)==0){
+if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.com\/buttons\.pl\?battle=/)==0){
   if ("combats_plugins_manager" in this) {
     combats_plugins_manager.Configure();
   } else {
@@ -27,13 +27,20 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
         return "Плагины Combats.RU";
       },
       "getProperties": function() {
+        var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
+        while (s && !s.slice(-1).charCodeAt(0)) {
+          s = s.slice(0,-1);
+        }
         return [
           { name: "\"Тихие\" ошибки плагинов", value: this.silent },
-          { name: "Загрузить новый плагин", value: this.loadCustomPlugin }
+          { name: "Загрузить новый плагин", value: this.loadCustomPlugin },
+          { name: "Перечень загружаемых плагинов", value: s, type:'textarea', style:"width:100%" }
         ];
       },
       "setProperties": function(a) {
         this.silent=a[0].value;
+//        
+//        var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
       },
       "attachEvent": function(event, method) {
         if (!(event in this.events))
@@ -132,7 +139,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.ru
         external.writeFile( this.security_id, "Combats.RU", "Combats.RU.log", s );
       },
       "logError": function(plugin,e) {
-        var messages = 'Ошибка в плагине "'+plugin.toString()+'"<BR>';
+        var messages = new Date().toLocaleString()+': Ошибка в плагине "'+plugin.toString()+'"<BR>';
         for(var i in e)
           messages += "&gt; ["+i+"]: "+e[i]+"<BR>";
         if (!this.silent) {
