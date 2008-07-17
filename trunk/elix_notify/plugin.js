@@ -25,7 +25,7 @@
           var now = parseInt((new Date()).getTime()/60000);
           cnt=0;
           for(var i=0;i<images.length;i++) {
-            if(images[i].src.search(/http\:\/\/img\.combats\.ru\/i\/misc\/icons\/(icon_pot_base_|spell_|wis_)/)!=0)
+            if(images[i].src.search(/http\:\/\/img\.combats\.(?:com|ru)\/i\/misc\/icons\/(icon_pot_base_|spell_|wis_)/)!=0)
               continue;
             var onmouseover = images[i].onmouseover;
             if (onmouseover==null)

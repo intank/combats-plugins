@@ -42,7 +42,7 @@
       this.menu = top.document.createElement('div');
       var s = '';
       for(var i=0; i<this.knownSpells.length; i++) {
-        s += '<tr><td style="width:100%; height: 40px; padding-left:50px; background: center left url(http://img.combats.ru/i/items/'+this.knownSpells[i].item+'.gif) no-repeat; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.knownSpells[i].name+'</td></tr>';
+        s += '<tr><td style="width:100%; height: 40px; padding-left:50px; background: center left url(http://img.combats.com/i/items/'+this.knownSpells[i].item+'.gif) no-repeat; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.knownSpells[i].name+'</td></tr>';
       }
       this.menu.innerHTML = '<table style="border: 2px solid black; width: 100%">'+s+'</table>';
       this.menu.style.cssText = 'position: absolute; z-index: 5; left: '+(window.event.clientX-window.event.offsetX)+'px; top: '+(window.event.clientY-window.event.offsetY+30)+'px; width: 200px; height: auto; background: #C7C7C7';
@@ -87,7 +87,8 @@
       var match;
       for (var i=0; i<doc.images.length; i++) {
         var obj = doc.images[i];
-        if (obj.src=='http://img.combats.ru/i/items/'+params.spellId+'.gif') {
+        match = obj.src.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/(.*?)\.gif/);
+        if (match && match[1]==params.spellId) {
           while(obj && obj.tagName!='A')
             obj = obj.nextSibling;
           if (obj && (match = decodeURI(obj.href).match(/^javascript\:(magicklogin\('(.*?)',\s*.*\))$/)) && match[2]==params.spellName) {

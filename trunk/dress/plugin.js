@@ -341,7 +341,7 @@
         return;
       for(i=1; i<tables[6].cells[1].all.length; i++)
         if ("src" in tables[6].cells[1].all[i]) {
-          matches = tables[6].cells[1].all[i].src.match(/http\:\/\/img\.combats\.ru\/i\/chars\/(\d+)\/.*?\.gif/);
+          matches = tables[6].cells[1].all[i].src.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/chars\/(\d+)\/.*?\.gif/);
           if (matches!=null) {
             this.char = matches[1];
             top.dress.save("char",this.char);

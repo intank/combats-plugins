@@ -46,7 +46,7 @@
       this.save('afk_timeout',this.afk_timeout);
       this.save('ignore_multi',this.ignore_multi);
       
-      this.arrStandardQuery = this.standardQuery.toUpperCase().trim().split(/\s*[,;]\s*/);
+      this.arrStandardQuery = this.standardQuery.toUpperCase().replace(/(?:^\s+|\s+$)/g,'').split(/\s*[,;]\s*/);
       if (this.arrStandardQuery.length==1 && this.arrStandardQuery[0]=='')
         this.arrStandardQuery = [];
     },

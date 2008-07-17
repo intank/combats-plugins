@@ -147,7 +147,7 @@
 	
 	plugin_antitimeout.prototype.onloadHandler = function() {
 		try {
-			if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.ru\/battle\d*\.pl/)!=0)
+			if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/battle\d*\.pl/)!=0)
 				return;
 			if(typeof(top.Battle.oBattle.Class)=='object'){
 				if(!(top.Battle.oBattle.Class.Settings() & 1)) top.Battle.oBattle.Class.Settings(1); // ----------”прощенный бой

@@ -303,7 +303,7 @@ for(i=0;i<cells.length;i++) {
   if (j>=components.length)
     components.push({ 
       id:id, 
-      src:'http://img.combats.ru/i/items/'+id+'.gif', 
+      src:'http://img.combats.com/i/items/'+id+'.gif', 
       count:cnt, 
       used:0, 
       name:name, 
@@ -313,7 +313,7 @@ for(i=0;i<cells.length;i++) {
 }
 
 for(j=0;j<components.length;j++)
-  components[j].src='http://img.combats.ru/i/items/'+components[j].id+'.gif';
+  components[j].src='http://img.combats.com/i/items/'+components[j].id+'.gif';
 
 components.sort(function(a,b) {if (a.name<b.name) return -1; else if (a.name>b.name) return 1; else return 0;});
 
@@ -444,7 +444,7 @@ function ShowRecipes() {
   selected_location = parseInt(document.all['locations'].value);
   for(var i in recipes) {
     if((selected_location==0 || recipes[i].location==selected_location-1) && recipes[i].possible>0) {
-      s += '<tr><td><img style="cursor: pointer;" src="http://img.combats.ru/i/items/'+recipes[i].name+'.gif" onclick="top.Accept(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+(recipes[i].possible);
+      s += '<tr><td><img style="cursor: pointer;" src="http://img.combats.com/i/items/'+recipes[i].name+'.gif" onclick="top.Accept(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+(recipes[i].possible);
       s += '<tr><td colspan=2 style="color: #888888">Требуется: '+recipes[i].comp_str+'<td>';
     }
   }
@@ -461,7 +461,7 @@ function ShowAccepted() {
   var s = '<html><body style="margin: 0; padding: 0;"><table width=100%>';
   for(i=0; i<recipes.length; i++) {
     if(recipes[i].accepted>0) {
-      s += '<tr><td><img style="cursor: pointer;" src="http://img.combats.ru/i/items/'+recipes[i].name+'.gif" onclick="top.Dismiss(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+recipes[i].accepted;
+      s += '<tr><td><img style="cursor: pointer;" src="http://img.combats.com/i/items/'+recipes[i].name+'.gif" onclick="top.Dismiss(\''+i+/*recipes[i].name+*/'\',1)"><td width=100%><b>'+recipes[i].descr+'</b><td rowspan=1>'+recipes[i].accepted;
       s += '<tr><td colspan=2 style="color: #888888">Требуется: '+recipes[i].comp_str+'<td>';
     }
   }

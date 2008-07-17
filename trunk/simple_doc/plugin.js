@@ -6,13 +6,41 @@
       top.combats_plugins_manager.get_binded_method(this,this.onmessage));
     this.oppositeAlign = this.load('oppositeAlign','0');
     this.fullSysMessage = this.load('fullSysMessage','true').toLowerCase()=='true';
+
+    this.messages['checking']    = this.load('message.checking',   this.messages['checking']);
+    this.messages['busy']        = this.load('message.busy',       this.messages['busy']);
+    this.messages['inprogress']  = this.load('message.inprogress', this.messages['inprogress']);
+    this.messages['waiting']     = this.load('message.waiting',    this.messages['waiting']);
+    this.messages['blacklisted'] = this.load('message.blacklisted',this.messages['blacklisted']);
+    this.messages['noresult']    = this.load('message.noresult',   this.messages['noresult']);
+    this.messages['error']       = this.load('message.error',      this.messages['error']);
+    this.messages['lost']        = this.load('message.lost',       this.messages['lost']);
+    this.messages['lowlevel']    = this.load('message.lowlevel',   this.messages['lowlevel']);
+    this.messages['wrongalign']  = this.load('message.wrongalign', this.messages['wrongalign']);
+    this.messages['chaos']       = this.load('message.chaos',      this.messages['chaos']);
+    this.messages['trading']     = this.load('message.trading',    this.messages['trading']);
   };
 
   plugin_simple_doc.prototype = {
+    messages: {
+      'checking': 'Самолечением занимаемся? Сейчас мы посмотрим, кто ты есть...', // цепь кастована на себя, предупреждаем
+      'busy': 'Извините, но сейчас я лечу другого. Попробуйте через минуту...',   // мы уже начали кого-то проверять, следующему придётся подождать
+      'inprogress': 'Я уже лечу этого персонажа. Можете проконтролировать результат через несколько секунд', // мы уже начали этого проверять, нефиг лечить ещё раз
+      'waiting': 'Извините, нужно отдохнуть от предыдущего каста.',               // 5 минут задержка на каст
+      'blacklisted': 'Я не доверяю тем, кто когда-то нагадил мне лично или другим игрокам :dont:', // ЧС - он и в Африке ЧС
+      'noresult': 'По каким-то причинам результат каста нераспознан :chtoza:',    // нашли свиток, пытались кастануть, но что-то пошло не так
+      'error': 'По каким-то причинам я не могу сейчас кастовать :chtoza:',        // пытались открыть инвентарь, но свитка не нашли
+      'lost': 'Вы не могли бы повторить сообщение? А то я пропустил... :sorry:',  // перебили процесс лечения
+      'lowlevel': 'Что-то лицо мне твоё не нравится :nono:',             // мелких не лечим
+      'wrongalign': 'Я не лечу персонажей оппозитной склонности :nono:', // тёмные не лечат светлых и наоборот
+      'chaos': 'Я не совершаю сделок с хаосниками :nono:',               // связываться с хаосниками себе дороже
+      'trading': 'Я сейчас в передачах. Освобожусь - кастану, ожидайте'  // открыт торгователь, как закроется - кастанётся
+    },
+    minLevel: 9, // минимальный левел для самолечения
+    Active: false, // true для активации при загрузке, false для ручного включения
     exchangeDetected: false,
     'debugger': false,
     lastCast: new Date(1900,0,1),
-    Active: false,
     aligns: ['-1','1','3'],
     Healing: null,
     sender: null,
@@ -20,7 +48,6 @@
     lastOnlineRefreshed: 0,
     oppositeAlign: 1,
     allowNoTarget: false,
-    minLevel: 9,
     fullSysMessage: true,
     toString: function() {
       return "Простой лекарь";
@@ -55,8 +82,21 @@
       this.save('oppositeAlign',this.oppositeAlign);
       this.save('BlackList',a[3].value);
       this.fullSysMessage = !a[4].value;
-      this.save('fullSysMessage',this.fullSysMessage);
+      this.save('fullSysMessage',this.fullSysMessage.toString());
       this.loadBlackList();
+
+      this.save('message.checking',   this.messages['checking']);
+      this.save('message.busy',       this.messages['busy']);
+      this.save('message.inprogress', this.messages['inprogress']);
+      this.save('message.waiting',    this.messages['waiting']);
+      this.save('message.blacklisted',this.messages['blacklisted']);
+      this.save('message.noresult',   this.messages['noresult']);
+      this.save('message.error',      this.messages['error']);
+      this.save('message.lost',       this.messages['lost']);
+      this.save('message.lowlevel',   this.messages['lowlevel']);
+      this.save('message.wrongalign', this.messages['wrongalign']);
+      this.save('message.chaos',      this.messages['chaos']);
+      this.save('message.trading',    this.messages['trading']);
     },
     addBlackList: function(a) {
       this.addPersToBlackList(a[3].value);
@@ -135,18 +175,18 @@
 //        this.sendAutoResponse('private ['+this.Healing.partner+'] нашёл (автоответ)');
         if (this.Healing.patient==this.Healing.partner) {
           if (parseInt(eventObj.level)<this.minLevel && eventObj.klan=='') {
-            this.sendAutoResponse('private ['+this.Healing.partner+'] Что-то лицо мне твоё не нравится :nono: (автоответ)');
+            this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['lowlevel']+' (автоответ)');
             this.Healing = null;
             return;
           }
         }
         if (eventObj.align.substr(0,1)==this.aligns[this.oppositeAlign]) {
-          this.sendAutoResponse('private ['+this.Healing.partner+'] Я не лечу персонажей оппозитной склонности :nono: (автоответ)');
+          this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['wrongalign']+' (автоответ)');
           this.Healing = null;
           return;
         }
         if (eventObj.align=='2') {
-          this.sendAutoResponse('private ['+this.Healing.partner+'] Я не совершаю сделок с хаосниками :nono: (автоответ)');
+          this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['chaos']+' (автоответ)');
           this.Healing = null;
           return;
         }
@@ -158,7 +198,7 @@
     heal: function(step) {
       if (combats_plugins_manager.getMainFrame().location.pathname=='/exchange.pl') {
         if (!this.exchangeDetected) {
-          this.sendAutoResponse('private ['+this.Healing.partner+'] Я сейчас в передачах. Освобожусь - кастану, ожидайте (автоответ)');
+          this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['trading']+' (автоответ)');
           this.exchangeDetected = true;
         }
         var centerElements = combats_plugins_manager.getMainFrame().document.getElementsByTagName('center');
@@ -189,7 +229,7 @@
           combats_plugins_manager.detachEvent('mainframe.load',this.mainframeload_handler);
           if (combats_plugins_manager.getMainFrame().location.pathname=='/exchange.pl') {
             combats_plugins_manager.getMainFrame().location = '/exchange.pl?setcancel=1&tmp='+Math.random();
-            this.sendAutoResponse('private ['+this.Healing.partner+'] Вы не могли бы повторить сообщение? А то я пропустил... :sorry: (автоответ)');
+            this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['lost']+' (автоответ)');
             this.Healing = null;
             return;
           }
@@ -197,7 +237,7 @@
           var result = false;
           for (var i=0; i<doc.images.length; i++) {
             var obj = doc.images[i];
-            if (obj.src=='http://img.combats.ru/i/items/cure_g1.gif') {
+            if (obj.src.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/cure_g1\.gif/)) {
 if (this['debugger']) debugger;
               do {
                 obj = obj.nextSibling;
@@ -216,7 +256,7 @@ if (this['debugger']) debugger;
             }
           }
           if (!result) {
-            this.sendAutoResponse('private ['+this.Healing.partner+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
+            this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['error']+' (автоответ)');
             this.Healing = null;
           }
           break;
@@ -242,7 +282,7 @@ if (this['debugger']) debugger;
               }
             }
           } else {
-            this.sendAutoResponse('private ['+s+'] По каким-то причинам результат каста нераспознан :chtoza: (автоответ)');
+            this.sendAutoResponse('private ['+s+'] '+this.messages['noresult']+' (автоответ)');
           }
 
           this.Healing = null;
@@ -271,7 +311,7 @@ if (this['debugger']) debugger;
 
       
       if (this.blacklist[match[1]] || this.blacklist[match[3]]) {
-        this.sendAutoResponse('private ['+match[1]+','+match[3]+'] Я не доверяю тем, кто когда-то нагадил мне лично или другим игрокам :dont: (автоответ)');
+        this.sendAutoResponse('private ['+match[1]+','+match[3]+'] '+this.messages['blacklisted']+' (автоответ)');
         return;
       }
       if (this['debugger']) {
@@ -295,15 +335,15 @@ if (this['debugger']) debugger;
         if (this.lastTarget==match[3]) {
           this.sendAutoResponse('private ['+match[1]+'] На этого персонажа была кастована цепь '+timeSpan+' секунд назад (автоответ)');
         } else {
-          this.sendAutoResponse('private ['+match[1]+'] Извините, нужно отдохнуть от предыдущего каста. Попробуйте через '+(5*60-timeSpan)+' секунд... (автоответ)');
+          this.sendAutoResponse('private ['+match[1]+'] '+this.messages['waiting']+' Попробуйте через '+(5*60-timeSpan)+' секунд... (автоответ)');
         }
         return;
       }
       if (this.Healing) {
         if (match[3]==this.Healing.patient)
-          this.sendAutoResponse('private ['+match[1]+'] Я уже лечу этого персонажа. Можете проконтролировать результат через несколько секунд (автоответ)');
+          this.sendAutoResponse('private ['+match[1]+'] '+this.messages['inprogress']+' (автоответ)');
         else
-          this.sendAutoResponse('private ['+match[1]+'] Извините, но сейчас я лечу другого. Попробуйте через минуту... (автоответ)');
+          this.sendAutoResponse('private ['+match[1]+'] '+this.messages['busy']+' (автоответ)');
       } else {
         this.Healing = {
           partner: match[1],
@@ -311,7 +351,7 @@ if (this['debugger']) debugger;
         };
         if (this.Healing.partner==this.Healing.patient) {
           s += ' :dont: Внимание! Самолечение!';
-          this.sendAutoResponse('private ['+this.Healing.partner+'] Самолечением занимаемся? Сейчас мы посмотрим, кто ты есть... (автоответ)');
+          this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['checking']+' (автоответ)');
         }
         this.exchangeDetected = false;
         this.heal();
