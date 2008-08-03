@@ -26,7 +26,7 @@
       return [
         { name:"Всегда отображать в пещерах", value: this.alwaysInDungeon },
         { name:"Начать запись последовательности", value: this.sequenceStartRecording },
-        { name:"Надеть комплект", value: this.sequencePlayComplect }
+        { name:"Удалить инормацию о комплектах", value: this.clearStoredComplects }
       ];
     },
     setProperties: function(a) {
@@ -34,6 +34,10 @@
       top.combats_plugins_manager.detachEvent("mainframe.load",dress.activate);
       if (this.alwaysInDungeon)
         top.combats_plugins_manager.attachEvent("mainframe.load",dress.activate);
+    },
+    clearStoredComplects: function() {
+      for(var j=0; j<6; j++)
+        this.save(""+j,'0,[нет комплекта]');
     },
     recordingOnClick: function(type) {
       var obj = top.combats_plugins_manager.getMainFrame().event.srcElement;

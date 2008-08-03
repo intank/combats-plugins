@@ -9,11 +9,14 @@
       top.combats_plugins_manager.get_binded_method(this,this.exchangeConfirmDlg));
     top.combats_plugins_manager.attachEvent('exchange.completed',
       top.combats_plugins_manager.get_binded_method(this,this.exchangeCompleted));
+    top.combats_plugins_manager.attachEvent('fighterContextMenu', 
+      top.combats_plugins_manager.get_binded_method(this, this.handlerCtxMenu));
   }
 
   plugin_exchange_sound.prototype = {
     autoAccept: false,
     autoCommit: false,
+    blackListIndicator: null,
     toString: function() {
       return "Звуковое уведомление о приглашении в передачи";
     },
@@ -61,6 +64,20 @@
     addPersToBlackList: function(a) {
       this.blacklist[a] = true;
       this.saveBlackList();
+    },
+    handlerCtxMenu: function(eventObj) {
+      if (!this.blackListIndicator) {
+        this.blackListIndicator = top.document.createElement('DIV');
+        top.Chat.Self.oCtxMenu.insertBefore(this.blackListIndicator,null);
+        this.blackListIndicator.style.color = '#D00000';
+        this.blackListIndicator.style.padding = '2px 12px 2px 8px';
+      }
+      if (this.blacklist[top.Chat.Self.oCtxMenu.sLogin]) {
+        this.blackListIndicator.style.display = '';
+        this.blackListIndicator.innerText = 'Персонаж в ЧС';
+      } else {
+        this.blackListIndicator.style.display = 'none';
+      }
     },
     exchangeCompleted: function() {
       var match=combats_plugins_manager.getMainFrame().document.body.innerHTML.match(/<TD .*?>Вы получили от\s*<SCRIPT>drwfl\("(.*?)",.*?\)<\/SCRIPT>\s*.*?\: (.*?) кр\.<\/TD>/mi);
