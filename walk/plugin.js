@@ -26,16 +26,22 @@
     },
 
     "bots": {
+      '1/1040a_dr8472409823': {
+        priority: 3, 
+        style: { backgroundColor: '#EF00EF' }
+      },
       '1/1040_vk8345642089': { 
         priority: 3, 
         style: { backgroundColor: '#EF00EF' }, 
         ids: { 
           33: {
             priority: 4, 
+            title: ' (марка)',
             style: { backgroundColor: '#A000A0' } 
           },
           53: {
             priority: 4, 
+            title: '[10]',
             style: { backgroundColor: '#A000A0' } 
           },
           76: {
@@ -316,14 +322,17 @@
 */
 		  var Obj_priority = 0;
 		  var style = {};
+		  var title = '';
 		  if (Obj.image in this.bots) {
 		    var match = Obj.id.match(/-(\d+)$/);
 		    if (('ids' in this.bots[Obj.image]) && match && (match[1] in this.bots[Obj.image].ids)) {
 		      Obj_priority = this.bots[Obj.image].ids[match[1]].priority || this.bots[Obj.image].priority || 2;
 		      style = this.bots[Obj.image].ids[match[1]].style || this.bots[Obj.image].style || { backgroundColor: 'red' };
+		      title = this.bots[Obj.image].ids[match[1]].title || '';
 		    } else {
 		      Obj_priority = this.bots[Obj.image].priority || 2;
 		      style = this.bots[Obj.image].style || { backgroundColor: 'red' };
+		      title = this.bots[Obj.image].title || '';
 		    }
 		  } else {
 		    if (o=='arrObjects' || Obj.HP) {
@@ -341,7 +350,7 @@
 		  }
 		  if(cell.title!="")
 		    cell.title+="\n";
-		  cell.title+=Obj.name;
+		  cell.title+=Obj.name + title;
 
 		  if((x==0 && y==1) || (y==0 && x==1)) { //---------------- если спереди или с боков, кликаем.
 		    if( o=='arrObjects' && !(Obj.id in this.usedObjects) && this.en_click && this.excludedObjects.indexOf(Obj.name)==-1) { //-------Кликать на объекты

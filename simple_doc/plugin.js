@@ -172,6 +172,7 @@
       if (eventObj.name==this.Healing.patient) {
         clearTimeout(this.userinfoTimer);
         combats_plugins_manager.detachEvent('onuserinfo',this.onuserinfo_handler);
+        this.onuserinfo_handler = null;
 //        this.sendAutoResponse('private ['+this.Healing.partner+'] нашёл (автоответ)');
         if (this.Healing.patient==this.Healing.partner) {
           if (parseInt(eventObj.level)<this.minLevel && eventObj.klan=='') {
@@ -205,11 +206,12 @@
         if (centerElements.length==0 || centerElements[0].innerText=='Передача предметов/кредитов другому игроку') {
           setTimeout(function(){combats_plugins_manager.getMainFrame().location='/main.pl';}, 0);
         }
-        setTimeout(combats_plugins_manager.get_binded_method(this,this.heal), 5000);
+        setTimeout(combats_plugins_manager.get_binded_method(this,this.heal,[step]), 5000);
         return;
       }
       if (!step) {
-        this.onuserinfo_handler = combats_plugins_manager.get_binded_method(this,this.onuserinfo);
+        if (!this.onuserinfo_handler)
+          this.onuserinfo_handler = combats_plugins_manager.get_binded_method(this,this.onuserinfo);
         combats_plugins_manager.attachEvent('onuserinfo',this.onuserinfo_handler);
         this.userinfoTimer = setTimeout(
           combats_plugins_manager.get_binded_method(
@@ -217,6 +219,7 @@
             function() {
               if (this.onuserinfo_handler) {
                 combats_plugins_manager.detachEvent('onuserinfo',this.onuserinfo_handler);
+                this.onuserinfo_handler = null;
                 this.sendAutoResponse('private ['+this.Healing.partner+'] Не нахожу персонажа '+this.Healing.patient+' в комнате :chtoza: (автоответ)');
                 this.Healing = null;
               }
