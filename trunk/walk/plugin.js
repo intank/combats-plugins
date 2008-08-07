@@ -223,7 +223,7 @@
 		var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
 		var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
         tables = d.getElementsByTagName('TABLE');
-	    if(!top.ChatSys) top.bottom.sw_sys(); //--------------- ¬ключаем системки
+	    if(!top.ChatSys && ('DungMap' in d.all)) top.bottom.sw_sys(); //--------------- ¬ключаем системки
 		
 		if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
 			top.Chat.am(this.sys_msg + '<i>'+Red_str[1]+'<i>');
