@@ -7,6 +7,12 @@
       return "Деление товара на пачки";
     },
 
+
+    isUnstack: function(node) {
+      if (node.tagName=="A")
+        return decodeURI(node.href).match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'(.*?)\s*\(x(\d+)\)'\)/);
+      return null;
+    },
     getProperties: function() {
       var Table = this.findBag();
       this.goods = {};
@@ -15,7 +21,7 @@
         for(var i=0; i<Table.rows.length; i++) {
           var children = Table.rows[i].cells[0].children;
           var match;
-          if (children[0].tagName=="SPAN" && children[children.length-2].tagName=="A" && (match=decodeURI(children[children.length-2].href).match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'(.*?)\s*\(x\d+\)'\)/))) {
+          if (children[0].tagName=="SPAN" && (match=(this.isUnstack(children[children.length-2]) || this.isUnstack(children[children.length-3])))) {
             if (!(match[1] in this.goods)) {
               this.goods[match[1]] = goodsArray.push(match[2])-1;
             }
@@ -76,10 +82,9 @@
             var children = Table.rows[i].cells[0].children;
             var match;
             if (children[0].tagName=="SPAN" 
-                && children[children.length-2].tagName=="A" 
-                && (match=decodeURI(children[children.length-2].href).match(/javascript\:unstack\('(.*?)',\s*'.*?',\s*'.*?\s*\(x(\d+)\)'\)/))
+                && (match=(this.isUnstack(children[children.length-2]) || this.isUnstack(children[children.length-3])))
                 && match[1]==this.selectedArticle
-                && parseFloat(match[2])>this.packSize) {
+                && parseFloat(match[3])>this.packSize) {
               var stopFlag = false;
               children[children.length-2].click();
               setTimeout(
