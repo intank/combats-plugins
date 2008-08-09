@@ -5,23 +5,25 @@
     toString: function() {
       return "Отдельный приватный чат с игроками";
     },
+    removePrivateTab: function(oTab, login) {
+      top.Chat.Self.oTab.SelectTab(top.Chat.Self.oTab.arrTabs.chat);
+      oTab.Hide();
+      for(var i in top.Chat.Self.oTab.arrTabs)
+        if (top.Chat.Self.oTab.arrTabs[i]==oTab)
+          delete top.Chat.Self.oTab.arrTabs[i];
+      var node = oTab.Frame().parentNode
+      node.parentNode.removeChild(node);
+      oTab.parentNode.removeChild(oTab);
+      delete oTab;
+      delete this.filters[login];
+    },
     addPrivateTab: function(login) {
       if (login in this.filters)
         return;
       top.Chat.Self.CtxMenuHide();
       var oTab = top.Chat.Self.oTab.arrTabs['private '+login] = top.Chat.Self.oTab.AddTab( "private "+login, login );
-      oTab.ondblclick = top.combats_plugins_manager.get_binded_method(this,
-        function(e) {
-          oTab.Hide();
-          for(var i in top.Chat.Self.oTab.arrTabs)
-            if (top.Chat.Self.oTab.arrTabs[i]==oTab)
-              delete top.Chat.Self.oTab.arrTabs[i];
-          oTab.Frame().parentNode.removeChild(oTab.Frame());
-          oTab.parentNode.removeChild(oTab);
-          delete oTab;
-          delete this.filters[login];
-        }
-      );
+      oTab.ondblclick = top.combats_plugins_manager.get_binded_method(
+        this, this.removePrivateTab, oTab, login);
       var filter = this.filters[login] = new RegExp('\\[<SPAN class=p_from>'+login+'<\\/SPAN>\]|<SPAN class=p title=.*?>'+login+'<\\/SPAN>');
 
       var div = top.Chat.Self.oTab.arrTabs.chat.Frame();
