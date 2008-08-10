@@ -110,7 +110,7 @@
         if (++this.step_attempt>this.attempts_limit) {
           combats_plugins_manager.detachEvent('mainframe.load',
             this.mainframeHandler);
-          combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>')
+          combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>')
           return;
         }
         setTimeout(
