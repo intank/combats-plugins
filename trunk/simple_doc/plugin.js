@@ -65,7 +65,7 @@
           } 
         },
         { name:"Доверять безадресным цепям", value:this.allowNoTarget },
-        { name:"Чёрный список", value:this.load('BlackList','')||'' },
+        { name:"Чёрный список", value:(this.load('BlackList','')||'').replace(/[;,\n\r]+/g,'\n'), type: 'textarea' },
         { name:"Реагировать на неполные системки", value:!this.fullSysMessage }
       ];
     },
@@ -80,7 +80,7 @@
       this.oppositeAlign=a[1].value.selected;
       this.allowNoTarget=a[2].value;
       this.save('oppositeAlign',this.oppositeAlign);
-      this.save('BlackList',a[3].value);
+      this.save('BlackList',a[3].value.split(/[\n\r;,]+/).sort(function(a,b){return a.toLocaleUpperCase()>b.toLocaleUpperCase()?1:-1;}).join(';'));
       this.fullSysMessage = !a[4].value;
       this.save('fullSysMessage',this.fullSysMessage.toString());
       this.loadBlackList();
@@ -108,7 +108,7 @@
       var blacklist = this.load('BlackList','');
       this.blacklist = {};
       if (blacklist!='') {
-        blacklist = blacklist.split(';');
+        blacklist = blacklist.split(/;|,/);
         for(var i=0; i<blacklist.length; i++) {
           this.blacklist[blacklist[i]] = true;
         }
