@@ -86,7 +86,10 @@
                 && match[1]==this.selectedArticle
                 && parseFloat(match[3])>this.packSize) {
               var stopFlag = false;
-              children[children.length-2].click();
+              if (this.isUnstack(children[children.length-2]))
+                children[children.length-2].click();
+              else if (this.isUnstack(children[children.length-3]))
+                children[children.length-3].click();
               setTimeout(
                 combats_plugins_manager.get_binded_method(
                   this,
