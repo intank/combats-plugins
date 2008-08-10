@@ -68,7 +68,7 @@
     handlerCtxMenu: function(eventObj) {
       if (!this.blackListIndicator) {
         this.blackListIndicator = top.document.createElement('DIV');
-        top.Chat.Self.oCtxMenu.insertBefore(this.blackListIndicator,null);
+        top.Chat.Self.oCtxMenu.insertBefore(this.blackListIndicator,top.Chat.Self.oCtxMenu.lastChild);
         this.blackListIndicator.style.color = '#D00000';
         this.blackListIndicator.style.padding = '2px 12px 2px 8px';
       }

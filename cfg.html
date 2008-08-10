@@ -82,7 +82,6 @@ function getPluginGfg() {
     return;
   }
   if ("getProperties" in plugin) {
-  debugger;
     props = plugin.getProperties();
     var s="<form onsubmit=\"return false\"><table>";
     for(var i=0; i<props.length; i++) {
