@@ -83,43 +83,48 @@ function getPluginGfg() {
   }
   if ("getProperties" in plugin) {
     props = plugin.getProperties();
-    var s="<form onsubmit=\"return false\"><table>";
-    for(var i=0; i<props.length; i++) {
-      if (is_function(props[i].value)) {
-        s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\">";
-      } else {
-        s += '<tr><td>'+props[i].name;
-        var style = '';
-        if ('style' in props[i])
-          style = props[i].style;
-        if (typeof(props[i].value)=="boolean") {
-          s += '<td><input type=checkbox style="'+style.replace(/"/g,'&quot;')+'"'+(props[i].value?' CHECKED':'')+'>';
-        } else if (typeof(props[i].value)=="object") {
-          s += '<td><select>\n';
-          if ('length' in props[i].value) {
-            for (var j=0; j<props[i].value.length; j++) {
-              if (j in props[i].value)
-                s += '<option value="'+j+'"'+(j==props[i].value.selected?' SELECTED':'')+'>'+props[i].value[j]+'</option>\n';
-            }
-          }
-          s += '</select>';
+    var s;
+    if (typeof(props)!='object') {
+      s = props;
+    } else {
+      s="<form onsubmit=\"return false\"><table>";
+      for(var i=0; i<props.length; i++) {
+        if (is_function(props[i].value)) {
+          s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\">";
         } else {
-          try {
-            if ("type" in props[i]) {
-              if (props[i].type=="textarea") {
-                style = 'width:100%; height:7em;'+style;
-                s += '<td><textarea style="'+style.replace(/"/g,'&quot;')+'">'+props[i].value+"</textarea>";
+          s += '<tr><td>'+props[i].name;
+          var style = '';
+          if ('style' in props[i])
+            style = props[i].style;
+          if (typeof(props[i].value)=="boolean") {
+            s += '<td><input type=checkbox style="'+style.replace(/"/g,'&quot;')+'"'+(props[i].value?' CHECKED':'')+'>';
+          } else if (typeof(props[i].value)=="object") {
+            s += '<td><select>\n';
+            if ('length' in props[i].value) {
+              for (var j=0; j<props[i].value.length; j++) {
+                if (j in props[i].value)
+                  s += '<option value="'+j+'"'+(j==props[i].value.selected?' SELECTED':'')+'>'+props[i].value[j]+'</option>\n';
+              }
+            }
+            s += '</select>';
+          } else {
+            try {
+              if ("type" in props[i]) {
+                if (props[i].type=="textarea") {
+                  style = 'width:100%; height:7em;'+style;
+                  s += '<td><textarea style="'+style.replace(/"/g,'&quot;')+'">'+props[i].value+"</textarea>";
+                } else
+                  throw new Exception();
               } else
                 throw new Exception();
-            } else
-              throw new Exception();
-          } catch(e) {
-            s += '<td><input type=text style="'+style.replace(/"/g,'&quot;')+'" value="'+props[i].value.toString().replace(/"/g,'&quot;')+'">';
+            } catch(e) {
+              s += '<td><input type=text style="'+style.replace(/"/g,'&quot;')+'" value="'+props[i].value.toString().replace(/"/g,'&quot;')+'">';
+            }
           }
         }
       }
+      s+="</table></form>";
     }
-    s+="</table></form>";
     if ("setProperties" in plugin) {
       s+="<input type=\"button\" value=\"Сохранить\" onclick=\"setPluginGfg()\">";
     }
