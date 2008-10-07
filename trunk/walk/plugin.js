@@ -45,9 +45,12 @@
             style: { backgroundColor: '#A000A0' } 
           },
           76: {
-            style: { backgroundColor: '#FF10FF' } 
+            priority: 4, 
+            title: '[10]',
+            style: { backgroundColor: '#A000A0' } 
           },
           56: {
+            title: '[8]',
             style: { backgroundColor: '#FF10FF' } 
           }
         }

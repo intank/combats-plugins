@@ -77,7 +77,7 @@
     handlerCtxMenu: function(eventObj) {
       if (!this.menuItem) {
         this.menuItem = top.document.createElement('A');
-        top.Chat.Self.oCtxMenu.insertBefore(this.menuItem,top.Chat.Self.oCtxMenu.lastChild);
+        top.Chat.Self.oCtxMenu.insertBefore(this.menuItem,top.Chat.Self.oCtxMenu.lastChild.previousSibling);
         this.menuItem.className = 'ChatCtxMenu';
         this.menuItem.href = 'javascript:void(0)';
       }
