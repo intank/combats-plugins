@@ -1,4 +1,4 @@
-п»ї<script language="JavaScript">
+<script language="JavaScript">
 try {
 if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.com\/buttons\.pl\?battle=/)==0){
   if ("combats_plugins_manager" in this) {
@@ -24,7 +24,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       "plugins_disabled": {},
       "silent": true,
       "toString": function() {
-        return " Combats.RU";
+        return "Плагины Combats.RU";
       },
       "getProperties": function() {
         var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
@@ -32,9 +32,9 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           s = s.slice(0,-1);
         }
         return [
-          { name: "\"\"  ", value: this.silent },
-          { name: "  ", value: this.loadCustomPlugin },
-          { name: "  ", value: s, type:'textarea', style:"width:100%" }
+          { name: "\"Тихие\" ошибки плагинов", value: this.silent },
+          { name: "Загрузить новый плагин", value: this.loadCustomPlugin },
+          { name: "Перечень загружаемых плагинов", value: s, type:'textarea', style:"width:100%" }
         ];
       },
       "setProperties": function(a) {
@@ -70,7 +70,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
       },
       "loadCustomPlugin": function() {
-        var pluginName=prompt("   (   )","");
+        var pluginName=prompt("Введите название плагина (имя папки с плагином)","");
         if (pluginName=="")
           return;
         this.loadPlugin(pluginName);
@@ -139,7 +139,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         external.writeFile( this.security_id, "Combats.RU", "Combats.RU.log", s );
       },
       "logError": function(plugin,e) {
-        var messages = new Date().toLocaleString()+':    "'+plugin.toString()+'"<BR>';
+        var messages = new Date().toLocaleString()+': Ошибка в плагине "'+plugin.toString()+'"<BR>';
         for(var i in e)
           messages += "&gt; ["+i+"]: "+e[i]+"<BR>";
         if (!this.silent) {
@@ -158,21 +158,21 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
               this.plugins_list[pluginName]=obj;
           } catch(e) {
             errCount++;
-            var messages = '<font class=date2>'+d+'</font>    "'+pluginName+'"<BR>';
+            var messages = '<font class=date2>'+d+'</font> Ошибка инициализации плагина "'+pluginName+'"<BR>';
             for(var i in e)
               messages += '&gt; ['+i+']: '+e[i]+'<BR>';
             this.add_chat(messages);
             this.addLog(messages);
           }
         } else {
-          var messages = '<font class=date2>'+d+'</font>  "'+pluginName+'"  :  "plugin.js"    ';
+          var messages = '<font class=date2>'+d+'</font> Плагин "'+pluginName+'" не загружен: файл "plugin.js" не найден или пуст';
           this.add_chat(messages);
           this.addLog(messages);
         }
         return errCount;
       },
       getMainFrame: function() {
-        return top.frames[3]; //   
+        return top.frames[3]; // пока что так
       },
       getHTTPRequest: function() {
         if (top.XMLHttpRequest) {
@@ -206,7 +206,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           if (!s) {
             s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini.sample");
             external.writeFile( this.security_id, "Combats.RU", "combats_plugins.ini", s);
-            this.add_chat('<font class=date2>'+d+'</font>   .    " "');
+            this.add_chat('<font class=date2>'+d+'</font> Первый запуск менеджера. Использованы настройки плагинов "по умолчанию"');
           }
           var combats_plugins = s.split(/[\x0A\x0D]+/);
         } else {
@@ -215,7 +215,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 	  configuration.loadXML(external.readFile(this.security_id, "Combats.RU", 'config.xml'));
 	  if (configuration.parseError.errorCode != 0) {
 	    var myErr = configuration.parseError;
-	    alert(" :\n" + myErr.reason);
+	    alert("Ошибка конфигурации:\n" + myErr.reason);
 	  } else {
 	    var root = configuration.documentElement;
 	    this.user = root.selectSingleNode('user[@name="'+top.mylogin+'"]');
@@ -234,9 +234,9 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           }
         }
         if (errCount>0) {
-          this.add_chat('<font class=date2>'+d+'</font>  : '+errCount);
+          this.add_chat('<font class=date2>'+d+'</font> Всего ошибок: '+errCount);
         } else {
-          this.add_chat('<font class=date2>'+d+'</font>   ');
+          this.add_chat('<font class=date2>'+d+'</font> Плагины успешно инициализированы');
         }
       }
     };
