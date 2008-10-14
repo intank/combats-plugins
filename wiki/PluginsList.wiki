@@ -1,3 +1,4 @@
+#labels Featured
 = Перечень плагинов =
 
  * [top_tray]
