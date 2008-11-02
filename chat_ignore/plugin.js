@@ -14,14 +14,14 @@
     },
     getProperties: function() {
       return [
-        { name: "Список игнорируемых персонажей", value: this.list, type: 'textarea', style: 'width:100%' }
+        { name: "Список игнорируемых персонажей", value: this.list.replace(/,+/g,'\n'), type: 'textarea', style: 'width:100%' }
       ];
     },
     setProperties: function(a) {
       try {
-        this.list = a[0].value.split(/\s*(?:\n|\r|,|;)+\s+/).join(',');
+        this.list = a[0].value.split(/\s*(?:\n|\r|,|;)+\s+/).sort().join(',');
         this.loadFilters();
-        this.save('list',a[0].value);
+        this.save('list',this.list);
       } catch (e) {
         alert('Ошибка настройки фильтров: "'+e.message+'"');
       }
@@ -37,12 +37,11 @@
       if (!filterPlugin) {
         throw new Exception('Для корретной работы нужен плагин chat_filter');
       }
-      var list = this.list.split(',');
       if (this.filterId!='')
         filterPlugin.removeFilter(this.filterId);
-      if (list.length>1 || list[0]!='') {
+      if (this.list.length>0) {
         this.filterId = filterPlugin.addFilter(
-          { filter:new RegExp('(?:!\\s*)?\\[<SPAN>(?:'+list.join('|')+')<\\/SPAN>\\] <font color=".*?">.*?(?:private|to)\\s*\\[(?:[^\\]]*,)?\\s*'+top.mylogin+'\\s*(?:,.*?)?\\]','i'),
+          { filter:new RegExp('(?:!\\s*)?\\[<SPAN>(?:'+this.list.replace(/,+/g,'|')+')<\\/SPAN>\\] <font color=".*?">.*?(?:private|to)\\s*\\[(?:[^\\]]*,)?\\s*'+top.mylogin+'\\s*(?:,.*?)?\\]','i'),
             handler:this.clear
           }
         );

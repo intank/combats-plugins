@@ -399,6 +399,7 @@
         'Вход в водосток': ['Страшилкина улица']
       }
     },
+    favorites: ['Общ. Этаж 2','Портал','Зал воинов 3','Филиал Аукциона'],
     toString: function() {
       return 'Перемещение в заданную локацию';
     },
@@ -423,6 +424,10 @@
     analyze_step: function(new_step, from) {
       if (!(from in this.steps))
         this.steps[from] = {};
+      if (!(from in this.pathes[this.city])) {
+        this.can_step = false;
+        return;
+      }
       for(var next in this.pathes[this.city][from]) {
         var next_name = this.pathes[this.city][from][next];
         if (!(next_name in this.steps[from])) {
@@ -555,8 +560,6 @@
         this.new_location = new_location;
       else
         this.new_location = new_location[0].value[new_location[0].value.selected];
-//      this.current_location = 'Магазин';
-//      this.city = 'emeraldscity';
       if (!this.mainframeHandler) {
         this.mainframeHandler = combats_plugins_manager.get_binded_method(
           this, this.try_run_to_new_location);
@@ -566,10 +569,68 @@
         this.mainframeHandler);
       this.try_run_to_new_location();
     },
+    selectLocation: function() {
+      if (this.menu) {
+        this.menu.parentNode.removeChild(this.menu);
+        this.menu = null;
+        return;
+      }
+      this.city = top.location.host.replace(/\..*$/,'');
+      this.menu = top.document.createElement('div');
+      var s = '';
+      for(var i=0; i<this.favorites.length; i++) {
+        s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.favorites[i]+'</td></tr>';
+      }
+      this.menu.innerHTML = '<table style="border: 2px solid black; width: 100%">'+s+'</table>';
+      this.menu.style.cssText = 'position: absolute; z-index: 5; left: '+(window.event.clientX-window.event.offsetX)+'px; top: '+(window.event.clientY-window.event.offsetY+30)+'px; width: 200px; height: auto; background: #C7C7C7';
+      top.document.body.insertBefore(this.menu);
+      this.menu.attachEvent(
+        'onclick',
+        combats_plugins_manager.get_binded_method(
+          this, 
+          function() {
+            if (this['debugger']) debugger;
+            if (window.event.srcElement.nodeName!='TD') return;
+
+            this.run_to_location(window.event.srcElement.innerText);
+            this.menu.parentNode.removeChild(this.menu);
+            this.menu = null;
+          }
+        )
+      );
+    },
     Init: function() {
+      top.combats_plugins_manager.plugins_list['top_tray'].addButton({
+        'button': {
+          'style': {
+            'width': "20px",
+            'height': "20px",
+            'background': "#505050",
+            'overflow': 'hidden'
+            },
+          'onclick': combats_plugins_manager.get_binded_method(
+            this, 
+            this.selectLocation)
+          },
+        'img': {
+          'style': {
+            'width': "20px",
+            'height': "20px",
+            'filter': "progid:DXImageTransform.Microsoft.BasicImage(Grayscale=1,Enabled=1)"
+            },
+          'onmouseout': function() {
+              this.filters['DXImageTransform.Microsoft.BasicImage'].Enabled=1;
+            },
+          'onmouseover': function() {
+              this.filters['DXImageTransform.Microsoft.BasicImage'].Enabled=0;
+            },
+          'src': "file:///"+combats_plugins_manager.base_folder+"run_to_location/run_to_location.gif",
+          'alt': "Бежать по городу"
+          }
+        });
     }
   }
 
-//  plugin_run_to_location.run_to_location('Храм');
+  plugin_run_to_location.Init();
   return plugin_run_to_location;
 })()

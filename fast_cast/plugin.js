@@ -5,13 +5,25 @@
 
   plugin_fast_cast.prototype = {
     cast_myself: false,
-    knownSpells: [
-      { item:'spell_powerHPup5', name:'Жажда Жизни +5', filter:'5' },
-      { item:'spell_powerHPup4', name:'Жажда Жизни +4', filter:'4', requirements: {'Интеллект: ':70} },
-      { item:'spell_powerup10', name:'Сокрушение', filter:'Сокрушение', requirements: {'Интеллект: ':15} },
-      { item:'spell_stat_intel', name:'Холодный Разум', filter:'Холодный Разум', requirements: {'Интеллект: ':70} },
-      { item:'cure_g1', name:'Цепь Исцеления', filter:'Цепь Исцеления' },
-      { item:'d_blat-6', name:'Пропуск Забытых', filter:'Пропуск Забытых', requirements: {'Интеллект: ':5} }
+    spellGroups: [
+      { icon: "file:///"+combats_plugins_manager.base_folder+"fast_cast/mag_.gif",
+        knownSpells: [
+          { item:'spell_powerHPup5', name:'Жажда Жизни +5', filter:'5' },
+          { item:'spell_powerHPup4', name:'Жажда Жизни +4', filter:'4', requirements: {'Интеллект: ':70} },
+          { item:'spell_powerup10', name:'Сокрушение', filter:'Сокрушение', requirements: {'Интеллект: ':15} },
+          { item:'spell_stat_intel', name:'Холодный Разум', filter:'Холодный Разум', requirements: {'Интеллект: ':70} },
+          { item:'cure_g1', name:'Цепь Исцеления', filter:'Цепь Исцеления' },
+          { item:'d_blat-6', name:'Пропуск Забытых', filter:'Пропуск Забытых', requirements: {'Интеллект: ':5} }
+        ]
+      },
+      { icon: "file:///"+combats_plugins_manager.base_folder+"fast_cast/icon.gif",
+        knownSpells: [
+          { item:'spell_protect1', name:'Защита от Огня', filter:'Защита от Огня' },
+          { item:'spell_protect3', name:'Защита от Воздуха', filter:'Защита от Воздуха' },
+          { item:'spell_protect2', name:'Защита от Воды', filter:'Защита от Воды' },
+          { item:'spell_protect4', name:'Защита от Земли', filter:'Защита от Земли' }
+        ]
+      }
     ],
     inProgress: false,
     castQueue: [],
@@ -33,16 +45,19 @@
     setProperties: function(a) {
       this.cast_myself = a[0].value;
     },
-    selectCast: function() {
+    selectCast: function(knownSpells) {
       if (this.menu) {
+        var menuButton = this.menu.menuButton;
         this.menu.parentNode.removeChild(this.menu);
         this.menu = null;
-        return;
+        if (menuButton==window.event.srcElement || menuButton==window.event.srcElement.parentElement)
+          return;
       }
       this.menu = top.document.createElement('div');
+      this.menu.menuButton = window.event.srcElement;
       var s = '';
-      for(var i=0; i<this.knownSpells.length; i++) {
-        s += '<tr><td style="width:100%; height: 40px; padding-left:50px; background: center left url(http://img.combats.com/i/items/'+this.knownSpells[i].item+'.gif) no-repeat; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.knownSpells[i].name+'</td></tr>';
+      for(var i=0; i<knownSpells.length; i++) {
+        s += '<tr><td style="width:100%; height: 40px; padding-left:50px; background: center left url(http://img.combats.com/i/items/'+knownSpells[i].item+'.gif) no-repeat; cursor: pointer; font-weight: bold; vertical-align: middle">'+knownSpells[i].name+'</td></tr>';
       }
       this.menu.innerHTML = '<table style="border: 2px solid black; width: 100%">'+s+'</table>';
       this.menu.style.cssText = 'position: absolute; z-index: 5; left: '+(window.event.clientX-window.event.offsetX)+'px; top: '+(window.event.clientY-window.event.offsetY+30)+'px; width: 200px; height: auto; background: #C7C7C7';
@@ -55,7 +70,7 @@
             if (this['debugger']) debugger;
             var i = window.event.srcElement.parentNode.rowIndex;
             if (typeof(i)=='number') {
-              this.queryName(i);
+              this.queryName(knownSpells[i]);
               this.menu.parentNode.removeChild(this.menu);
               this.menu = null;
             }
@@ -63,17 +78,17 @@
         )
       );
     },
-    queryName: function(i) {
+    queryName: function(spell) {
       top.Window.Prompt(
         function(a){
           if (a) {
-            this.castSpell({spellName:this.knownSpells[i].name,spellId:this.knownSpells[i].item,filter:this.knownSpells[i].filter,requirements:this.knownSpells[i].requirements,target:a});
+            this.castSpell({spellName:spell.name,spellId:spell.item,filter:spell.filter,requirements:spell.requirements,target:a});
           }
         },
         this,
         'Для каста заклинания необходимо выбрать цель. Введите ник или щёлкните по нику в чате',
         '',
-        'Кастуем "<b>'+this.knownSpells[i].name+'</b>"'
+        'Кастуем "<b>'+spell.name+'</b>"'
       );
     },
     sendAutoResponse: function(message) {
@@ -111,12 +126,12 @@
           while(obj.nodeName!='SCRIPT') {
             if (obj.nodeName=='#text') {
               if ((obj.nodeValue in params.requirements) && parseInt(obj.nextSibling.innerText)<params.requirements[obj.nodeValue]) {
-                result = false;
-                break;
+                return false;
               }
             }
             obj = obj.nextSibling;
           }
+          break;
         }
       }
       return result;
@@ -174,17 +189,17 @@
         case 1:
           combats_plugins_manager.detachEvent('mainframe.load',this.mainframeload_handler);
           var link;
-          if (link=this.findSpell(params)) {
-            if (this.matchStats(params)) {
+          if (this.matchStats(params)) {
+            if (link=this.findSpell(params)) {
               this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.castSpell,params,2);
               combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
               this.doCast(link, params);
             } else {
-              alert('Наденьте правильный комплект!');
+              this.sendAutoResponse('private ['+params.target+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
               this.nextCast();
             }
           } else {
-            this.sendAutoResponse('private ['+params.target+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
+            alert('Наденьте правильный комплект!');
             this.nextCast();
           }
           break;
@@ -219,6 +234,11 @@
       );
     },
     init: function() {
+      for(var i=0; i<this.spellGroups.length; i++) {
+        this.addIcon(this.spellGroups[i].icon,this.spellGroups[i].knownSpells)
+      }
+    },
+    addIcon: function(icon, knownSpells) {
       top.combats_plugins_manager.plugins_list['top_tray'].addButton({
         'button': {
           'style': {
@@ -229,7 +249,8 @@
             },
           'onclick': combats_plugins_manager.get_binded_method(
             this, 
-            this.selectCast)
+            this.selectCast,
+            knownSpells)
           },
         'img': {
           'style': {
@@ -246,7 +267,7 @@
           'onmouseover': function() {
               this.filters.Glow.Enabled=1;
             },
-          'src': "file:///"+combats_plugins_manager.base_folder+"fast_cast/mag_.gif",
+          'src': icon,
           'alt': "Быстрые заклинания"
           }
         });
