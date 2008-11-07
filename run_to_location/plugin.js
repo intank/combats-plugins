@@ -603,10 +603,10 @@
       top.combats_plugins_manager.plugins_list['top_tray'].addButton({
         'button': {
           'style': {
-            'width': "20px",
+            'width': "32px",
             'height': "20px",
-            'background': "#505050",
-            'overflow': 'hidden'
+            'padding': "2px",
+            'background': "#505050"
             },
           'onclick': combats_plugins_manager.get_binded_method(
             this, 
@@ -614,8 +614,11 @@
           },
         'img': {
           'style': {
-            'width': "20px",
-            'height': "20px",
+            'width': "33px",
+            'height': "24px",
+            'left': "-2px",
+            'top': "-1px",
+            'position': "relative",
             'filter': "progid:DXImageTransform.Microsoft.BasicImage(Grayscale=1,Enabled=1)"
             },
           'onmouseout': function() {

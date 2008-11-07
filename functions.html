@@ -75,54 +75,35 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           return;
         this.loadPlugin(pluginName);
       },
-
-      "StartCfgPanelDrag": function() {
-        if (window.event.srcElement.nodeName=='DIV' && !this.DragInfo) {
-          var e = window.event;
-          this.DragInfo = {
-            MoveCfgPanelX: this.CfgDiv.offsetLeft,
-            MoveCfgPanelY: this.CfgDiv.offsetTop,
-	    MouseLeft: e.clientX-this.CfgDiv.offsetLeft,
-	    MouseTop: e.clientY-this.CfgDiv.offsetTop
-	  }
-          document.attachEvent('onmousemove',this.DragCfgPanel);
-          this.CfgDiv.style.cursor="move";
-        }
-      },
-      "DragCfgPanel": function() {
-        if (top.combats_plugins_manager.DragInfo) {
-          var e = window.event;
-          top.combats_plugins_manager.CfgDiv.style.left = e.clientX-top.combats_plugins_manager.DragInfo.MouseLeft+"px";
-          top.combats_plugins_manager.CfgDiv.style.top = e.clientY-top.combats_plugins_manager.DragInfo.MouseTop+"px";
-        }
-      },
-      "StopCfgPanelDrag": function() {
-        this.DragInfo=null;
-        document.detachEvent('onmousemove',this.DragCfgPanel);
-        this.CfgDiv.style.cursor="auto";
-      },
-      "HideCfgPanel": function() {
-        if (this.CfgDiv)
-          document.body.removeChild(this.CfgDiv);
-        this.CfgDiv = null;
-        this.MoveCfgPanelMode=false; 
-      },
       "Configure": function() {
+        var oConfig;
         if (!this.CfgDiv) {
-          var w;
-          this.CfgDiv = document.createElement('<div>');
-          this.CfgDiv.style.width = '600px';
-          this.CfgDiv.style.height = '400px';
-          this.CfgDiv.style.position = 'absolute';
-          document.body.insertBefore(this.CfgDiv);
-          this.CfgDiv.innerHTML = '<div style="width:100%; background:navy; text-align:right" oonmousemove="top.combats_plugins_manager.MoveCfgPanel()" oonmouseout="top.combats_plugins_manager.MoveCfgPanel()" onmousedown="top.combats_plugins_manager.StartCfgPanelDrag()" onmouseup="top.combats_plugins_manager.StopCfgPanelDrag()">\
-<span style="cursor:pointer; color:white" onclick="top.combats_plugins_manager.HideCfgPanel()">&nbsp;X&nbsp;</span></div>\
-<iframe style="width:100%; height:100%"></iframe>';
-          w = this.CfgDiv.childNodes[1].contentWindow;
-          w.document.write(external.readFile( this.security_id, "Combats.RU", "cfg.html"));
+          this.CfgDiv = document.createElement('<iframe style="width:100%; height:100%;">');
+          document.body.appendChild(this.CfgDiv);
+          this.CfgDiv.contentWindow.document.write(external.readFile( this.security_id, "Combats.RU", "cfg.html"));
+
+	  this.oWindow = this.oWindow || top.Window.New( { bNoResize: true } );
+	  oConfig = this.oConfig = {
+		oWindow: this.oWindow,
+		Class: this,
+		Cancel: function PromptCancel( ) {
+		        this.oWindow.Hide( );
+		},
+		SetStyle: function ( sStyle ) {
+			debugger;
+		        this.oWindow.SetStyle( sStyle );
+		}
+	  };
+        } else {
+       	  oConfig = this.oConfig;
         }
-        this.CfgDiv.style.left = (window.screen.width-600)/2;
-        this.CfgDiv.style.top = (window.screen.height-400)/2;
+	oConfig.oWindow.Insert( this.CfgDiv );
+	oConfig.oWindow.SetTitle( "Настройки" );
+	oConfig.oWindow.SetHook( oConfig, PromptCancel );
+	oConfig.oWindow.SizeTo( 640,480 );
+	oConfig.oWindow.Show( );
+        oConfig.oWindow.SetStyle('Neitral');
+	oConfig.oWindow.Align( "1/2", "1/2" );
       },
 
       "get_binded_method": function() { // object, method, ...
