@@ -38,14 +38,11 @@
     },
 
     onloadHandler: function() {
-      if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\//)!=0) {
-        return;
-      }
       try {
         var d=top.frames[3].document;
         if (d.title=="[503] Service Unavailable" || d.title=="[504] Gateway Timeout" || d.title=="[502] Bad Gateway" || d.title.search('Server Error')>=0) {
           if (!this.stateError) {
-            top.combats_plugins_manager.addLog('Отказ сервера.');
+            top.combats_plugins_manager.addLog((new Date()).toLocaleTimeString()+'Отказ сервера.');
             this.stateError = true;
           }
           this.timer = top.setTimeout(this.refresh,1000*this.timeOut);
@@ -55,7 +52,7 @@
           );
         } else {
           if (this.stateError) {
-            top.combats_plugins_manager.addLog('Сервер вышел из состояния отказа.');
+            top.combats_plugins_manager.addLog((new Date()).toLocaleTimeString()+'Сервер вышел из состояния отказа.');
             this.stateError = false;
           }
         }
