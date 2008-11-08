@@ -29,3 +29,16 @@ chat_hilight
 split_goods
 battle_preload
 simple_doc
+; == Следующие плагины так же могут быть подключены пользователем ==
+;fast_cast
+;chat_private_tab
+;chat_context_menu
+;userlist_ctxmenu
+;chat_speed
+;fighter_notebook
+;fiz_filter
+;claims_filter
+;hide_advert
+;mana_donor
+;portal_notify
+;show_heal_speed
