@@ -274,7 +274,7 @@
       var output = '{}';
       if (from_array.length>0)
         output = '{\n'+from_array.join(',\n')+'\n}';
-      external.writeFile(combats_plugins_manager.security_id,"Combats.RU","run_to_location\\pathes_'+this.city+'.!.js",output);
+      external.writeFile(combats_plugins_manager.security_id,"Combats.RU",'run_to_location\\pathes_'+this.city+'.!.js',output);
     },
 
     Init: function() {
