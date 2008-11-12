@@ -263,13 +263,14 @@
 
       var from_array = [];
       for(var from in this.pathes) {
-        var ss = '"'+from+'": [';
+        if (this.pathes[from].length<=0)
+          continue;
 
         var to_array = [];
         for(var i in this.pathes[from]) {
           to_array.push('"'+this.pathes[from][i]+'"');
         }
-        from_array.push(ss+to_array.join(',')+']');
+        from_array.push('"'+from+'": ['+to_array.join(',')+']');
       }
       var output = '{}';
       if (from_array.length>0)
