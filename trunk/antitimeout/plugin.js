@@ -1,45 +1,44 @@
 (function() {
-	plugin_antitimeout = function() {
-		this.autotime = 0;
-		this.kickTimer = null;
-		this.minTime = 5;
-		this.timeAttack = 0;
-		this.MethodPriority = new Array();
-		this.BusyCount = 0;
-		this.init();
-		this.onloadHandler();
-	}
+	return {
+	  autotime: 0,
+	  kickTimer: null,
+	  minTime: 5,
+	  timeAttack: 0,
+	  MethodPriority: [],
+	  BusyCount: 0,
 
-	plugin_antitimeout.prototype.toString = function() {
+	  toString: function() {
 		return "Предотвращение тайм-аута (автобой)"; 
-	}
+	  },
 
-	plugin_antitimeout.prototype.getProperties = function() {
-		return [{ name:"Время автоудара (сек)", value: this.autotime },
-				{ name:"Время обновления (сек)", value: this.minTime }];
-	}
+	  getProperties: function() {
+		return [
+			{ name:"Время автоудара (сек)", value: this.autotime },
+			{ name:"Время обновления (сек)", value: this.minTime }
+		];
+	  },
 	
-	plugin_antitimeout.prototype.setProperties = function(a) {
+	  setProperties: function(a) {
 		this.autotime=parseInt(a[0].value);
 		this.minTime=parseInt(a[1].value);
 		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"autotime",""+this.autotime);
 		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"refresh",""+this.minTime);
-	}
+	  },
 	
-	plugin_antitimeout.prototype.clearKickTimer = function() {
+	  clearKickTimer: function() {
 		if (this.kickTimer==null)
 			return;
 		clearTimeout(this.kickTimer);
 		this.kickTimer = null;
-	}
+	  },
 	
-	plugin_antitimeout.prototype.setKickTimer = function(kick_time) {
+	  setKickTimer: function(kick_time) {
 		if (this.kickTimer!=null)
 			clearTimeout(this.kickTimer);
 		this.kickTimer = setTimeout( top.combats_plugins_manager.get_binded_method(this,this.autoKick), kick_time);
-	}
+	  },
 
-	plugin_antitimeout.prototype.autoKick = function() {
+	  autoKick: function() {
 		try {
 			if( (typeof(top.Battle.oBattle )!="object") && !top.Battle.bInBattle) //------- А есть ли бой???
 				return;
@@ -143,9 +142,9 @@
 			e.Function = 'autoKick';
         	combats_plugins_manager.logError(this,e);
 		}
-	}
+	  },
 	
-	plugin_antitimeout.prototype.onloadHandler = function() {
+	  onloadHandler: function() {
 		try {
 			if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/battle\d*\.pl/)!=0)
 				return;
@@ -160,22 +159,19 @@
 				this.kickTimer = null;
 			
 			top.frames[3].attachEvent( "onbeforeunload", top.combats_plugins_manager.get_binded_method(this,this.clearKickTimer));
-  
 		}catch(e){
 			e.Function = 'onLoadHandler';
         	combats_plugins_manager.logError(this,e);
 		}
-	}
+	  },
 	
-	plugin_antitimeout.prototype.init = function() {
-		
+	  init: function() {
 		
 		var t = external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"autotime","90");
 		this.autotime = parseInt(t); //----------- время в секундах до самостоятельного удара
 		var t = external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"refresh","10");
 		this.minTime = parseInt(t); // --------- минимальное время в секундах для обновления
-		
-		
+
 		for(i=1;i<=20;i++){ // считывание приемов
 			t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"Method"+i,"");
 			if(a=t.match(/(\S+)\s*([^;]*).*/)){ // ----- отделяем прием от параметров
@@ -192,13 +188,10 @@
 				if(Method['id'])
 					this.MethodPriority.push(Method);
 			}
-			
 		}
-		
-		
 
 		top.combats_plugins_manager.attachEvent('mainframe.load',top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
-	}
-	
-	return new plugin_antitimeout();
+		this.onloadHandler();
+	  }
+	}.init();
 })()
