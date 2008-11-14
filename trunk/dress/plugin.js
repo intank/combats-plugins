@@ -191,6 +191,29 @@
         if (match != null) {
           dress.sd4 = match[1];
         }
+
+	d = combats_plugins_manager.getMainFrame().document;
+
+        match = dress.oReq.responseText.match(/(<table[^<>]+class="posit">[\s\S]*?<\/table><\/td>[\s\n\r]*<\/tr>[\s\n\r]*<\/table>[\s\n\r]*<\/td>[\s\n\r]*<\/tr>[\s\n\r]*<tr>[\s\n\r]*<td>[\s\S]*?<\/td>[\s\n\r]*<\/tr>[\s\n\r]*<\/table>)/);
+        if (match) {
+          var toyHTML = match[1];
+	  var tables = d.getElementsByTagName('TABLE');
+	  for(var i=0; i<tables.length; i++) {
+	    if (tables[i].className=='posit') {
+	      tables[i].outerHTML = toyHTML;
+	      var w = combats_plugins_manager.getMainFrame();
+	      if (w.gfastshow && !w.fastshow) {
+		w.fastshow = w.gfastshow;
+		w.hideshow = w.ghideshow;
+	      }
+	      if (w.fastshow && !w.gfastshow) {
+		w.gfastshow = w.fastshow;
+		w.ghideshow = w.hideshow;
+	      }
+	      break;
+	    }
+	  }
+	}
         
         match = dress.oReq.responseText.match(/top\.setHP\(([0-9\.]+),([0-9\.]+),([0-9\.]+)\)/);
         if (match != null) {
@@ -200,7 +223,6 @@
         if (match != null) {
           top.setMana(parseFloat(match[1]),parseFloat(match[2]),parseFloat(match[3]));
         }
-        d = top.frames[3].document;
 
         if (top.dress.div in d.all) {
           if (top.dress.inDungeon) {
