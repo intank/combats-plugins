@@ -1,14 +1,10 @@
 (function() {
-  var plugin_mana_donor = function() {
-    if (top.location.hostname!='mooncity.combats.ru')
-      return;
-    top.combats_plugins_manager.attachEvent(
-      "mainframe.load",
-      combats_plugins_manager.get_binded_method(this,this.onloadHandler)
-    );
-  };
-
-  plugin_mana_donor.prototype = {
+  if (top.location.hostname!='mooncity.combats.com') {
+//    throw new Error('Плагин "mana_donor" работает только в <B>mooncity</B>');
+    combats_plugins_manager.add_chat('<font class="date2">'+(new Date()).toLocaleTimeString()+'</font> Плагин "mana_donor" работает только в <B>mooncity</B>');
+    return null;
+  }
+  return {
     active: false,
     hide: false,
     timeOut: 1,
@@ -109,8 +105,13 @@
       if (gungeons.length>0) {
         gungeons[Math.floor(Math.random()*gungeons.length)].click();
       }
+    },
+
+    Init: function() {
+      top.combats_plugins_manager.attachEvent(
+        "mainframe.load",
+        combats_plugins_manager.get_binded_method(this,this.onloadHandler)
+      );
     }
-    
-  };
-  return new plugin_mana_donor();
+  }.Init();
 })()
