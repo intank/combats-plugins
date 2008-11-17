@@ -1,27 +1,5 @@
 (function (){
-  var plugin_simple_doc = function() {
-    this.loadVIP();
-    this.loadBlackList();
-    top.combats_plugins_manager.attachEvent('onmessage',
-      top.combats_plugins_manager.get_binded_method(this,this.onmessage));
-    this.oppositeAlign = this.load('oppositeAlign','0');
-    this.fullSysMessage = this.load('fullSysMessage','true').toLowerCase()=='true';
-
-    this.messages['checking']    = this.load('message.checking',   this.messages['checking']);
-    this.messages['busy']        = this.load('message.busy',       this.messages['busy']);
-    this.messages['inprogress']  = this.load('message.inprogress', this.messages['inprogress']);
-    this.messages['waiting']     = this.load('message.waiting',    this.messages['waiting']);
-    this.messages['blacklisted'] = this.load('message.blacklisted',this.messages['blacklisted']);
-    this.messages['noresult']    = this.load('message.noresult',   this.messages['noresult']);
-    this.messages['error']       = this.load('message.error',      this.messages['error']);
-    this.messages['lost']        = this.load('message.lost',       this.messages['lost']);
-    this.messages['lowlevel']    = this.load('message.lowlevel',   this.messages['lowlevel']);
-    this.messages['wrongalign']  = this.load('message.wrongalign', this.messages['wrongalign']);
-    this.messages['chaos']       = this.load('message.chaos',      this.messages['chaos']);
-    this.messages['trading']     = this.load('message.trading',    this.messages['trading']);
-  };
-
-  plugin_simple_doc.prototype = {
+  return {
     messages: {
       'checking': 'Самолечением занимаемся? Сейчас мы посмотрим, кто ты есть...', // цепь кастована на себя, предупреждаем
       'busy': 'Извините, но сейчас я лечу другого. Попробуйте через минуту...',   // мы уже начали кого-то проверять, следующему придётся подождать
@@ -36,6 +14,8 @@
       'chaos': 'Я не совершаю сделок с хаосниками :nono:',               // связываться с хаосниками себе дороже
       'trading': 'Я сейчас в передачах. Освобожусь - кастану, ожидайте'  // открыт торгователь, как закроется - кастанётся
     },
+    enableLog: true,
+    DateStr: '',
     minLevel: 9, // минимальный левел для самолечения
     Active: false, // true для активации при загрузке, false для ручного включения
     exchangeDetected: false,
@@ -66,7 +46,8 @@
         },
         { name:"Доверять безадресным цепям", value:this.allowNoTarget },
         { name:"Чёрный список", value:(this.load('BlackList','')||'').replace(/[;,\n\r]+/g,'\n'), type: 'textarea' },
-        { name:"Реагировать на неполные системки", value:!this.fullSysMessage }
+        { name:"Реагировать на неполные системки", value:!this.fullSysMessage },
+        { name:"Вести журнал", value:this.enableLog }
       ];
     },
     load: function(key,def_val){
@@ -83,6 +64,8 @@
       this.save('BlackList',a[3].value.split(/[\n\r;,]+/).sort(function(a,b){return a.toLocaleUpperCase()>b.toLocaleUpperCase()?1:-1;}).join(';'));
       this.fullSysMessage = !a[4].value;
       this.save('fullSysMessage',this.fullSysMessage.toString());
+      this.enableLog = a[5].value;
+      this.save('enableLog',this.enableLog.toString());
       this.loadBlackList();
 
       this.save('message.checking',   this.messages['checking']);
@@ -97,6 +80,24 @@
       this.save('message.wrongalign', this.messages['wrongalign']);
       this.save('message.chaos',      this.messages['chaos']);
       this.save('message.trading',    this.messages['trading']);
+    },
+    addLog: function(msg) {
+      if (!this.enableLog)
+        return;
+      var d = new Date();
+      var s = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+      var log = msg+'\n';
+      if (s != this.DateStr) {
+        this.DateStr = s;
+      } else {
+        log = (external.readFile(combats_plugins_manager.security_id,"Combats.RU",'simple_doc/'+this.DateStr+'.log') || '');
+        while (log && !log.slice(-1).charCodeAt(0)) {
+          log = log.slice(0,-1);
+        }
+        log += msg + '\n';
+      }
+//      combats_plugins_manager.add_chat(this.DateStr+': '+msg);
+      external.writeFile(combats_plugins_manager.security_id,'Combats.RU','simple_doc/'+this.DateStr+'.log',log);
     },
     addBlackList: function(a) {
       this.addPersToBlackList(a[3].value);
@@ -173,22 +174,26 @@
         clearTimeout(this.userinfoTimer);
         combats_plugins_manager.detachEvent('onuserinfo',this.onuserinfo_handler);
         this.onuserinfo_handler = null;
+        this.addLog('Найден персонаж ['+eventObj.name+'], уровень: '+eventObj.level+', склонность: '+eventObj.align);
 //        this.sendAutoResponse('private ['+this.Healing.partner+'] нашёл (автоответ)');
         if (this.Healing.patient==this.Healing.partner) {
           if (parseInt(eventObj.level)<this.minLevel && eventObj.klan=='') {
             this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['lowlevel']+' (автоответ)');
             this.Healing = null;
+            this.addLog('>>> Отказано: уровень мал');
             return;
           }
         }
         if (eventObj.align.substr(0,1)==this.aligns[this.oppositeAlign]) {
           this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['wrongalign']+' (автоответ)');
           this.Healing = null;
+          this.addLog('>>> Отказано: некорректная склонность');
           return;
         }
         if (eventObj.align=='2') {
           this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['chaos']+' (автоответ)');
           this.Healing = null;
+          this.addLog('>>> Отказано: лечится хаосник');
           return;
         }
         this.mainframeload_handler = combats_plugins_manager.get_binded_method(this,this.heal,1);
@@ -201,6 +206,7 @@
         if (!this.exchangeDetected) {
           this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['trading']+' (автоответ)');
           this.exchangeDetected = true;
+          this.addLog('>>> В передчачах');
         }
         var centerElements = combats_plugins_manager.getMainFrame().document.getElementsByTagName('center');
         if (centerElements.length==0 || centerElements[0].innerText=='Передача предметов/кредитов другому игроку') {
@@ -223,6 +229,7 @@
                 this.sendAutoResponse('private ['+this.Healing.partner+'] Не нахожу персонажа '+this.Healing.patient+' в комнате :chtoza: (автоответ)');
                 this.Healing = null;
               }
+              this.addLog('!!! Персонаж ['+this.Healing.patient+'] не найден в комнате');
             }
           ),
           7000);
@@ -234,6 +241,7 @@
             combats_plugins_manager.getMainFrame().location = '/exchange.pl?setcancel=1&tmp='+Math.random();
             this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['lost']+' (автоответ)');
             this.Healing = null;
+            this.addLog('!!! Сбой каста: передача');
             return;
           }
           var doc = combats_plugins_manager.getMainFrame().document;
@@ -261,6 +269,7 @@ if (this['debugger']) debugger;
           if (!result) {
             this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['error']+' (автоответ)');
             this.Healing = null;
+            this.addLog('!!! Не найден свиток цепи исцеления');
           }
           break;
         case 2:
@@ -275,6 +284,7 @@ if (this['debugger']) debugger;
           else
             castResult = '';
           if (castResult!='') {
+            this.addLog(castResult);
             this.sendAutoResponse('private ['+s+'] '+castResult+' (автоответ)');
             
             if (castResult.match(/(?:".*?" исцелен от травм|Вы присоединились к цепи исцеления для ".*?")/)) {
@@ -285,6 +295,7 @@ if (this['debugger']) debugger;
               }
             }
           } else {
+            this.addLog('>>> Не распознан результат заклинания');
             this.sendAutoResponse('private ['+s+'] '+this.messages['noresult']+' (автоответ)');
           }
 
@@ -313,10 +324,6 @@ if (this['debugger']) debugger;
         return;
 
       
-      if (this.blacklist[match[1]] || this.blacklist[match[3]]) {
-        this.sendAutoResponse('private ['+match[1]+','+match[3]+'] '+this.messages['blacklisted']+' (автоответ)');
-        return;
-      }
       if (this['debugger']) {
         debugger;
       }
@@ -333,6 +340,17 @@ if (this['debugger']) debugger;
         return;
 
       var s = '['+match[1]+'] предлагает исцелить персонажа ['+match[3]+'] от '+match[4]+' травм.';
+      this.addLog(s);
+      if (this.blacklist[match[1]]) {
+        this.sendAutoResponse('private ['+match[1]+','+match[3]+'] '+this.messages['blacklisted']+' (автоответ)');
+        this.addLog('>>> Отказано: персонаж ['+match[1]+'] в ЧС');
+        return;
+      }
+      if (this.blacklist[match[3]]) {
+        this.sendAutoResponse('private ['+match[1]+','+match[3]+'] '+this.messages['blacklisted']+' (автоответ)');
+        this.addLog('>>> Отказано: персонаж ['+match[3]+'] в ЧС');
+        return;
+      }
       var timeSpan = Math.floor(((new Date()).getTime()-this.lastCast.getTime())/1000);
       if (timeSpan<5*60) {
         if (this.lastTarget==match[3]) {
@@ -340,6 +358,7 @@ if (this['debugger']) debugger;
         } else {
           this.sendAutoResponse('private ['+match[1]+'] '+this.messages['waiting']+' Попробуйте через '+(5*60-timeSpan)+' секунд... (автоответ)');
         }
+        this.addLog('Отказано: до следующего каста '+(5*60-timeSpan)+' секунд');
         return;
       }
       if (this.Healing) {
@@ -347,6 +366,7 @@ if (this['debugger']) debugger;
           this.sendAutoResponse('private ['+match[1]+'] '+this.messages['inprogress']+' (автоответ)');
         else
           this.sendAutoResponse('private ['+match[1]+'] '+this.messages['busy']+' (автоответ)');
+        this.addLog('Отказано: уже в очереди на лечение');
       } else {
         this.Healing = {
           partner: match[1],
@@ -355,12 +375,38 @@ if (this['debugger']) debugger;
         if (this.Healing.partner==this.Healing.patient) {
           s += ' :dont: Внимание! Самолечение!';
           this.sendAutoResponse('private ['+this.Healing.partner+'] '+this.messages['checking']+' (автоответ)');
+          this.addLog('>>> Самолечение');
         }
         this.exchangeDetected = false;
         this.heal();
       }
       combats_plugins_manager.add_chat(s);
+    },
+    Init: function() {
+      this.loadVIP();
+      this.loadBlackList();
+      top.combats_plugins_manager.attachEvent('onmessage',
+        top.combats_plugins_manager.get_binded_method(this,this.onmessage));
+      this.oppositeAlign = this.load('oppositeAlign','0');
+      this.fullSysMessage = this.load('fullSysMessage','true').toLowerCase()=='true';
+      this.enableLog = this.load('enableLog','true').toLowerCase()=='true';
+
+      this.messages['checking']    = this.load('message.checking',   this.messages['checking']);
+      this.messages['busy']        = this.load('message.busy',       this.messages['busy']);
+      this.messages['inprogress']  = this.load('message.inprogress', this.messages['inprogress']);
+      this.messages['waiting']     = this.load('message.waiting',    this.messages['waiting']);
+      this.messages['blacklisted'] = this.load('message.blacklisted',this.messages['blacklisted']);
+      this.messages['noresult']    = this.load('message.noresult',   this.messages['noresult']);
+      this.messages['error']       = this.load('message.error',      this.messages['error']);
+      this.messages['lost']        = this.load('message.lost',       this.messages['lost']);
+      this.messages['lowlevel']    = this.load('message.lowlevel',   this.messages['lowlevel']);
+      this.messages['wrongalign']  = this.load('message.wrongalign', this.messages['wrongalign']);
+      this.messages['chaos']       = this.load('message.chaos',      this.messages['chaos']);
+      this.messages['trading']     = this.load('message.trading',    this.messages['trading']);
+
+      var d = new Date();
+      this.DateStr = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+      return this;
     }
-  };
-  return new plugin_simple_doc();
+  }.Init();
 })()
