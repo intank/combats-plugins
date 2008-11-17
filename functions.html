@@ -153,6 +153,32 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
         return errCount;
       },
+      getConfigurationElement: function(plugin) {
+        for(var name in this.plugins_list) {
+          if (this.plugins_list[name]==plugin) {
+            return {
+              login: top.getCookie('battle'),
+              loadIni: function(key,def_val){
+                return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU",name+"/settings.ini",this.login,key,def_val)||def_val;
+              },
+              saveIni: function(key,val){
+                external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU",name+"/settings.ini",this.login,key,val);
+              },
+              loadFile: function(filename) {
+                var s = external.readFile(combats_plugins_manager.security_id,'Combats.RU',name+'/'+filename);
+                while (s && !s.slice(-1).charCodeAt(0)) {
+                  s = s.slice(0,-1);
+                }
+                return s?s:'';
+              },
+              saveFile: function(filename, content) {
+                external.writeFile(combats_plugins_manager.security_id,'Combats.RU',name+'/'+filename,content);
+              }
+            };
+          }
+        }
+        throw new Error('Неверный идентификатор плагина "'+plugin+'"');
+      },
       getMainFrame: function() {
         return top.frames[3]; // пока что так
       },
@@ -208,7 +234,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
 
         var errCount=0;
-        this.plugins_list['combats_plugins_manager']=this;
+        this.plugins_list['.']=this;
         for(i=0;i<combats_plugins.length;i++) {
           s = combats_plugins[i].replace(/^\s*(.*?)\s*(?:[#;].*)?$/,'$1');
           if (s) {
