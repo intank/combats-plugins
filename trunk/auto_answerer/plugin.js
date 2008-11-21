@@ -25,7 +25,7 @@
       return [
         { name: "Активен", value: this.active },
         { name: "Стандартный ответ", value: this.standardResponse, type:"textarea"},
-        { name: "Стандартный запрос", value: this.standardQuery},
+        { name: "Расширенный запрос", value: this.standardQuery},
         { name: "Расширенный ответ", value: this.autoResponse, type:"textarea"},
         { name: "Тайм-аут беседы (с)", value: this.conversation_timeout },
         { name: "Тайм-аут отсутствия (с)", value: this.afk_timeout },
@@ -121,7 +121,7 @@
         if (!match && !this.ignore_remote)
           match = mess.match(this.testRemoteRegExp);
         
-        if (match && /*match[1]!=top.mylogin &&*/ !match[1].match(/^klan(?:-\d)?$/)) {
+        if (match && match[1]!=top.mylogin && !match[1].match(/^klan(?:-\d)?$/)) {
           var ok = false;
 
           var charlist = match[2].toLocaleUpperCase().split(/\s*,\s*/);
@@ -137,9 +137,9 @@
           if (ok) {
             if (afk) {
               ok=false;
-              match[1] = match[1].toUpperCase();
+              match[3] = match[3].toUpperCase();
               for(var k=0; k<this.arrStandardQuery.length;k++) {
-                if (match[1].indexOf(this.arrStandardQuery[k])>=0) {
+                if (match[3].indexOf(this.arrStandardQuery[k])>=0) {
                   ok=true;
                   break;
                 }
