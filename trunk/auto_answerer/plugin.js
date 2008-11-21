@@ -7,10 +7,12 @@
     standardResponse: '',
     standardQuery: '',
     autoResponse: '',
-    testRegExp: /<font class="date">[0-9\:]+<\/font> \[<SPAN>([^<]+)<\/SPAN>\] <font color=.*?>(?:private|to) \[\s*(.*?)\s*\] (.*?)<\/font>/,
+    testLocalRegExp: /<font class="date">[0-9\:]+<\/font> \[<SPAN>([^<]+)<\/SPAN>\] <font color=.*?>(?:private|to) \[\s*(.*?)\s*\] (.*?)<\/font>/,
+    testRemoteRegExp: /<FONT style="background-color:#E0E0E0"><font class="date">[0-9\:]+<\/font>! \[<SPAN>([^<]+)<\/SPAN>\] (?:private|to) \[\s*(.*?)\s*\] (.*?)<\/FONT>/,
     conversation_timeout: 180, //3 минуты защиты от флуда
     afk_timeout: 120, // 2 минуты
     ignore_multi: false,
+    ignore_remote: true,
     arrStandardQuery: [],
     skipNames: {},
     names: [],
@@ -27,7 +29,8 @@
         { name: "Расширенный ответ", value: this.autoResponse, type:"textarea"},
         { name: "Тайм-аут беседы (с)", value: this.conversation_timeout },
         { name: "Тайм-аут отсутствия (с)", value: this.afk_timeout },
-        { name: "Игнорировать групповые сообщения", value: this.ignore_multi }
+        { name: "Игнорировать групповые сообщения", value: this.ignore_multi },
+        { name: "Игнорировать сообщения из других городов", value: this.ignore_remote }
       ];
     },
     setProperties: function(a) {
@@ -38,13 +41,15 @@
       this.conversation_timeout = a[4].value;
       this.afk_timeout = a[5].value;
       this.ignore_multi = a[6].value;
+      this.ignore_remote = a[7].value;
       
       this.save('standardResponse',this.enQuoteText(this.standardResponse));
       this.save('standardQuery',this.standardQuery);
       this.save('autoResponse',this.enQuoteText(this.autoResponse));
       this.save('conversation_timeout',this.conversation_timeout);
       this.save('afk_timeout',this.afk_timeout);
-      this.save('ignore_multi',this.ignore_multi);
+      this.save('ignore_multi',this.ignore_multi.toString());
+      this.save('ignore_remote',this.ignore_remote.toString());
       
       this.arrStandardQuery = this.standardQuery.toUpperCase().replace(/(?:^\s+|\s+$)/g,'').split(/\s*[,;]\s*/);
       if (this.arrStandardQuery.length==1 && this.arrStandardQuery[0]=='')
@@ -76,6 +81,7 @@
       this.conversation_timeout = parseInt(this.load('conversation_timeout','180'));
       this.afk_timeout = parseInt(this.load('afk_timeout','120'));
       this.ignore_multi = (this.load('ignore_multi','false')=='true');
+      this.ignore_remote = (this.load('ignore_remote','true')!='false');
       combats_plugins_manager.attachEvent(
         'onmessage',
         combats_plugins_manager.get_binded_method(this,this.new_message));
@@ -111,9 +117,11 @@
       var mylogin = top.mylogin.toLocaleUpperCase();
       for(var i=0; i<messages.length; i++) {
         var mess = messages[i];
-        var match = mess.match(this.testRegExp);
+        var match = mess.match(this.testLocalRegExp);
+        if (!match && !this.ignore_remote)
+          match = mess.match(this.testRemoteRegExp);
         
-        if (match && match[1]!=top.mylogin && !match[1].match(/^klan(?:-\d)?$/)) {
+        if (match && /*match[1]!=top.mylogin &&*/ !match[1].match(/^klan(?:-\d)?$/)) {
           var ok = false;
 
           var charlist = match[2].toLocaleUpperCase().split(/\s*,\s*/);
@@ -129,9 +137,9 @@
           if (ok) {
             if (afk) {
               ok=false;
-              match[3] = match[3].toUpperCase();
+              match[1] = match[1].toUpperCase();
               for(var k=0; k<this.arrStandardQuery.length;k++) {
-                if (match[3].indexOf(this.arrStandardQuery[k])>=0) {
+                if (match[1].indexOf(this.arrStandardQuery[k])>=0) {
                   ok=true;
                   break;
                 }
