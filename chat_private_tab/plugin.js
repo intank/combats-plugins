@@ -99,6 +99,7 @@
       this.menuItem.innerText = 'Приват с "'+top.Chat.Self.oCtxMenu.sLogin+'"';
     },
     makeTabsBetter: function() {
+      if (this.tabsMadeBetter) return;
       var tabsDiv = top.Chat.Self.oTab.oLayer.firstChild;
       tabsDiv.style.overflowX='hidden';
       tabsDiv.style.left='0px';
