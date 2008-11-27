@@ -1,15 +1,17 @@
 (function() {
   return {
+    extendedModeVariants: 10, // количество фильтров для расширенного режима
     extendedMode: false,
     standardResponse: '',
     extendedQuery: '',
     extendedResponse: '',
     extendedQuery_array: [],
     extendedResponse_array: [],
+    arrExtendedQuery_array: [],
     testLocalRegExp: /<font class="date">[0-9\:]+<\/font> \[<SPAN>([^<]+)<\/SPAN>\] <font color=.*?>(?:private|to) \[\s*(.*?)\s*\] (.*?)<\/font>/,
     testRemoteRegExp: /<FONT style="background-color:#E0E0E0"><font class="date">[0-9\:]+<\/font>! \[<SPAN>([^<]+)<\/SPAN>\] (?:private|to) \[\s*(.*?)\s*\] (.*?)<\/FONT>/,
     conversation_timeout: 180, //3 минуты защиты от флуда
-    afk_timeout: 120, // 2 минуты
+    afk_timeout: 120, // 2 минуты на "отошёл"
     ignore_multi: false,
     ignore_remote: true,
     arrExtendedQuery: [],
@@ -33,7 +35,7 @@
         { name: "Игнорировать сообщения из других городов", value: this.ignore_remote }
       ];
       if (this.extendedMode) {
-        for (var i=0; i<10; i++) {
+        for (var i=0; i<this.extendedModeVariants; i++) {
           params.push( { name: "Расширенный запрос "+(i+1), value: this.extendedQuery_array[i] || '' } );
           params.push( { name: "Расширенный ответ "+(i+1), value: this.extendedResponse_array[i] || '', type:"textarea" } );
         }
@@ -51,7 +53,7 @@
       this.ignore_remote = a[8].value;
 
       if (this.extendedMode) {
-        for (var i=0; i<10; i++) {
+        for (var i=0; i<this.extendedModeVariants; i++) {
           this.extendedQuery_array[i] = a[9+i*2].value;
           this.extendedResponse_array[i] = a[10+i*2].value;
           this.save('standardQuery'+i,this.extendedQuery_array[i]);
@@ -67,7 +69,7 @@
       this.save('afk_timeout',this.afk_timeout);
       this.save('ignore_multi',this.ignore_multi.toString());
       this.save('ignore_remote',this.ignore_remote.toString());
-      for (var i=0; i<10; i++) {
+      for (var i=0; i<this.extendedModeVariants; i++) {
         this.save('standardQuery'+i,this.extendedQuery_array[i]);
         this.save('autoResponse'+i,this.enQuoteText(this.extendedResponse_array[i]));
       }
@@ -76,7 +78,7 @@
       if (this.arrExtendedQuery.length==1 && this.arrExtendedQuery[0]=='')
         this.arrExtendedQuery = [];
       this.arrExtendedQuery_array = [];
-      for (var i=0; i<10; i++) {
+      for (var i=0; i<this.extendedModeVariants; i++) {
         this.arrExtendedQuery_array[i] = this.extendedQuery_array[i].toUpperCase().replace(/(?:^\s+|\s+$)/g,'').split(/\s*[,;]\s*/);
         if (this.arrExtendedQuery_array[i].length==1 && this.arrExtendedQuery_array[i][0]=='')
           this.arrExtendedQuery_array[i] = [];
@@ -106,7 +108,7 @@
       this.extendedQuery = this.load('standardQuery','info');
       this.extendedResponse = this.deQuoteText(this.load('autoResponse','отсутствую (автоответ)'));
 
-      for (var i=0; i<10; i++) {
+      for (var i=0; i<this.extendedModeVariants; i++) {
         this.extendedQuery_array[i] = this.load('standardQuery'+i,'');
         this.extendedResponse_array[i] = this.deQuoteText(this.load('autoResponse'+i,''));
       }
@@ -175,7 +177,7 @@
               {
                 ok = false;
                 if (this.extendedMode) {
-                  for(var k=0; k<10; k++) {
+                  for(var k=0; k<this.extendedModeVariants; k++) {
                     if (this.check_extendedQuery(match[3], match[1], { query: this.arrExtendedQuery_array[k], response: this.extendedResponse_array[k] })) {
                       ok = true;
                       break;
