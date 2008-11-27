@@ -187,7 +187,7 @@
                     }
                   }
                 }
-                if (!ok && !(match[1] in this.skipNames)) {
+                if (this.useStandardResponse && !ok && !(match[1] in this.skipNames)) {
                   this.send_response(match[1], this.standardResponse);
                 }
               }
