@@ -81,8 +81,11 @@ function getPluginGfg() {
     document.all["props"].innerHTML = "";
     return;
   }
+  props = null;
   if ("getProperties" in plugin) {
     props = plugin.getProperties();
+  }
+  if (props!=null) {
     var s;
     if (typeof(props)!='object') {
       s = props;
