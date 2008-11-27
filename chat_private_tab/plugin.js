@@ -1,9 +1,19 @@
 (function(){
 
   var plugin_chat_private_tab = {
+    tabsMadeBetter: false,
     filters: {},
     toString: function() {
       return "Отдельный приватный чат с игроками";
+    },
+    getProperties: function() {
+      if (this.tabsMadeBetter) {
+        return null;
+      } else {
+        return [
+          { name:'Расширить пространство для вкладок чата', value:this.makeTabsBetter }
+        ];
+      }
     },
     removePrivateTab: function(oTab, login) {
       if (!top.confirm('Закрыть вкладку привата с "'+login+'"?'))
@@ -87,6 +97,26 @@
       }
       this.menuItem.onclick = combats_plugins_manager.get_binded_method(this,this.addPrivateTab,top.Chat.Self.oCtxMenu.sLogin);
       this.menuItem.innerText = 'Приват с "'+top.Chat.Self.oCtxMenu.sLogin+'"';
+    },
+    makeTabsBetter: function() {
+      var tabsDiv = top.Chat.Self.oTab.oLayer.firstChild;
+      tabsDiv.style.overflowX='hidden';
+      tabsDiv.style.left='0px';
+      tabsDiv.style.right='0px';
+      tabsDiv.align='left';
+      var button = tabsDiv.document.createElement('<button style="width:15px; height:15px; position:absolute; right: 20px; top:5px; padding:0; margin:0; font-size: 6pt">')
+      button.innerHTML = '&lt;';
+      button.ondblclick = button.onclick = function() {
+        top.Chat.Self.oTab.oLayer.firstChild.scrollLeft += 150;
+      }
+      top.Chat.Self.oTab.oLayer.parentNode.insertBefore(button,top.Chat.Self.oTab.oLayer.nextSibling);
+      var button = tabsDiv.document.createElement('<button style="width:15px; height:15px; position:absolute; right: 5px; top:5px; padding:0; margin:0; font-size: 6pt">')
+      button.innerHTML = '&gt;';
+      button.ondblclick = button.onclick = function() {
+        top.Chat.Self.oTab.oLayer.firstChild.scrollLeft -= 150;
+      }
+      top.Chat.Self.oTab.oLayer.parentNode.insertBefore(button,top.Chat.Self.oTab.oLayer.nextSibling);
+      this.tabsMadeBetter = true;
     },
     Init: function() {
       top.combats_plugins_manager.attachEvent('onmessage',
