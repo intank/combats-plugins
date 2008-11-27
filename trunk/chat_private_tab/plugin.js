@@ -6,6 +6,8 @@
       return "Отдельный приватный чат с игроками";
     },
     removePrivateTab: function(oTab, login) {
+      if (!top.confirm('Закрыть вкладку привата с "'+login+'"?'))
+        return;
       top.Chat.Self.oTab.SelectTab(top.Chat.Self.oTab.arrTabs.chat);
       oTab.Hide();
       for(var i in top.Chat.Self.oTab.arrTabs)
@@ -21,8 +23,8 @@
       if (login in this.filters)
         return;
       top.Chat.Self.CtxMenuHide();
-      var oTab = top.Chat.Self.oTab.arrTabs['private '+login] = top.Chat.Self.oTab.AddTab( "private "+login, login );
-      oTab.ondblclick = top.combats_plugins_manager.get_binded_method(
+      var oTab = top.Chat.Self.oTab.arrTabs['private '+login] = top.Chat.Self.oTab.AddTab( "private "+login, login+'&nbsp;<img src="http://img.combats.com/i/clear.gif" style="cursor:pointer">' );
+      oTab.firstChild.lastChild.onclick = oTab.ondblclick = top.combats_plugins_manager.get_binded_method(
         this, this.removePrivateTab, oTab, login);
       var filter = this.filters[login] = new RegExp('\\[<SPAN class=p_from>'+login+'<\\/SPAN>\]|<SPAN class=p title=.*?>'+login+'<\\/SPAN>');
 
@@ -65,7 +67,9 @@
         msg = msg.previousSibling;
       }
       for (var login in privateMessages) {
-        var oFrame = top.Chat.Self.oTab.arrTabs['private '+login].Frame();
+        var oTab = top.Chat.Self.oTab.arrTabs['private '+login];
+        oTab.className = 'TabTextM';
+        var oFrame = oTab.Frame();
         while (privateMessages[login].length>0) {
           var msg = privateMessages[login].pop();
           var newElement = oFrame.insertBefore(msg.cloneNode(true), null);
