@@ -2,6 +2,7 @@
   return {
     extendedModeVariants: 10, // количество фильтров для расширенного режима
     extendedMode: false,
+    useStandardResponse: true,
     standardResponse: '',
     extendedQuery: '',
     extendedResponse: '',
@@ -26,6 +27,7 @@
       var params = [
         { name: "Активен", value: this.active },
         { name: "Расширенный режим", value: this.extendedMode },
+        { name: "Использовать стандартный ответ", value: this.useStandardResponse },
         { name: "Стандартный ответ", value: this.standardResponse, type:"textarea"},
         { name: "Расширенный запрос", value: this.extendedQuery},
         { name: "Расширенный ответ", value: this.extendedResponse, type:"textarea"},
@@ -44,18 +46,19 @@
     },
     setProperties: function(a) {
       this.active = a[0].value;
-      this.standardResponse = a[2].value;
-      this.extendedQuery = a[3].value;
-      this.extendedResponse = a[4].value;
-      this.conversation_timeout = a[5].value;
-      this.afk_timeout = a[6].value;
-      this.ignore_multi = a[7].value;
-      this.ignore_remote = a[8].value;
+      this.useStandardResponse = a[2].value;
+      this.standardResponse = a[3].value;
+      this.extendedQuery = a[4].value;
+      this.extendedResponse = a[5].value;
+      this.conversation_timeout = a[6].value;
+      this.afk_timeout = a[7].value;
+      this.ignore_multi = a[8].value;
+      this.ignore_remote = a[9].value;
 
       if (this.extendedMode) {
         for (var i=0; i<this.extendedModeVariants; i++) {
-          this.extendedQuery_array[i] = a[9+i*2].value;
-          this.extendedResponse_array[i] = a[10+i*2].value;
+          this.extendedQuery_array[i] = a[10+i*2].value;
+          this.extendedResponse_array[i] = a[11+i*2].value;
           this.save('standardQuery'+i,this.extendedQuery_array[i]);
           this.save('autoResponse'+i,this.enQuoteText(this.extendedResponse_array[i]));
         }
@@ -173,19 +176,19 @@
           if (ok) {
             if (afk) {
               match[3] = match[3].toUpperCase();
-              if (!this.check_extendedQuery(match[3], match[1], { query: this.arrExtendedQuery, response: this.extendedResponse }))
+              if (!this.check_extendedQuery(match[3], match[1], this.arrExtendedQuery, this.extendedResponse))
               {
                 ok = false;
                 if (this.extendedMode) {
                   for(var k=0; k<this.extendedModeVariants; k++) {
-                    if (this.check_extendedQuery(match[3], match[1], { query: this.arrExtendedQuery_array[k], response: this.extendedResponse_array[k] })) {
+                    if (this.check_extendedQuery(match[3], match[1], this.arrExtendedQuery_array[k], this.extendedResponse_array[k])) {
                       ok = true;
                       break;
                     }
                   }
                 }
                 if (!ok && !(match[1] in this.skipNames)) {
-                  this.names.push({private:match[1],message:this.standardResponse});
+                  this.send_response(match[1], this.standardResponse);
                 }
               }
             }
@@ -198,18 +201,19 @@
         this.sendAutoResponse();
       }
     },
-    check_extendedQuery: function(phrase, name, params) {
-      var ok = false;
-      for(var k=0; k<params.query.length; k++) {
-        if (phrase.indexOf(params.query[k])>=0) {
-          ok=true;
-          var echo = params.response.split(/\s*(\n|\r)+\s*/);
-          for(var k=0; k<echo.length; k++)
-            this.names.push({private:name,message:echo[k]});
-          break;
+    check_extendedQuery: function(phrase, name, query, response) {
+      for(var k=0; k<query.length; k++) {
+        if (phrase.indexOf(query[k])>=0) {
+          this.send_response(name, response);
+          return true;
         }
       }
-      return ok;
+      return false;
+    },
+    send_response: function(name, response) {
+      var echo = response.split(/\s*(\n|\r)+\s*/);
+      for(var k=0; k<echo.length; k++)
+        this.names.push({private:name,message:echo[k]});
     }
   }.Init();
 })()
