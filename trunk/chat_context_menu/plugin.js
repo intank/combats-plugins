@@ -1,5 +1,5 @@
 (function(){
-  var chat_context_menu = {
+  return {
     original_CtxMenu: top.Chat.Self.CtxMenu,
     toString: function() {
       return 'Контекстное меню бойца';
@@ -17,9 +17,7 @@
     },
     Init: function() {
       top.Chat.Self.CtxMenu = combats_plugins_manager.get_binded_method(this, this.CtxMenu);
+      return this;
     }
-  };
-
-  chat_context_menu.Init();
-  return chat_context_menu;
+  }.Init();
 })()
