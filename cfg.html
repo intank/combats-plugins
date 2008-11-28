@@ -85,12 +85,15 @@ function getPluginGfg() {
   if ("getProperties" in plugin) {
     props = plugin.getProperties();
   }
+  var s = '';
+  if (plugin_index!='.') {
+    var s = '<a href="http://code.google.com/p/combats-plugins/wiki/'+plugin_index+'" target=_blank title="Возможно, не все плагины имеют документацию. Будьте снисходительны.">Документация</a>';
+  }
   if (props!=null) {
-    var s;
     if (typeof(props)!='object') {
-      s = props;
+      s += props;
     } else {
-      s='<form onsubmit="return false"><table style="width:100%; overflow:scroll; white-space:normal;"><colgroup><col/><col style="width:66%"/></colgroup>';
+      s += '<form onsubmit="return false"><table style="width:100%; overflow:scroll; white-space:normal;"><colgroup><col/><col style="width:66%"/></colgroup>';
       for(var i=0; i<props.length; i++) {
         if (is_function(props[i].value)) {
           s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\">";
@@ -136,7 +139,7 @@ function getPluginGfg() {
     document.all["props"].innerHTML = s;
   } else {
     props = null;
-    document.all["props"].innerHTML = "<br><i>Плагин не имеет настраиваемых параметров</i>";
+    document.all["props"].innerHTML = s+"<br><i>Плагин не имеет настраиваемых параметров</i>";
   }
   if (("disable" in plugin) && !parent.combats_plugins_manager.plugins_disabled[plugin_index]) {
     document.all["props"].innerHTML = "<br><input type=\"button\" value=\"Отключить\" onclick=\"disablePlugin("+plugin_index+")\"><br>"+document.all["props"].innerHTML;
