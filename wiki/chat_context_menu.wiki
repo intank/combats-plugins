@@ -16,8 +16,13 @@
         this.menuItem.className = 'ChatCtxMenu';
         this.menuItem.href = 'javascript:void(0)';
       }
-      this.menuItem.onclick = combats_plugins_manager.get_binded_method(this,this.addPrivateTab,top.Chat.Self.oCtxMenu.sLogin);
+      this.menuItem.onclick = combats_plugins_manager.get_binded_method(this,this.someAction,top.Chat.Self.oCtxMenu.sLogin);
       this.menuItem.innerText = 'Некоторое действие с "'+top.Chat.Self.oCtxMenu.sLogin+'"';
+    },
+...
+    someAction: function(login) {
+      top.Chat.Self.CtxMenuHide(); // скрыть меню после клика
+      alert(login);
     },
 ...
 }}}
