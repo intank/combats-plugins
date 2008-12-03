@@ -1,5 +1,6 @@
 #summary Автоответчик. Отправка определённых фраз на входящие сообщения
 #labels Phase-Deploy
+#sidebar PluginsListNavigation
 
 = Введение =
 
