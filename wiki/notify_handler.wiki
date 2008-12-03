@@ -1,5 +1,6 @@
 #summary Уведомление в чат о приближающихся событиях.
 #labels Phase-Implementation
+#sidebar PluginsListNavigation
 
 Плагин реализует следующие функции:
  * add_notification(group, name, estimation, action) - добавляет уведомление с заголовком *name* в группу *group*, которое удалится через *estimation* минут. Параметр *action* пока не несёт нагрузки.
