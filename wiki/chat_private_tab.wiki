@@ -1,5 +1,6 @@
 #summary Создание отдельной закладки привата для любого собеседника
 #labels Phase-Deploy
+#sidebar PluginsListNavigation
 
 = Введение =
 
