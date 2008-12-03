@@ -1,4 +1,5 @@
 #summary "Простой лекарь", автоматическое лечение, автодок.
+#sidebar PluginsListNavigation
 
 = Введение =
 
