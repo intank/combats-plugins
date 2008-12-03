@@ -44,10 +44,21 @@
             'selected': this.oppositeAlign
           } 
         },
+        { name:"Разрешать самолечение с уровня", value:this.minLevel, style:'width: 3em' },
         { name:"Доверять безадресным цепям", value:this.allowNoTarget },
         { name:"Чёрный список", value:(this.load('BlackList','')||'').replace(/[;,\n\r]+/g,'\n'), type: 'textarea' },
         { name:"Реагировать на неполные системки", value:!this.fullSysMessage },
-        { name:"Вести журнал", value:this.enableLog }
+        { name:"Вести журнал", value:this.enableLog },
+        { name:"Автоответы", 
+          value: (function(messages){
+            var result = [];
+            for(var msg in messages) {
+              result.push(msg+'='+messages[msg]);
+            }
+            return result.join("\n");
+          })(this.messages),
+          type:'textarea'
+        }
       ];
     },
     load: function(key,def_val){
@@ -59,27 +70,27 @@
     setProperties: function(a) {
       this.Active = a[0].value;
       this.oppositeAlign=a[1].value.selected;
-      this.allowNoTarget=a[2].value;
       this.save('oppositeAlign',this.oppositeAlign);
-      this.save('BlackList',a[3].value.split(/[\n\r;,]+/).sort(function(a,b){return a.toLocaleUpperCase()>b.toLocaleUpperCase()?1:-1;}).join(';'));
-      this.fullSysMessage = !a[4].value;
+      this.minLevel = parseFloat(a[2].value) || 8;
+      this.save('minLevel',this.minLevel.toString());
+      this.allowNoTarget=a[3].value;
+      this.save('allowNoTarget',this.allowNoTarget.toString());
+      this.save('BlackList',a[4].value.split(/[\n\r;,]+/).sort(function(a,b){return a.toLocaleUpperCase()>b.toLocaleUpperCase()?1:-1;}).join(';'));
+      this.fullSysMessage = !a[5].value;
       this.save('fullSysMessage',this.fullSysMessage.toString());
-      this.enableLog = a[5].value;
+      this.enableLog = a[6].value;
       this.save('enableLog',this.enableLog.toString());
       this.loadBlackList();
 
-      this.save('message.checking',   this.messages['checking']);
-      this.save('message.busy',       this.messages['busy']);
-      this.save('message.inprogress', this.messages['inprogress']);
-      this.save('message.waiting',    this.messages['waiting']);
-      this.save('message.blacklisted',this.messages['blacklisted']);
-      this.save('message.noresult',   this.messages['noresult']);
-      this.save('message.error',      this.messages['error']);
-      this.save('message.lost',       this.messages['lost']);
-      this.save('message.lowlevel',   this.messages['lowlevel']);
-      this.save('message.wrongalign', this.messages['wrongalign']);
-      this.save('message.chaos',      this.messages['chaos']);
-      this.save('message.trading',    this.messages['trading']);
+      var messages = a[7].value.split(/\s*[\n\r]+\s*/);
+      for(var i in messages) {
+        var match=messages[i].match(/^(.*?)=(.*)$/);
+        if (match && (match[1] in this.messages))
+          this.messages[match[1]] = match[2];
+      }
+      for(var msg in this.messages) {
+        this.save('message.'+msg,   this.messages[msg]);
+      }
     },
     addLog: function(msg) {
       if (!this.enableLog)
@@ -388,6 +399,8 @@ if (this['debugger']) debugger;
       top.combats_plugins_manager.attachEvent('onmessage',
         top.combats_plugins_manager.get_binded_method(this,this.onmessage));
       this.oppositeAlign = this.load('oppositeAlign','0');
+      this.minLevel = parseFloat(this.load('minLevel', '9')) || 9;
+
       this.fullSysMessage = this.load('fullSysMessage','true').toLowerCase()=='true';
       this.enableLog = this.load('enableLog','true').toLowerCase()=='true';
 
