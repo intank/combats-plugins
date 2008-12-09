@@ -14,6 +14,7 @@
       'chaos': 'Я не совершаю сделок с хаосниками :nono:',               // связываться с хаосниками себе дороже
       'trading': 'Я сейчас в передачах. Освобожусь - кастану, ожидайте'  // открыт торгователь, как закроется - кастанётся
     },
+    successfullCastMessage: "",
     enableLog: true,
     DateStr: '',
     minLevel: 9, // минимальный левел для самолечения
@@ -58,7 +59,8 @@
             return result.join("\n");
           })(this.messages),
           type:'textarea'
-        }
+        },
+        { name:"Сообщение удачного каста", value:this.successfullCastMessage, style:"width:100%" }
       ];
     },
     load: function(key,def_val){
@@ -89,8 +91,11 @@
           this.messages[match[1]] = match[2];
       }
       for(var msg in this.messages) {
-        this.save('message.'+msg,   this.messages[msg]);
+        this.save('message.'+msg, this.messages[msg]);
       }
+
+      this.successfullCastMessage = a[8].value;
+      this.save('successfullCastMessage',this.successfullCastMessage);
     },
     addLog: function(msg) {
       if (!this.enableLog)
@@ -299,6 +304,9 @@ if (this['debugger']) debugger;
             this.sendAutoResponse('private ['+s+'] '+castResult+' (автоответ)');
             
             if (castResult.match(/(?:".*?" исцелен от травм|Вы присоединились к цепи исцеления для ".*?")/)) {
+              if (this.successfullCastMessage) {
+                this.sendAutoResponse('private ['+s+'] '+this.successfullCastMessage);
+              }
               this.lastCast = new Date();
               this.lastTarget = this.Healing.patient;
               if (this.addPersToVIP(this.Healing.patient)) {
@@ -404,18 +412,11 @@ if (this['debugger']) debugger;
       this.fullSysMessage = this.load('fullSysMessage','true').toLowerCase()=='true';
       this.enableLog = this.load('enableLog','true').toLowerCase()=='true';
 
-      this.messages['checking']    = this.load('message.checking',   this.messages['checking']);
-      this.messages['busy']        = this.load('message.busy',       this.messages['busy']);
-      this.messages['inprogress']  = this.load('message.inprogress', this.messages['inprogress']);
-      this.messages['waiting']     = this.load('message.waiting',    this.messages['waiting']);
-      this.messages['blacklisted'] = this.load('message.blacklisted',this.messages['blacklisted']);
-      this.messages['noresult']    = this.load('message.noresult',   this.messages['noresult']);
-      this.messages['error']       = this.load('message.error',      this.messages['error']);
-      this.messages['lost']        = this.load('message.lost',       this.messages['lost']);
-      this.messages['lowlevel']    = this.load('message.lowlevel',   this.messages['lowlevel']);
-      this.messages['wrongalign']  = this.load('message.wrongalign', this.messages['wrongalign']);
-      this.messages['chaos']       = this.load('message.chaos',      this.messages['chaos']);
-      this.messages['trading']     = this.load('message.trading',    this.messages['trading']);
+      for(var msg in this.messages) {
+        this.messages[msg]    = this.load('message.'+msg, this.messages[msg]);
+      }
+
+      this.successfullCastMessage = this.load('successfullCastMessage','');
 
       var d = new Date();
       this.DateStr = d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
