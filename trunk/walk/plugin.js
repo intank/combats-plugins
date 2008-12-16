@@ -1,26 +1,5 @@
 (function() {
-  plugin_walk = function() {
-    this.Direction = 0;
-    this.en_click=false;
-    this.mat_click=false;
-    this.ignoreWall=false;
-    this.autoPilot=true;
-	this.autoAttack=false;
-    this.steptimer=null;
-    this.forced=false;
-	this.showUnits=true;
-	this.showObjects=true;
-	this.minHP = 95;
-	this.minMana = 95;
-	this.excludedObjects='';
-    this.skip_quest=false;
-    this.usedObjects=new Object();
-	this.sys_msg = '';
-	//this.Coordinates=new Array();
-    this.init();
-  }
-
-  plugin_walk.prototype = {
+  return {
     "toString": function() {
       return "Бродилка по пещере";
     },
@@ -33,7 +12,45 @@
       '1/1040_vk8345642089': { 
         priority: 3, 
         style: { backgroundColor: '#EF00EF' }, 
-        ids: { 
+// 9:57,34(д3),39,69
+        ids: {
+          57: {
+            priority: 5, 
+            title: '[11]',
+            style: { backgroundColor: '#800080' } 
+          },
+          12: {
+            priority: 5, 
+            title: '[11]',
+            style: { backgroundColor: '#800080' } 
+          },
+          28: {
+            priority: 5, 
+            title: '[11]',
+            style: { backgroundColor: '#800080' } 
+          },
+
+          72: {
+            priority: 4, 
+            title: '[10]',
+            style: { backgroundColor: '#A000A0' } 
+          },
+          42: {
+            priority: 4, 
+            title: '[10]',
+            style: { backgroundColor: '#A000A0' } 
+          },
+          26: {
+            priority: 4, 
+            title: '[10]',
+            style: { backgroundColor: '#A000A0' } 
+          },
+          67: {
+            priority: 4, 
+            title: '[10]',
+            style: { backgroundColor: '#A000A0' } 
+          },
+          
           33: {
             priority: 4, 
             title: ' (марка)',
@@ -80,9 +97,8 @@
       external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","walk\\walk.ini",top.getCookie('battle'),key,val);
     },
     "getProperties": function() {
-	
       return [
-        { name: "\"Опережающий\" таймер", value: this.forced },
+		{ name: "\"Опережающий\" таймер", value: this.forced },
 		{ name: "Отображать монстров на радаре", value: this.showUnits },
 		{ name: "Отображать объекты на радаре", value: this.showObjects },
 		{ name: "Минимум HP для автонападения", value: this.minHP},
@@ -92,19 +108,19 @@
     },
 
     "setProperties": function(a) {
-      this.forced=a[0].value;
-	  this.showUnits=a[1].value;
-	  this.showObjects=a[2].value;
-	  this.minHP=a[3].value;
-	  this.minMana=a[4].value;
-	  this.excludedObjects=a[5].value;
+	this.forced=a[0].value;
+	this.showUnits=a[1].value;
+	this.showObjects=a[2].value;
+	this.minHP=a[3].value;
+	this.minMana=a[4].value;
+	this.excludedObjects=a[5].value;
 
-	  this.save('forced',this.forced?"yes":"no");
-	  this.save('showUnits',this.showUnits?"yes":"no");
-	  this.save('showObjects',this.showObjects?"yes":"no");
-	  this.save('minHP',this.minHP);
-	  this.save('minMana',this.minMana);
-	  this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,";"));
+	this.save('forced',this.forced?"yes":"no");
+	this.save('showUnits',this.showUnits?"yes":"no");
+	this.save('showObjects',this.showObjects?"yes":"no");
+	this.save('minHP',this.minHP);
+	this.save('minMana',this.minMana);
+	this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,";"));
     },
 
     "setDirection": function(a) {
@@ -464,39 +480,56 @@
       }
     },
 
-    "init": function() {
-      top.combats_plugins_manager.attachEvent(
-        'mainframe.load',
-        top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
-      this.clearUsedObjects();
-	  /*
-	  if(t = external.readFile(top.combats_plugins_manager.security_id,"Combats.RU","walk\\coordinates.ini")){ //загрузка индексов координат
+    "Init": function() {
+	this.Direction = 0;
+	this.en_click=false;
+	this.mat_click=false;
+	this.ignoreWall=false;
+	this.autoPilot=true;
+	this.autoAttack=false;
+	this.steptimer=null;
+	this.forced=false;
+	this.showUnits=true;
+	this.showObjects=true;
+	this.minHP = 95;
+	this.minMana = 95;
+	this.excludedObjects='';
+	this.skip_quest=false;
+	this.usedObjects=new Object();
+	this.sys_msg = '';
+
+	top.combats_plugins_manager.attachEvent(
+          'mainframe.load',
+	  top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
+	this.clearUsedObjects();
+/*
+	this.Coordinates=new Array();
+	if(t = external.readFile(top.combats_plugins_manager.security_id,"Combats.RU","walk\\coordinates.ini")){ //загрузка индексов координат
 	  	s=t.split(/[\x0A\x0D]+/);
 	  	for(i in s){
 	  		top.Chat.am("3");
 	  		t=s[i].split(" ");
 	  		this.Coordinates[t[0]]={x:t[1],y:t[2]};
 	  	}
-	  }
-	  */
-	  this.forced=(this.load('forced','no')=='yes');
-	  this.showUnits=(this.load('showUnits','yes')=='yes');
-	  this.showObjects=(this.load('showObjects','yes')=='yes');
-	  this.minHP=parseInt(this.load('minHP','95'));
-	  this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
-	  if( /walkSettings=(\d+)/.test( document.cookie ) ){
+	}
+*/
+	this.forced=(this.load('forced','no')=='yes');
+	this.showUnits=(this.load('showUnits','yes')=='yes');
+	this.showObjects=(this.load('showObjects','yes')=='yes');
+	this.minHP=parseInt(this.load('minHP','95'));
+	this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
+	if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );
 		
 	  	this.en_click=((t & 8)>0);
 	  	this.mat_click=((t & 16)>0);
-      	this.ignoreWall=((t & 32)>0);
-      	this.autoPilot=((t & 64)>0);
-      	this.autoAttack=((t & 128)>0);
+		this.ignoreWall=((t & 32)>0);
+		this.autoPilot=((t & 64)>0);
+		this.autoAttack=((t & 128)>0);
 		
 		this.Direction=(t & 7);
-	  }
+	}
+	return this;
     }
-  };
-    
-  return new plugin_walk();
+  }.Init();
 })()
