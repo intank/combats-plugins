@@ -27,8 +27,11 @@
       this.adjustPanelWidth(true);
     },
     adjustPanelWidth: function(forced) {
-      if (forced || window.event.propertyName=='nWidth')
-        this.panel.style.width = ''+(top.document.body.offsetWidth-190-500)+'px';
+      if (forced || window.event.propertyName=='nWidth') {
+        var newWidth = (top.document.body.offsetWidth-190-500);
+        if (newWidth<40) newWidth=40;
+        this.panel.style.width = ''+newWidth+'px';
+      }
     },
     addButton: function(properties) {
       var button = top.document.createElement('BUTTON');
