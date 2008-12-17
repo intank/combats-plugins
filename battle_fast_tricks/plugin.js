@@ -1,5 +1,5 @@
 (function(){
-  var obj = {
+  return {
     ignoreDisabledMethod: true,
     shortcuts: {
       49: 'spirit_block25'
@@ -33,6 +33,7 @@
     },
     init: function() {
       top.document.onkeydown = top.combats_plugins_manager.get_binded_method(this,this.keydown);
+      return this;
     },
     keydown: function(e) {
       if (!top.Battle.bInBattle)
@@ -57,7 +58,5 @@
           top.Battle.oBattle.ApplyMethod(this.method.oMethod);
       }
     }
-  };
-  obj.init();
-  return obj;
+  }.init();
 })()

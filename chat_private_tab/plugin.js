@@ -1,18 +1,28 @@
 (function(){
-
-  var plugin_chat_private_tab = {
+  return {
     tabsMadeBetter: false,
     filters: {},
     toString: function() {
       return "Отдельный приватный чат с игроками";
     },
+    load: function(key,def_val){
+      return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","chat_private_tab\\settings.ini",top.getCookie('battle'),key,def_val);
+    },
+    save: function(key,val){
+      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","chat_private_tab\\settings.ini",top.getCookie('battle'),key,val);
+    },
     getProperties: function() {
-      if (this.tabsMadeBetter) {
-        return null;
-      } else {
-        return [
-          { name:'Расширить пространство для вкладок чата', value:this.makeTabsBetter }
-        ];
+      return [
+        { name:'Расширить пространство для вкладок чата', value:this.tabsMadeBetter }
+      ];
+    },
+    setProperties: function(a) {
+      if (this.tabsMadeBetter && !a[0].value) {
+        this.save('makeTabsBetter', 'false');
+        alert('Внешний вид чата будет восстановлен после обновления игрового окна');
+      } else if (!this.tabsMadeBetter && a[0].value) {
+        this.save('makeTabsBetter', 'true');
+        this.makeTabsBetter();
       }
     },
     removePrivateTab: function(oTab, login) {
@@ -124,8 +134,9 @@
         top.combats_plugins_manager.get_binded_method(this,this.onmessage));
       top.combats_plugins_manager.attachEvent('fighterContextMenu', 
         top.combats_plugins_manager.get_binded_method(this, this.handlerCtxMenu));
+      if (this.load('makeTabsBetter','false')=='true')
+        this.makeTabsBetter();
+      return this;
     }
-  }
-  plugin_chat_private_tab.Init();
-  return plugin_chat_private_tab;
+  }.Init();
 })()

@@ -93,16 +93,16 @@ function getPluginGfg() {
     if (typeof(props)!='object') {
       s += props;
     } else {
-      s += '<form onsubmit="return false"><table style="width:100%; overflow:scroll; white-space:normal;"><colgroup><col/><col style="width:66%"/></colgroup>';
+      s += '<form onsubmit="return false"><table style="width:100%; overflow:scroll; white-space:normal; table-layout:fixed"><colgroup><col/><col style="width:66%"/></colgroup>';
       for(var i=0; i<props.length; i++) {
         if (is_function(props[i].value)) {
           s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\">";
         } else {
           var style = '';
           if ('style' in props[i])
-            style = props[i].style;
+            style = props[i].style.replace(/"/g,'&quot;');
           if (typeof(props[i].value)=="boolean") {
-            s += '<tr><td colspan="2"><input type=checkbox style="'+style.replace(/"/g,'&quot;')+'"'+(props[i].value?' CHECKED':'')+' id="prop_'+i+'"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
+            s += '<tr><td colspan="2"><input type=checkbox style="'+style+'"'+(props[i].value?' CHECKED':'')+' id="prop_'+i+'"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
           } else if (typeof(props[i].value)=="object") {
             s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
             s += '<td><select id="prop_'+i+'">\n';
@@ -119,14 +119,16 @@ function getPluginGfg() {
                 if (props[i].type=="textarea") {
                   style = 'width:100%; height:7em; '+style;
                   s += '<tr><td colspan="2"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL><br/>';
-                  s += '<textarea style="'+style.replace(/"/g,'&quot;')+'" id="prop_'+i+'">'+props[i].value+"</textarea>";
+                  s += '<textarea style="'+style+'" id="prop_'+i+'">'+props[i].value+"</textarea>";
                 } else
                   throw new Exception();
               } else
                 throw new Exception();
             } catch(e) {
+              if (typeof(props[i].value)=="string")
+                style = "width:100%; "+style;
               s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
-              s += '<td><input type=text style="'+style.replace(/"/g,'&quot;')+'" value="'+props[i].value.toString().replace(/"/g,'&quot;')+'" id="prop_'+i+'">';
+              s += '<td><input type=text style="'+style+'" value="'+props[i].value.toString().replace(/"/g,'&quot;')+'" id="prop_'+i+'">';
             }
           }
         }
