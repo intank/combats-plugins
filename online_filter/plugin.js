@@ -1,13 +1,5 @@
 (function (){
-  var online_filter = function() {
-    this.minLevel = parseInt(this.load("minLevel", '8'));
-    this.injuried = this.load("injuried", 'false')=='false'?false:true;
-    this.claner = this.load("claner", 'false')=='false'?false:true;
-    this.filterButton = this.load("filterButton", 'true')=='true'?true:false;
-    this.filterButtonShowHide();
-  };
-
-  online_filter.prototype = {
+  return {
     minLevel: 8,
     injuried: false,
     claner: false,
@@ -92,16 +84,21 @@
       this.injuried=a[1].value;
       this.claner=a[2].value;
       this.filterButton=a[3].value;
-      this.save("minLevel",this.minLevel);
-      this.save("injuried",this.injuried?'true':'false');
-      this.save("claner",this.claner?'true':'false');
-      this.save("filterButton",'true');
+      this.save("minLevel",this.minLevel.toString());
+      this.save("injuried",this.injuried.toString());
+      this.save("claner",this.claner.toString());
+      this.save("filterButton",this.filterButton.toString());
 
       this.filterButtonShowHide();
       this.doFilter();
+    },
+    Init: function() {
+      this.minLevel = parseInt(this.load("minLevel", '8'));
+      this.injuried = this.load("injuried", 'false')=='false'?false:true;
+      this.claner = this.load("claner", 'false')=='false'?false:true;
+      this.filterButton = this.load("filterButton", 'true')=='true'?true:false;
+      this.filterButtonShowHide();
+      return this;
     }
-  };
-
-  var online_filter_object = new online_filter();
-  return online_filter_object;
+  }.Init();
 })()
