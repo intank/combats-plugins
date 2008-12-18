@@ -1,11 +1,12 @@
 #summary Перечень плагинов, имеющих описание.
 
- * [notify_handler]
- * [chat_context_menu]
- * [chat_private_tab]
  * [auto_answerer]
- * [simple_doc]
- * [flooder]
- * [chat_hilight]
+ * [chat_context_menu]
  * [chat_handler]
+ * [chat_hilight]
+ * [chat_private_tab]
+ * [fighter_notebook]
+ * [flooder]
+ * [notify_handler]
  * [top_tray] 
+ * [simple_doc]
