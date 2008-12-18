@@ -26,10 +26,12 @@
       }
       s = s || '';
       var matches = s.match(/(?=^|\n)(.*?)=(.*?)(?=$|\n)/gm);
-      for(var i=0; i<matches.length; i++) {
-        matches[i] = matches[i].match(/^(.*?)=(.*)$/);
-        if (matches[i]) {
-          this.fighterData[matches[i][1]]=matches[i][2];
+      if (matches) {
+        for(var i=0; i<matches.length; i++) {
+          matches[i] = matches[i].match(/^(.*?)=(.*)$/);
+          if (matches[i]) {
+            this.fighterData[matches[i][1]]=matches[i][2];
+          }
         }
       }
     },
