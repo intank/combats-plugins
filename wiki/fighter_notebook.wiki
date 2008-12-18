@@ -1,4 +1,6 @@
 #summary Записки о бойце.
+#labels Phase-Deploy
+#sidebar PluginsListNavigation
 
 = Введение =
 
