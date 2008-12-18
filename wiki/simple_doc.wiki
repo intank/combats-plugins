@@ -1,4 +1,5 @@
 #summary "Простой лекарь", автоматическое лечение, автодок.
+#labels Phase-Deploy
 #sidebar PluginsListNavigation
 
 = Введение =
