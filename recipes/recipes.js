@@ -455,7 +455,7 @@ function Analyze() {
             if (components[j].count<recipes[i].comp[k+1])
               s += '<font color=#FF3F00>'+components[j].name+'('+recipes[i].comp[k+1]+')</font>';
             else
-              s += components[j].name+'('+recipes[i].comp[k+1]+')';
+              s += '<img src="http://img.combats.com/i/items/'+components[j].id+'.gif" style="height:20px"/>&nbsp;'+components[j].name+'('+recipes[i].comp[k+1]+')';
             break;
           }
         }
