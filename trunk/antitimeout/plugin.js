@@ -192,6 +192,7 @@
 
 		top.combats_plugins_manager.attachEvent('mainframe.load',top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
 		this.onloadHandler();
+		return this;
 	  }
 	}.init();
 })()
