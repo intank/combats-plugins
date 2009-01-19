@@ -7,6 +7,7 @@
  * [chat_private_tab]
  * [fighter_notebook]
  * [flooder]
+ * [inventory_backup]
  * [notify_handler]
  * [top_tray] 
  * [simple_doc]
