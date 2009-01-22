@@ -16,10 +16,11 @@
         locations_list.sort();
         locations_list.selected = 0;
         return [
+          { name:"Запомнить переходы локации", value:this.savePathes },
+          { name:"Экспорт переходов в файл", value:this.exportPathes },
           { name:"Куда бежим:", value:locations_list },
           { name:"Побежали!", value:this.run_to_location },
-          { name:"Запомнить переходы локации", value:this.savePathes },
-          { name:"Экспорт переходов в файл", value:this.exportPathes }
+          { name:"Предпочитаемые локации", value:this.favorites.join('\n'), type:'textarea' }
         ];
       } else {
         return [
@@ -27,6 +28,11 @@
           { name:"Экспорт переходов в файл", value:this.exportPathes }
         ];
       }
+    },
+    setProperties: function(a) {
+      if (a.length!=5)
+        return;
+      this.favorites = a[2].value.split(/\s*[;,\n\r]+\s*/);
     },
     analyze_step: function(new_step, from, pathes) {
       if (!(from in this.steps))
