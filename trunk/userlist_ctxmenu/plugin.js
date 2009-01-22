@@ -1,6 +1,10 @@
 (function (){
-  var plugin_userlist_ctxmenu = function() {
-    top.frames['activeusers'].document.body.oncontextmenu = function(){
+  return {
+    toString: function() {
+      return "Контектсное меню в списке игроков";
+    },
+
+    ctxMenuHandler: function(){
       var eEvent = top.frames['activeusers'].event;
       if (eEvent.srcElement.nodeName!='A' || eEvent.srcElement.innerText=='') return;
       if (true || eEvent.ctrlKey) {
@@ -20,28 +24,24 @@
         
         oMenu.style.left = nLeft+'px';
         oMenu.style.top = nTop+'px';
-	oMenu.sTimer = Timer.Add( oMenu, function () {
+        oMenu.sTimer = Timer.Add( oMenu,
+	  function () {
 	    if( this.bMouseOver )
 		return;
 	    this.nTimeCount++;
 	    if( this.nTimeCount > 2 )
 		this.Hide( );
-          },
-          0.1
-        );
-	oMenu.nTimeCount = 0;
-	oMenu.bMouseOver = true;
-	eEvent.returnValue = false;
+	  }, 0.1);
+        oMenu.nTimeCount = 0;
+        oMenu.bMouseOver = true;
+        eEvent.returnValue = false;
         return false;
       }
-    }
-  };
+    },
 
-  plugin_userlist_ctxmenu.prototype = {
-    toString: function() {
-      return "Контектсное меню в списке игроков";
+    Init: function() {
+      top.frames['activeusers'].document.body.oncontextmenu = this.ctxMenuHandler;
+      return this;
     }
-  };
-
-  return new plugin_userlist_ctxmenu();
+  }.Init();
 })()
