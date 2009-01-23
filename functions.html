@@ -75,6 +75,27 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           return;
         this.loadPlugin(pluginName);
       },
+      "createWindow": function(title, width, height, cancelHandler) {
+        oWindow = /*this.oWindow ||*/ top.Window.New( { bNoResize: true } );
+        oPanel = {
+          oWindow: oWindow,
+          Class: this,
+          Cancel: function ( ) {
+            this.oWindow.Hide( );
+            if (cancelHandler)
+              cancelHandler();
+          },
+          SetStyle: function ( sStyle ) {
+            this.oWindow.SetStyle( sStyle );
+          }
+        };
+        oPanel.oWindow.SetTitle( title );
+        oPanel.oWindow.SetHook( oPanel, oPanel.Cancel );
+        oPanel.oWindow.SizeTo( width, height );
+        oPanel.oWindow.SetStyle('Neitral');
+        oPanel.oWindow.Align( "1/2", "1/2" );
+        return oPanel;
+      },
       "Configure": function() {
         var oConfig;
         if (!this.CfgDiv) {
@@ -82,28 +103,12 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           document.body.appendChild(this.CfgDiv);
           this.CfgDiv.contentWindow.document.write(external.readFile( this.security_id, "Combats.RU", "cfg.html"));
 
-	  this.oWindow = this.oWindow || top.Window.New( { bNoResize: true } );
-	  oConfig = this.oConfig = {
-		oWindow: this.oWindow,
-		Class: this,
-		Cancel: function PromptCancel( ) {
-		        this.oWindow.Hide( );
-		},
-		SetStyle: function ( sStyle ) {
-			debugger;
-		        this.oWindow.SetStyle( sStyle );
-		}
-	  };
+	  oConfig = this.oConfig = this.createWindow("Настройки", 640,480);
         } else {
        	  oConfig = this.oConfig;
         }
 	oConfig.oWindow.Insert( this.CfgDiv );
-	oConfig.oWindow.SetTitle( "Настройки" );
-	oConfig.oWindow.SetHook( oConfig, PromptCancel );
-	oConfig.oWindow.SizeTo( 640,480 );
 	oConfig.oWindow.Show( );
-        oConfig.oWindow.SetStyle('Neitral');
-	oConfig.oWindow.Align( "1/2", "1/2" );
 	this.CfgDiv.contentWindow.Init();
       },
 
@@ -153,28 +158,33 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
         return errCount;
       },
+
+      createConfigurationElement: function(name) {
+        return {
+          login: top.getCookie('battle'),
+          loadIni: function(key,def_val){
+            return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU",name+"/settings.ini",this.login,key,def_val)||def_val;
+          },
+          saveIni: function(key,val){
+            external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU",name+"/settings.ini",this.login,key,val);
+          },
+          loadFile: function(filename) {
+            var s = external.readFile(combats_plugins_manager.security_id,'Combats.RU',name+'/'+filename);
+            while (s && !s.slice(-1).charCodeAt(0)) {
+              s = s.slice(0,-1);
+            }
+            return s?s:'';
+          },
+          saveFile: function(filename, content) {
+            external.writeFile(combats_plugins_manager.security_id,'Combats.RU',name+'/'+filename,content);
+          }
+        };
+      },
+
       getConfigurationElement: function(plugin) {
         for(var name in this.plugins_list) {
           if (this.plugins_list[name]==plugin) {
-            return {
-              login: top.getCookie('battle'),
-              loadIni: function(key,def_val){
-                return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU",name+"/settings.ini",this.login,key,def_val)||def_val;
-              },
-              saveIni: function(key,val){
-                external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU",name+"/settings.ini",this.login,key,val);
-              },
-              loadFile: function(filename) {
-                var s = external.readFile(combats_plugins_manager.security_id,'Combats.RU',name+'/'+filename);
-                while (s && !s.slice(-1).charCodeAt(0)) {
-                  s = s.slice(0,-1);
-                }
-                return s?s:'';
-              },
-              saveFile: function(filename, content) {
-                external.writeFile(combats_plugins_manager.security_id,'Combats.RU',name+'/'+filename,content);
-              }
-            };
+	    return createConfigurationElement(name);
           }
         }
         throw new Error('Неверный идентификатор плагина "'+plugin+'"');
