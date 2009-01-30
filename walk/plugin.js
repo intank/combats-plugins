@@ -114,7 +114,8 @@
 		{ name: "Минимум HP для автонападения", value: this.minHP},
 		{ name: "Минимум маны для автонападения", value: this.minMana},
 		{ name: "Список исключенных <br>из автокликера объектов", value: this.excludedObjects, type:"textarea"},
-		{ name: "Предметы, которые не нужно поднимать", value: items.join("\n"), type:"textarea"}
+		{ name: "Предметы, которые не нужно поднимать", value: items.join("\n"), type:"textarea"},
+		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
 
@@ -141,6 +142,14 @@
 	this.save('minMana',this.minMana.toString());
 	this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,";"));
 	this.save('excludeItems',a[6].value.replace(/\s*[\n\r]+\s*/g,";"));
+    },
+
+    "clearLog": function() {
+      this.log = [];
+    },
+
+    "addLog": function(s) {
+      this.log.push(s);
     },
 
     "setDirection": function(a) {
@@ -466,7 +475,6 @@
         d.all['td_stop'].onclick = top.combats_plugins_manager.get_binded_method(this,this.stop_it);
         d.all['en_click'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
         d.all['mat_click'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
-//        d.all['ignoreWall'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
         d.all['autoPilot'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
         d.all['autoAttack'].onclick = top.combats_plugins_manager.get_binded_method(this,this.setCurrentSettings);
         d.all['showMap'].onclick = top.combats_plugins_manager.get_binded_method(this,this.doShowMap);
@@ -479,6 +487,7 @@
 
         this.doShowMap();
 
+        combats_plugins_manager.fireEvent('dungeon_walk.step',null);
         if (this.destination)
           this.makeStep();
         else if (this.autoPilot) {
@@ -495,16 +504,16 @@
               return;
             }
           }
+          var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
+          if (mtime<0)
+            mtime = 0;
+          if(!this.forced || this.steptimer==null || mtime==0) {
+            if (d.getElementById("m"+this.Direction) && (this.Direction!=1 || !("l2op1" in d.all) || d.all["l2op1"].childNodes.length>1 )){
+              this.StartStepTimer(this.do_step, mtime);
+	    }
+          }
         }
 
-        var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
-        if (mtime<0)
-          mtime = 0;
-        if(!this.forced || this.steptimer==null || mtime==0) {
-          if (d.getElementById("m"+this.Direction) && (this.Direction!=1 || !("l2op1" in d.all) || d.all["l2op1"].childNodes.length>1 )){
-            this.StartStepTimer(this.do_step, mtime);
-	  }
-        }
         d.parentWindow.attachEvent("onbeforeunload",top.combats_plugins_manager.get_binded_method(this,this.onunloadHandler));
       } catch (e) {
         e.Function = 'onLoadHandler';
@@ -512,8 +521,8 @@
       }
     },
 
-    
     getMapPosition: function(Map, arrMap) {
+      // this.addLog('getMapPosition');
       function search_map_row(start_row) {
         start_row = start_row || 0;
         var found = false;
@@ -558,56 +567,71 @@
             break;
           }
         }
-        if (found)
+        if (found) {
+          // this.addLog(''+(map_x+4)+', '+(map_y+4));
           return {x:map_x+4, y:map_y+4};
+        }
         map_y = search_map_row(map_y+1);
       }
+      // this.addLog('?, ?');
       return null;
     },
 
     "getCurrentFloor": function() {
+      // this.addLog('getCurrentFloor');
       try {
-        return top.frames[3].document.getElementsByTagName('table')[0].cells[1].innerHTML.replace(/^(?:^.*?\s)?(Этаж\s+\d+).*?\s*-.*$/,'$1');
+        var match = top.frames[3].document.getElementsByTagName('table')[0].cells[1].innerHTML.match(/(Этаж\s+\d+(?:\S*?)|^.+(?=\s*-.+?$))/,'$1');
+        return match ? match[1].replace(/^\s*(.*?)\s*$/,'$1') : '';
       } catch(e) {
       }
     },
-    
+
+    "updateMap": function(enforce) {
+      this.dungeonName = top.frames['activeusers'].document.getElementById('room').innerText.replace(/\s+\(\d+\)$/,'')
+      var mapFileName = 'walk\\'+this.dungeonName+'.js';
+      if (enforce || this.mapFileName!=mapFileName) {
+        // this.addLog('loading map file');
+        var s = external.readFile(
+          top.combats_plugins_manager.security_id,
+          "Combats.RU",
+          mapFileName) || '';
+        if (s) {
+          this.Map = eval('(function(){ return '+s+' })()');
+          this.mapFileName = mapFileName;
+        } else {
+          this.Map = null;
+        }
+      }
+    },
+
     "doShowMap": function() {
+      // this.addLog('doShowMap');
       if (this.mapTargetMenu)
         this.mapTargetMenu.style.display = 'none';
       var b = top.frames[3].document.getElementById('showMap');
       if (!b || b.checked) {
         this.setCurrentSettings();
         if (!this.mapPanel) {
-          this.mapPanel = combats_plugins_manager.createWindow('Карта', 320, 240, combats_plugins_manager.get_binded_method(this,this.doHideMap,true));
+          // this.addLog('creating panel');
+          this.mapPanel = combats_plugins_manager.createWindow('Карта', 480, 360, combats_plugins_manager.get_binded_method(this,this.doHideMap,true));
           var div = top.document.createElement('<div style="width:100%; height:100%; overflow: scroll;">');
           this.div = top.document.createElement('<div style="position: relative">');
           div.insertBefore( this.div, null );
           oPanel.oWindow.Insert( div );
         }
-// debugger;
-        var Map;
-        this.dungeonName = top.frames['activeusers'].document.getElementById('room').innerText.replace(/\s+\(\d+\)$/,'')
-        var mapFileName = 'walk\\'+this.dungeonName+'.js';
-        if (this.mapFileName!=mapFileName) {
-          var s = external.readFile(
-            top.combats_plugins_manager.security_id,
-            "Combats.RU",
-            mapFileName) || '';
-          if (s) {
-            this.Map = eval('(function(){ return '+s+' })()');
-            this.mapFileName = mapFileName;
-          } else {
-            this.Map = null;
-          }
-        }
+
         var floor = this.getCurrentFloor();
-        Map = this.Map ? this.Map[floor] : null;
+        var Map = this.Map ? this.Map[floor] : null;
+        if (!Map) {
+          this.updateMap(true);
+          Map = this.Map ? this.Map[floor] : null;
+        }
         while (this.div.firstChild)
           this.div.removeChild(this.div.firstChild);
         if (Map) {
-          this.div.style.width = ''+((Map.length-8)*15)+'px';
-          this.div.style.height = ''+((Map[0].length-8)*15)+'px';
+          // this.addLog('floor found');
+          this.div.style.width = ''+((Map[0].length-8)*15)+'px';
+          this.div.style.height = ''+((Map.length-8)*15)+'px';
           var selectMapTarget = combats_plugins_manager.get_binded_method(this,this.selectMapTarget);
           for(var i=4; i<Map.length-4; i++)
             for(var j=4; j<Map[i].length-4; j++) {
@@ -619,14 +643,18 @@
                 cell.mapY = i;
               }
             }
-          if (top.frames[3].arrMap[4][4].constructor == top.frames[3].Array)
-            top.frames[3].arrMap[4][4] = top.frames[3].arrMap[4][4][0];
-          this.position = this.getMapPosition(Map, top.frames[3].arrMap);
+          var arrMap = top.frames[3].arrMap;
+          for (var i in arrMap)
+            for (var j in arrMap[i])
+              if (arrMap[i][j].constructor == top.frames[3].Array)
+                arrMap[i][j] = arrMap[i][j][0];
+          this.position = this.getMapPosition(Map, arrMap);
           if (this.position) {
             var cell = top.document.createElement('<div style="position: absolute; width:7px; height:7px; background: url(http://img.combats.com/i/move/p1/d0.gif) no-repeat center center; left:'+(this.position.x*15-55)+'px; top:'+(this.position.y*15-59)+'px" title="Текущее местонаходение">');
             this.div.insertBefore(cell, null);
           }
           if (this.destination) {
+            // this.addLog('destination: '+this.destination.x+','+this.destination.y);
             this.displayDestinationPointer(this.destination);
           }
         } else {
@@ -640,6 +668,7 @@
     },
 
     "doHideMap": function(permanent) {
+      // this.addLog('doHideMap');
       if (this.mapPanel)
         this.mapPanel.oWindow.Hide();
       if (permanent) {
@@ -654,6 +683,7 @@
     },
 
     "displayDestinationPointer": function(position) {
+      // this.addLog('displayDestinationPointer');
       if (!this.pointer)
         this.pointer = top.document.createElement('<div style="position: absolute; width:9px; height:13px; background: url(file:///'+combats_plugins_manager.base_folder+'/walk/arrow.gif) no-repeat; line-height: 1px">');
       this.pointer.style.left = ''+(position.x*15-56)+'px';
@@ -663,6 +693,7 @@
     },
 
     "selectMapTarget": function(e) {
+      // this.addLog('selectMapTarget');
       e = e || window.event;
       this.selectedPosition = {x:e.srcElement.mapX, y:e.srcElement.mapY, floor:this.getCurrentFloor()};
       var x = e.srcElement.offsetLeft+5;
@@ -680,7 +711,6 @@
       item.innerText = 'Бежать сюда';
       item.onclick = combats_plugins_manager.get_binded_method(this,function(){
         this.mapTargetMenu.style.display = 'none';
-        this.pointer.style.display = 'none';
         this.runToPont(this.selectedPosition);
       });
       this.mapTargetMenu.insertBefore(item, null);
@@ -689,15 +719,19 @@
     },
     
     "runToPont": function(position) {
+      // this.addLog('runToPont');
+      this.oneStepMode = false;
       this.Direction=0;
       this.destination = position;
       this.makeStep();
     },
 
     "createPath": function() {
+      // this.addLog('createPath');
       var floor = this.getCurrentFloor();
       var _map = this.Map ? this.Map[floor] : null;
       if (_map) {
+        // this.addLog('floor found');
         var Map = [];
         var wave = [];
         for(var i in _map) {
@@ -712,7 +746,9 @@
         var currLen = 1;
         wave[this.destination.y][this.destination.x] = currLen;
         try {
-          while(true) {
+          waveIsOk = true;
+          while(waveIsOk) {
+            waveIsOk = false;
             for(var ii in Map) {
               i = parseInt(ii)
               for(var jj in Map[i]) {
@@ -728,6 +764,7 @@
                     wave[i][j]=currLen+1;
 
                   if (wave[i][j]==currLen+1) {
+                    waveIsOk = true;
                     if (i==this.position.y && j==this.position.x) {
                       throw completeObj;
                     }
@@ -737,8 +774,10 @@
             }
             currLen++;
           }
+          return null;
         } catch (e) {
           if (e == completeObj) {
+            // this.addLog('path found');
             var x = this.position.x;
             var y = this.position.y;
 	    var cell = Map[y][x];
@@ -756,13 +795,15 @@
       }
     },
     
-    "checkDirection": function(path) {
+    "checkDirection": function(d) {
+      // this.addLog('check direction');
       var match = top.frames[3].document.body.innerHTML.match(/>смотрим на (север|юг|запад|восток)<\//i);
       if (match) {
+        // this.addLog('direction found');
         var direction = {'север':1,'восток':3,'юг':5,'запад':7}[match[1]];
-        if (direction==path.d)
+        if (direction==d)
           return true;
-        if (direction==1 && path.d==3 || direction==3 && path.d==5 || direction==5 && path.d==7 || direction==7 && path.d==1) {
+        if (direction==1 && d==3 || direction==3 && d==5 || direction==5 && d==7 || direction==7 && d==1) {
           // turn right;
           setTimeout("top.frames[3].location=top.frames[3].location.pathname+'?rnd="+Math.random()+"&path=rr';",100);
           return false;
@@ -773,44 +814,101 @@
       }
     },
 
-    "doStep": function() {
-      this.StartStepTimer(function(){
-        try {
-          var units = top.frames[3].arrLayers[1][0].l.arrUnits;
-          for(var i in units) {
-            // если есть хотя бы один противник, ждём 10 секунд и обновляем
-            if (!units[i].maxHP) {
-              combats_plugins_manager.fireEvent('dungeon_walk.enemy', {units:units});
-              this.StartStepTimer(function(){
-                top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
-              }, 10);
-              return;
-            }
-          }
-        } catch(e) {
+    "checkEnemy": function() {
+      if (!top.frames[3].arrLayers[1] || !top.frames[3].arrLayers[1][0])
+        return true;
+      var units = top.frames[3].arrLayers[1][0].l.arrUnits;
+      for(var i in units) {
+        // если есть хотя бы один противник, ждём 10 секунд и обновляем
+        if (!units[i].maxHP) {
+          // this.addLog('enemy');
+          combats_plugins_manager.fireEvent('dungeon_walk.enemy', {units:units});
+          this.StartStepTimer(function(){
+            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+          }, 10);
+          return false;
         }
-        top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
-      },top.frames[3].mtime+0.1);
+      }
+      return true;
+    },
+
+    "startOneStepForward": function(startPosition, finishPosition) {
+      this.oneStepMode = true;
+      this.prevPosition = { x:startPosition.x, y:startPosition.y };
+      this.nextPosition = { x:finishPosition.x, y:finishPosition.y };
+      this.doStep();
+    },
+
+    "doStep": function() {
+      // this.addLog('doStep');
+      var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
+      if (this.checkEnemy()) {
+        this.StartStepTimer(function(){
+          try {
+            this.checkEnemy();
+          } catch(e) {
+          }
+          // this.addLog('step forward');
+          top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
+        },mtime+0.1);
+      }
     },
     
     "makeStep": function() {
+      // this.addLog('makeStep');
       var floor = this.getCurrentFloor();
-      if (floor!=this.destination.floor) {
-        this.destination = null;
-        combats_plugins_manager.fireEvent('dungeon_walk.finish', {position:null});
-        return;
-      }
       var Map = this.Map ? this.Map[floor] : null;
       if (Map) {
-        if (top.frames[3].arrMap[4][4].constructor == top.frames[3].Array)
-          top.frames[3].arrMap[4][4] = top.frames[3].arrMap[4][4][0];
-        this.position = this.getMapPosition(Map, top.frames[3].arrMap);
-        if (this.position.x!=this.destination.x || this.position.y!=this.destination.y) {
-          var path = this.createPath();
-          if (this.checkDirection(path)) {
-            this.doStep();
+        var arrMap = top.frames[3].arrMap;
+        for (var i in arrMap)
+          for (var j in arrMap[i])
+            if (arrMap[i][j].constructor == top.frames[3].Array)
+              arrMap[i][j] = arrMap[i][j][0];
+        this.position = this.getMapPosition(Map, arrMap);
+        if (this.position) 
+        {
+          if (floor==this.destination.floor && this.position.x==this.destination.x && this.position.y==this.destination.y) {
+            if (this.oneStepMode || !this.destination.d || this.checkDirection(this.destination.d)) {
+              this.oneStepMode = false;
+              this.nextPosition = null;
+              this.prevPosition = null;
+              this.destination = null;
+              combats_plugins_manager.fireEvent('dungeon_walk.finish', {position:this.position});
+            }
+          } else if (floor==this.destination.floor
+            && ((!this.prevPosition || (this.position.x==this.prevPosition.x && this.position.y==this.prevPosition.y))
+                || (!this.nextPosition || (this.position.x==this.nextPosition.x && this.position.y==this.nextPosition.y)))) 
+          {
+            // шаг не удался, надо ещё раз попробовать
+            // или шаг удался, шагаем дальше
+            if (this.oneStepMode) {
+              this.doStep();
+            } else {
+              var path = this.createPath();
+              if (path) {
+                if (this.checkDirection(path.d)) {
+                  this.prevPosition = { x:this.position.x, y:this.position.y };
+                  this.nextPosition = { x:path.x, y:path.y };
+                  this.doStep();
+                }
+              } else {
+                // this.addLog('cannot create path');
+                this.nextPosition = null;
+                this.prevPosition = null;
+                this.destination = null;
+                combats_plugins_manager.fireEvent('dungeon_walk.finish', { position:this.position });
+              }
+            }
+          } else {
+            this.nextPosition = null;
+            this.prevPosition = null;
+            this.destination = null;
+            combats_plugins_manager.fireEvent('dungeon_walk.finish', { position:this.position });
           }
         } else {
+          // this.addLog('position is unknown');
+          this.nextPosition = null;
+          this.prevPosition = null;
           this.destination = null;
           combats_plugins_manager.fireEvent('dungeon_walk.finish', {position:this.position});
         }
@@ -835,6 +933,8 @@
 	this.skip_quest=false;
 	this.usedObjects=new Object();
 	this.sys_msg = '';
+
+	this.clearLog();
 
 	top.combats_plugins_manager.attachEvent(
           'mainframe.load',
