@@ -15,7 +15,7 @@
       try {
         var elements = top.combats_plugins_manager.getMainFrame().document.getElementsByTagName('small');
         if (elements.length>0) {
-          var match = elements[elements.length-1].innerText.match(/\(Вы можете посетить подземелье через\s*(?:(\d+) ч\.)?\s*(?:(\d+) мин\.)?\)/);
+          var match = elements[elements.length-1].innerText.match(/\(Вы можете посетить подземелье через\s*(?:(\d+) ч\.)?\s*(?:(\d+) мин\.)?.*?\)/);
           if (match) {
             var notify_handler = top.combats_plugins_manager.plugins_list['notify_handler'];
             var timespan = 0;

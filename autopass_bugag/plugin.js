@@ -51,9 +51,10 @@
         try {
           var d = top.frames[3].document;
           var arr_H4 = d.getElementsByTagName('H4');
-          var button = d.createElement('<input type="button" value="Показать параметры" onclick="top.cht(\'/main.pl?attack=[]\')"/>');
-          d.body.insertBefore(button,arr_H4[0]);
-
+          if (arr_H4.length>0) {
+            var button = d.createElement('<input type="button" value="Показать параметры" onclick="top.cht(\'/main.pl?attack=[]\')"/>');
+            d.body.insertBefore(button,arr_H4[0]);
+          }
           var bugag=d.getElementById('mo_dialog:emc_bugag_prewelcome');
           if (!bugag)
             return;
@@ -67,7 +68,7 @@
         var images = top.frames[3].document.images;
         var obj = null;
         for(var i=0; i<images.length; i++) {
-          if (images[i].src.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/glasses(?:1|2)\.gif/)) {
+          if (images[i].src.match(/^(?:http\:\/\/img\.combats\.(?:com|ru)\/i|file\:\/\/.*?)\/items\/glasses(?:1|2)\.gif/)) {
             var obj = images[i];
             while(obj && obj.nodeName!='A') {
               obj = obj.nextSibling;

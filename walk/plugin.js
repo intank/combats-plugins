@@ -7,6 +7,7 @@
     mapFileName: '',
     Map: null,
     excludedItems: {},
+    alwaysItems: {},
 
     "bots": {
       '1/1040a_dr8472409823': {
@@ -102,8 +103,13 @@
     },
     "getProperties": function() {
       var items = [];
+      items[0] = [];
       for(var i in this.excludedItems) {
-        items.push(i);
+        items[0].push(i);
+      }
+      items[1] = [];
+      for(var i in this.alwaysItems) {
+        items[1].push(i);
       }
       return [
 		{ name: "\"Опережающий\" таймер", value: this.forced },
@@ -113,8 +119,10 @@
 		{ name: "Скрывать карту, если открыто не подземелье", value: this.autoHideMap },
 		{ name: "Минимум HP для автонападения", value: this.minHP},
 		{ name: "Минимум маны для автонападения", value: this.minMana},
-		{ name: "Список исключенных <br>из автокликера объектов", value: this.excludedObjects, type:"textarea"},
-		{ name: "Предметы, которые не нужно поднимать", value: items.join("\n"), type:"textarea"},
+		{ name: "Принудительное время ожидания шага", value: this.forcedStepTime},
+		{ name: "Список исключенных из автокликера объектов", value: this.excludedObjects, type:"textarea"},
+		{ name: "Список объектов, на которые нужно кликать <b>всегда</b>", value: items[1].join("\n"), type:"textarea"},
+		{ name: "Предметы, которые не нужно поднимать", value: items[0].join("\n"), type:"textarea"},
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -127,9 +135,14 @@
 	this.autoHideMap=a[4].value;
 	this.minHP=parseFloat(a[5].value) || 95;
 	this.minMana=parseFloat(a[6].value) || 95;
-	this.excludedObjects=a[7].value;
+	this.forcedStepTime = parseFloat(a[7].value) || 0;
+	this.excludedObjects=a[8].value;
+        this.alwaysItems = {};
+        var items = a[9].value.split(/\s*[\n\r;]+\s*/);
+	for(var i=0; i<items.length; i++)
+          this.alwaysItems[items[i]] = true;
         this.excludedItems = {};
-        var items = a[8].value.split(/\s*[\n\r;]+\s*/);
+        items = a[10].value.split(/\s*[\n\r;]+\s*/);
 	for(var i=0; i<items.length; i++)
           this.excludedItems[items[i]] = true;
 
@@ -140,8 +153,10 @@
 	this.save('autoHideMap',this.autoHideMap?"yes":"no");
 	this.save('minHP',this.minHP.toString());
 	this.save('minMana',this.minMana.toString());
+	this.save('forcedStepTime',this.forcedStepTime.toString());
 	this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,";"));
-	this.save('excludeItems',a[6].value.replace(/\s*[\n\r]+\s*/g,";"));
+	this.save('alwaysItems',a[9].value.replace(/\s*[\n\r]+\s*/g,";"));
+	this.save('excludedItems',a[10].value.replace(/\s*[\n\r]+\s*/g,";"));
     },
 
     "clearLog": function() {
@@ -324,10 +339,17 @@
 // ---------- try drop ----------
         for(i=0;i<d.links.length;i++) {
           link=d.links(i);
-          if (link.href.search(/dungeon\d*\.pl\?get=/)>=0 && (this.mat_click && !this.skip_mat_click || (link.children[0].src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest))) {
-            if (!(link.children[0].alt.replace(/^.*?'(.*)'.*?$/,'$1') in this.excludedItems)) {
-              top.frames[3].location = link.href;
-              return;
+          if (link.href.search(/dungeon\d*\.pl\?get=/)>=0) {
+            var img = link.children[0];
+            var match;
+            if (this.mat_click && !this.skip_mat_click 
+                || (!this.skip_mat_click && img.src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest)
+                || (!this.skip_mat_click && (match = img.alt.match(/'(.*?)'/)) && (match[1] in this.alwaysItems)))
+            {
+              if (!(img.alt.replace(/^.*?'(.*)'.*?$/,'$1') in this.excludedItems)) {
+                top.frames[3].location = link.href;
+                return;
+              }
             }
           }
         }
@@ -410,7 +432,7 @@
 		  cell.title+=Obj.name + title;
 
 		  if((x==0 && y==1) || (y==0 && x==1)) { //---------------- если спереди или с боков, кликаем.
-		    if( o=='arrObjects' && !(Obj.id in this.usedObjects) && this.en_click && this.excludedObjects.indexOf(Obj.name)==-1) { //-------Кликать на объекты
+		    if( o=='arrObjects' && !(Obj.id in this.usedObjects) && (this.alwaysItems[Obj.name] || this.en_click && this.excludedObjects.indexOf(Obj.name)==-1)) { //-------Кликать на объекты
 		      this.usedObjects[Obj.id]=true;
 		      if(top.ChatSys) //------------ Добавить к логу на что кликали (если включены системки)
 			this.sys_msg='<font class=date2>'+cur_time+'</font> Кликнули объект <b>'+Obj.name+'</b>, ';
@@ -507,6 +529,8 @@
           var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
           if (mtime<0)
             mtime = 0;
+          if (this.forcedStepTime && mtime>this.forcedStepTime)
+            mtime = this.forcedStepTime;
           if(!this.forced || this.steptimer==null || mtime==0) {
             if (d.getElementById("m"+this.Direction) && (this.Direction!=1 || !("l2op1" in d.all) || d.all["l2op1"].childNodes.length>1 )){
               this.StartStepTimer(this.do_step, mtime);
@@ -957,11 +981,17 @@
 	this.showObjects=(this.load('showObjects','yes')=='yes');
 	this.autoHideMap = (this.load('autoHideMap','yes')=='yes');
 	this.minHP=parseInt(this.load('minHP','95'));
+	this.minMana=parseInt(this.load('minMana','95'));
 	this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
-	var items=this.load('excludeItems','').split(/;/);
+	var items=this.load('alwaysItems','Блеклый подземник;Черепичный подземник;Кровавый подземник').split(/;/);
+	this.alwaysItems = {};
+	for(var i=0; i<items.length; i++)
+          this.alwaysItems[items[i]] = true;
+	items=this.load('excludedItems','').split(/;/);
 	this.excludedItems = {};
 	for(var i=0; i<items.length; i++)
           this.excludedItems[items[i]] = true;
+	this.forcedStepTime = parseFloat(this.load('forcedStepTime','0'));
 	if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );
 		
