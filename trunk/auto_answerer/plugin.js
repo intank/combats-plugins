@@ -174,6 +174,7 @@
           }
 
           if (ok) {
+            var useAnswer = '';
             if (afk) {
               match[3] = match[3].toUpperCase();
               if (!this.check_extendedQuery(match[3], match[1], this.arrExtendedQuery, this.extendedResponse))
@@ -181,7 +182,8 @@
                 ok = false;
                 if (this.extendedMode) {
                   for(var k=0; k<this.extendedModeVariants; k++) {
-                    if (this.check_extendedQuery(match[3], match[1], this.arrExtendedQuery_array[k], this.extendedResponse_array[k])) {
+                    if (!((match[1]+k) in this.skipNames) && this.check_extendedQuery(match[3], match[1], this.arrExtendedQuery_array[k], this.extendedResponse_array[k])) {
+                      useAnswer = k;
                       ok = true;
                       break;
                     }
@@ -192,7 +194,7 @@
                 }
               }
             }
-            this.skipNames[match[1]] = time;
+            this.skipNames[match[1]+useAnswer] = time;
           }
         }
       }

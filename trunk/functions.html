@@ -71,7 +71,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       },
       "loadCustomPlugin": function() {
         var pluginName=prompt("Введите название плагина (имя папки с плагином)","");
-        if (pluginName=="")
+        if (!pluginName)
           return;
         this.loadPlugin(pluginName);
       },
@@ -152,13 +152,12 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
             this.addLog(messages);
           }
         } else {
-          var messages = '<font class=date2>'+d+'</font> Плагин "'+pluginName+'" не загружен: файл "plugin.js" не найден или пуст';
+          var messages = '<font class=date2>'+d+'</font> Плагин "'+pluginName+'" не загружен: файл "'+pluginName+'\\plugin.js" не найден или пуст';
           this.add_chat(messages);
           this.addLog(messages);
         }
         return errCount;
       },
-
       createConfigurationElement: function(name) {
         return {
           login: top.getCookie('battle'),
@@ -180,11 +179,10 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           }
         };
       },
-
       getConfigurationElement: function(plugin) {
         for(var name in this.plugins_list) {
           if (this.plugins_list[name]==plugin) {
-	    return createConfigurationElement(name);
+            return this.createConfigurationElement(name);
           }
         }
         throw new Error('Неверный идентификатор плагина "'+plugin+'"');
@@ -200,23 +198,35 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
         return null;
       },
+      add_sys: function(s) {
+        top.Chat.am(s);
+      },
       add_chat: function(s) {
         top.Chat.am(s);
       },
       Init: function() {
+        var sleep = 0;
         try {
-          var sleep = false;
           for(var i=0; i<top.frames.length; i++) {
-            sleep |= (top.frames[i].document.readyState!="complete" && top.frames[i].document.readyState!="interactive");
+            sleep += (top.frames[i].document.readyState!="complete" && top.frames[i].document.readyState!="interactive")?1:0;
           }
           if (sleep) {
             throw new Exception('Page is not ready');
           }
         } catch(e) {
+          if (!this.loadingWindow) {
+            this.loadingWindow = this.createWindow("Загрузка", 200, 100);
+            this.loadingPanel = document.createElement('<div style="width:100%; height:100%; text-align:center">');
+            this.loadingWindow.oWindow.Insert(this.loadingPanel)
+            this.loadingWindow.oWindow.Show();
+          }
+          this.loadingPanel.innerText = 'Осталось загрузить\n'+sleep+' фреймов';
           setTimeout(this.get_binded_method(this,this.Init),500);
           return;
         }
 
+        if (this.loadingWindow)
+          this.loadingWindow.oWindow.Hide();
         var d = (new Date()).toLocaleTimeString();
         var s;
         if (true) {

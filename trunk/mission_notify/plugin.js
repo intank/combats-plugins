@@ -9,7 +9,7 @@
         return;
       try {
         if (/(?:\?|&)ql=.*?/.test(d.location.search)) {
-          var match = d.body.innerText.match(/Задания отсюда недоступны еще\s*(?:(\d+) ч\.)?\s*(?:(\d+) мин\.)?/);
+          var match = d.body.innerText.match(/Задания отсюда недоступны еще\s*(?:(\d+) ч\.)?\s*(?:(\d+) мин\.)?.*?/);
           if (match) {
             var notify_handler = top.combats_plugins_manager.plugins_list['notify_handler'];
             var timespan = 0;

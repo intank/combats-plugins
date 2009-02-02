@@ -13,7 +13,9 @@
           { item:'spell_powerup10', name:'Сокрушение', filter:'Сокрушение', requirements: {'Интеллект: ':15} },
           { item:'spell_stat_intel', name:'Холодный Разум', filter:'Холодный Разум', requirements: {'Интеллект: ':70} },
           { item:'cure_g1', name:'Цепь Исцеления', filter:'Цепь Исцеления' },
-          { item:'d_blat-6', name:'Пропуск Забытых', filter:'Пропуск Забытых', requirements: {'Интеллект: ':5} }
+          { item:'d_blat-6', name:'Пропуск Забытых', filter:'Пропуск Забытых', requirements: {'Интеллект: ':5} },
+          { item:'food_l11_e', name:'Жесткая Рыба', filter:'Жесткая Рыба', notarget:true },
+          { item:'firework2-5', name:'Радужный Всплеск [5]', filter:'Радужный Всплеск', notarget:true }
         ]
       },
       { icon: "file:///"+combats_plugins_manager.base_folder+"fast_cast/icon.gif",
@@ -57,7 +59,7 @@
       this.menu.menuButton = window.event.srcElement;
       var s = '';
       for(var i=0; i<knownSpells.length; i++) {
-        s += '<tr><td style="width:100%; height: 40px; padding-left:50px; background: center left url(http://img.combats.com/i/items/'+knownSpells[i].item+'.gif) no-repeat; cursor: pointer; font-weight: bold; vertical-align: middle">'+knownSpells[i].name+'</td></tr>';
+        s += '<tr><td style="width:100%; height: 40px; padding-left:70px; background: center left url(http://img.combats.com/i/items/'+knownSpells[i].item+'.gif) no-repeat; cursor: pointer; font-weight: bold; vertical-align: middle">'+knownSpells[i].name+'</td></tr>';
       }
       this.menu.innerHTML = '<table style="border: 2px solid black; width: 100%">'+s+'</table>';
       this.menu.style.cssText = 'position: absolute; z-index: 5; left: '+(window.event.clientX-window.event.offsetX)+'px; top: '+(window.event.clientY-window.event.offsetY+30)+'px; width: 200px; height: auto; background: #C7C7C7';
@@ -79,17 +81,28 @@
       );
     },
     queryName: function(spell) {
-      top.Window.Prompt(
-        function(a){
-          if (a) {
-            this.castSpell({spellName:spell.name,spellId:spell.item,filter:spell.filter,requirements:spell.requirements,target:a});
-          }
-        },
-        this,
-        'Для каста заклинания необходимо выбрать цель. Введите ник или щёлкните по нику в чате',
-        '',
-        'Кастуем "<b>'+spell.name+'</b>"'
-      );
+      if (spell.notarget) {
+        top.Window.Confirm(
+          function(){
+            this.castSpell({spellName:spell.name,spellId:spell.item,filter:spell.filter,requirements:spell.requirements});
+          },
+          this,
+          'Использовать сейчас?',
+          'Кастуем "<b>'+spell.name+'</b>"'
+        );
+      } else {
+        top.Window.Prompt(
+          function(a){
+            if (a) {
+              this.castSpell({spellName:spell.name,spellId:spell.item,filter:spell.filter,requirements:spell.requirements,target:a});
+            }
+          },
+          this,
+          'Для каста заклинания необходимо выбрать цель. Введите ник или щёлкните по нику в чате',
+          '',
+          'Кастуем "<b>'+spell.name+'</b>"'
+        );
+      }
     },
     sendAutoResponse: function(message) {
       if (!this.sender)
@@ -102,11 +115,14 @@
       var match;
       for (var i=0; i<doc.images.length; i++) {
         var obj = doc.images[i];
-        match = obj.src.match(/http\:\/\/img\.combats\.(?:com|ru)\/i\/items\/(.*?)\.gif/);
+        match = obj.src.match(/^(?:http\:\/\/img\.combats\.(?:com|ru)\/i|file\:\/\/.*?)\/items\/(.*?)\.gif/);
         if (match && match[1]==params.spellId) {
           while(obj && obj.tagName!='A')
             obj = obj.nextSibling;
           if (obj && (match = decodeURI(obj.href).match(/^javascript\:(magicklogin\('(.*?)',\s*.*\))$/)) && match[2]==params.spellName) {
+            return obj;
+          }
+          if (obj && (match = decodeURI(obj.href).match(/^javascript\:(UseMagick\('(.*?)',\s*.*\))$/)) && match[2]==params.spellName) {
             return obj;
           }
         }
@@ -138,9 +154,13 @@
     },
     doCast: function(link, params) {
       var doc = link.document;
-      var match=decodeURI(link.href).match(/^javascript\:(magicklogin\('(.*?)',\s*.*\))$/)
+      var match=decodeURI(link.href).match(/^javascript\:(magicklogin\('(.*?)',\s*.*\))$/);
+      if (!match) {
+        match = decodeURI(link.href).match(/^javascript\:(UseMagick\('(.*?)',\s*.*\))$/);
+      }
       doc.parentWindow.eval(match[1]);
-      doc.forms['slform'].elements['param'].value = params.target;
+      if (doc.forms['slform'].elements['param'] && params.target)
+        doc.forms['slform'].elements['param'].value = params.target;
       doc.forms['slform'].submit();
     },
     castSpell: function(params, step) {
@@ -195,7 +215,10 @@
               combats_plugins_manager.attachEvent('mainframe.load',this.mainframeload_handler);
               this.doCast(link, params);
             } else {
-              this.sendAutoResponse('private ['+params.target+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
+              if (params.target)
+                this.sendAutoResponse('private ['+params.target+'] По каким-то причинам я не могу сейчас кастовать :chtoza: (автоответ)');
+              else
+                combats_plugins_manager.add_chat('Кастовали "'+params.spellName+'", свиток не найден или инвентарь не доступен');
               this.nextCast();
             }
           } else {
@@ -212,9 +235,17 @@
             if (castResult.innerText.search('Успешно')>-1) {
 //              congratulations = ' :superng: С Новым годом!';
             }
-            this.sendAutoResponse('private ['+params.target+'] '+castResult.innerText+' (автоответ)'+congratulations);
+            if (params.target) {
+              this.sendAutoResponse('private ['+params.target+'] '+castResult.innerText+' (автоответ)'+congratulations);
+            } else {
+              combats_plugins_manager.add_chat(castResult.innerText);
+            }
           } else {
-            this.sendAutoResponse('private ['+params.target+'] По каким-то причинам результат каста не распознан :chtoza: (автоответ)');
+            if (params.target) {
+              this.sendAutoResponse('private ['+params.target+'] По каким-то причинам результат каста не распознан :chtoza: (автоответ)');
+            } else {
+              combats_plugins_manager.add_chat('Кастовали "'+params.spellName+'", результат каста не распознан');
+            }
           }
           this.nextCast();
           break;
