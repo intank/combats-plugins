@@ -866,6 +866,8 @@
     "doStep": function() {
       // this.addLog('doStep');
       var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
+      if (this.forcedStepTime && mtime>this.forcedStepTime)
+        mtime = this.forcedStepTime;
       if (this.checkEnemy()) {
         this.StartStepTimer(function(){
           try {
