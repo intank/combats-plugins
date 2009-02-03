@@ -2,8 +2,8 @@
   return {
     URL: '',
     knownDiggersLists: {
-      BKTorg: 'http://www.bktorg.ru/list?search=',
-      DarkLaw: 'http://www.darklaw.ru/diggers.php?act=fast_check&mini_view=1&login='
+      'DarkLaw': 'http://www.darklaw.ru/diggers.php?act=fast_check&mini_view=1&login=',
+      'BKTorg': 'http://www.bktorg.ru/list.php?view=yes&nick='
     },
     oPanel: null,
     oWindow: null,
@@ -24,9 +24,9 @@
         var select = this.div.firstChild.cells[0].firstChild.firstChild.nextSibling;
         for(var listId in this.knownDiggersLists) {
           var option = document.createElement('option');
-          option.innerText = listId;
-          option.selected = (this.knownDiggersLists[listId] == this.URL);
           select.options.add(option);
+          option.innerText = listId;
+          option.selected = (this.URL && (this.knownDiggersLists[listId] == this.URL));
         }
         document.body.appendChild(this.div);
 	this.iframe = this.div.firstChild.cells[1].firstChild;
@@ -41,7 +41,7 @@
       oPanel.oWindow.Show();
       var select = this.div.firstChild.cells[0].firstChild.firstChild.nextSibling;
       var listId = select.options[select.selectedIndex].innerText;
-      if (this.URL!=this.knownDiggersLists[listId]) {
+      if (!this.URL || this.URL!=this.knownDiggersLists[listId]) {
         this.URL = this.knownDiggersLists[listId];
         this.configurator.saveIni('listId',listId);
       }
