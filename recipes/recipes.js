@@ -46,7 +46,8 @@ var locations = [
   'Мастерская в ПТП',
   'Фонтан зачарованных гор в ПТП',
   'Лаборатория в Бездне',
-  'Наковальня в Бездне'
+  'Наковальня в Бездне',
+  'Цветочный магазин'
 ];
 
 oOptions = document.all['locations'].options;
@@ -118,13 +119,13 @@ var recipes = [
 //  {name:'spell_repare_10', descr:'Свиток починки 10', comp:['mater4', 1, 'mater17', 1, 'mater7', 1, 'mater28', 1, 'mater9', 1], location:1, possible:0, accepted:0},
 
 //  {name:'ring116', descr:'Кольцо Кровавой Луны', comp:['mater25', 1, 'mater21', 3], location:1, possible:0, accepted:0},
-  {name:'ring116_1', descr:'Кольцо Кровавой Луны [10]', comp:['sp_mat3', 1, 'mater27', 1, 'mater16', 3, 'mater4', 1], location:4, possible:0, accepted:0},
+//  {name:'ring116_1', descr:'Кольцо Кровавой Луны [10]', comp:['sp_mat3', 1, 'mater27', 1, 'mater16', 3, 'mater4', 1], location:4, possible:0, accepted:0},
 
 //  {name:'ring110', descr:'Кольцо Паука', comp:['mater30', 1, 'mater23', 3], location:1, possible:0, accepted:0},
-  {name:'ring110_1', descr:'Кольцо Паука [10]', comp:['mater30', 1, 'mater23', 3, 'sp_mat3', 1, 'mater25', 1, 'mater17', 3, 'mater12', 1], location:4, possible:0, accepted:0},
+//  {name:'ring110_1', descr:'Кольцо Паука [10]', comp:['mater30', 1, 'mater23', 3, 'sp_mat3', 1, 'mater25', 1, 'mater17', 3, 'mater12', 1], location:4, possible:0, accepted:0},
 
 //  {name:'ring117', descr:'Кольцо Забытых Времен', comp:['mater25', 1, 'mater21', 3], location:1, possible:0, accepted:0},
-  {name:'ring117_1', descr:'Кольцо Забытых Времен [10]', comp:['sp_mat3', 1, 'mater27', 1, 'mater16', 3, 'mater4', 1], location:4, possible:0, accepted:0},
+//  {name:'ring117_1', descr:'Кольцо Забытых Времен [10]', comp:['sp_mat3', 1, 'mater27', 1, 'mater16', 3, 'mater4', 1], location:4, possible:0, accepted:0},
 
 //  {name:'ring83', descr:'Кольцо Интуиции', comp:['mater2', 5, 'mater11', 2, 'mater14', 1, 'mater15', 2], location:1, possible:0, accepted:0},
 //  {name:'ring83', descr:'Кольцо Интуиции', comp:['mater1', 2, 'mater6', 5, 'mater19', 1], location:1, possible:0, accepted:0},  // не работает
@@ -260,40 +261,44 @@ var recipes = [
 //  {name:'', descr:'', comp:['mater',0,'mater',0,'mater',0,'mater',0,'mater',0], location:4, possible:0, accepted:0},
 
 // Йолки ;)
-  { name:'el1', descr:'Йолка', comp: ['elka_vetv1',4,'shar3_2005',3,'shar5_2005',3,'shar2_2005',2,'ny06ball1',2,'ny06ball9',2,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'el2', descr:'Йолка', comp: ['shar1_2005',6,'shar5_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar2_2005',2,'ny06ball6',1,'ny06ball7',1,'elka_base1',1,'ny06ball5',1,'ny06ball11',1], location:3, possible:0, accepted:0},
-  { name:'nel3', descr:'Йолка', comp: ['shar3_2005',3,'elka_vetv2',3,'shar5_2005',2,'shar2_2005',2,'shar1_2005',2,'svechka3',1,'elka_vetv1',1,'shar6_2005',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'nel1', descr:'Йолка', comp: ['shar5_2005',4,'shar2_2005',4,'elka_vetv2',3,'ny06ball6',1,'elka_vetv1',1,'ny06ball9',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'gnel2', descr:'Йолка', comp: ['elka_vetv2',3,'shar2_2005',3,'shar5_2005',2,'bengal1',1,'elka_vetv1',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'gnel1', descr:'Йолка', comp: ['elka_vetv2',2,'shar5_2005',2,'elka_vetv1',2,'bengal1',1,'svechka1',1,'ny06ball3',1,'shar1_2005',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'gnel3', descr:'Йолка', comp: ['shar4_2005',6,'shar2_2005',5,'elka_vetv1',3,'shar3_2005',1,'elka_vetv2',1,'shar5_2005',1,'ny06ball3',1,'ny06ball9',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w8', descr:'Йолка', comp: ['shar4_2005',4,'elka_vetv1',3,'elka_vetv2',1,'shar5_2005',1,'bengal1',1,'ny06ball5',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w9', descr:'Йолка', comp: ['shar4_2005',3,'shar3_2005',2,'elka_vetv2',2,'elka_vetv1',2,'shar7_2005',1,'ny06ball4',1,'ny06ball10',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w2', descr:'Йолка', comp: ['shar5_2005',4,'elka_vetv2',3,'shar2_2005',3,'shar1_2005',3,'shar3_2005',1,'bengal1',1,'svechka1',1,'elka_vetv1',1,'ny06ball1',1,'ny06ball5',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w7', descr:'Йолка', comp: ['shar4_2005',4,'elka_vetv2',3,'shar5_2005',2,'shar2_2005',1,'ny06ball10',1,'elka_vetv1',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w3', descr:'Йолка', comp: ['shar2_2005',7,'elka_vetv1',4,'shar3_2005',3,'shar4_2005',1,'shar7_2005',1,'ny06ball3',1,'elka_base1',1,'ny06ball12',1], location:3, possible:0, accepted:0},
-  { name:'elka_w5', descr:'Йолка', comp: ['shar3_2005',4,'elka_vetv2',3,'shar4_2005',2,'shar2_2005',2,'elka_vetv1',1,'ny06ball1',1,'ny06ball3',1,'elka_base1',1,'ny06ball8',1], location:3, possible:0, accepted:0},
-  { name:'elka_w4', descr:'Йолка', comp: ['shar1_2005',4,'shar4_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar3_2005',1,'ny06ball6',1,'svechka1',1,'elka_base1',1,'shar8_2005',1], location:3, possible:0, accepted:0},
-  { name:'elka_w6', descr:'Йолка', comp: ['elka_vetv1',4,'shar4_2005',2,'shar3_2005',2,'shar5_2005',2,'shar1_2005',2,'ny06ball4',1,'ny06ball5',1,'elka_base1',1,'ny06ball8',1,'ny06ball11',1], location:3, possible:0, accepted:0},
-  { name:'elka_w1', descr:'Йолка', comp: ['elka_vetv2',3,'shar3_2005',2,'shar4_2005',1,'ny06ball7',1,'elka_vetv1',1,'ny06ball1',1,'ny06ball5',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w15', descr:'Йолка', comp: ['elka_vetv2',3,'shar5_2005',3,'shar3_2005',2,'shar2_2005',1,'ny06ball10',1,'elka_vetv1',1,'ny06ball3',1,'shar1_2005',1,'elka_base1',1,'ny06ball8',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w17', descr:'Йолка', comp: ['shar3_2005',3,'shar1_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar4_2005',1,'shar5_2005',1,'svechka2',1,'ny06ball3',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w12', descr:'Йолка', comp: ['elka_vetv1',4,'shar4_2005',2,'shar1_2005',2,'ny06ball6',1,'elka_base1',1,'shar8_2005',1], location:3, possible:0, accepted:0},
-  { name:'elka_w13', descr:'Йолка', comp: ['elka_vetv1',4,'shar5_2005',3,'shar1_2005',3,'shar3_2005',2,'shar2_2005',2,'shar4_2005',1,'bengal1',1,'svechka1',1,'ny06ball1',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w14', descr:'Йолка', comp: ['shar1_2005',4,'elka_vetv2',3,'shar2_2005',2,'shar4_2005',1,'ny06ball6',1,'shar5_2005',1,'bengal1',1,'elka_vetv1',1,'ny06ball5',1,'elka_base1',1,'ny06ball12',1], location:3, possible:0, accepted:0},
-  { name:'elka_w16', descr:'Йолка', comp: ['elka_vetv2',3,'shar3_2005',2,'shar2_2005',2,'shar4_2005',1,'svechka3',1,'shar5_2005',1,'ny06ball4',1,'svechka1',1,'elka_vetv1',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w26', descr:'Йолка', comp: ['elka_vetv2',3,'shar5_2005',2,'shar1_2005',2,'shar4_2005',1,'ny06ball10',1,'elka_vetv1',1,'ny06ball5',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w27', descr:'Йолка', comp: ['elka_vetv1',3,'shar3_2005',2,'shar4_2005',2,'shar5_2005',2,'elka_vetv2',1,'svechka2',1,'ny06ball9',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w24', descr:'Йолка', comp: ['elka_vetv1',4,'shar2_2005',3,'shar4_2005',2,'ny06ball7',1,'svechka1',1,'elka_base1',1,'ny06ball2',1], location:3, possible:0, accepted:0},
-  { name:'elka_w25', descr:'Йолка', comp: ['shar4_2005',3,'elka_vetv2',3,'shar5_2005',2,'shar2_2005',2,'shar3_2005',1,'elka_vetv1',1,'ny06ball1',1,'ny06ball5',1,'elka_base1',1,'ny06ball8',1], location:3, possible:0, accepted:0},
-  { name:'elka_w23', descr:'Йолка', comp: ['shar2_2005',5,'shar3_2005',4,'elka_vetv1',3,'shar1_2005',2,'shar4_2005',1,'elka_vetv2',1,'ny06ball3',1,'elka_base1',1,'ny06ball8',1], location:3, possible:0, accepted:0},
-  { name:'elka_w21', descr:'Йолка', comp: ['elka_vetv1',3,'shar3_2005',1,'shar4_2005',1,'elka_vetv2',1,'shar5_2005',1,'ny06ball4',1,'shar2_2005',1,'svechka1',1,'shar1_2005',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w20', descr:'Йолка', comp: ['shar4_2005',4,'elka_vetv1',3,'elka_vetv2',1,'shar2_2005',1,'ny06ball10',1,'elka_base1',1,'ny06ball2',1,'shar8_2005',1], location:3, possible:0, accepted:0},
-  { name:'elka_w22', descr:'Йолка', comp: ['shar2_2005',4,'elka_vetv2',3,'shar4_2005',2,'ny06ball5',2,'shar5_2005',1,'elka_vetv1',1,'elka_base1',1,'shar8_2005',1], location:3, possible:0, accepted:0},
-  { name:'elka_w29', descr:'Йолка', comp: ['elka_vetv2',3,'shar2_2005',3,'shar5_2005',2,'shar3_2005',1,'svechka3',1,'svechka2',1,'ny06ball4',1,'elka_vetv1',1,'shar1_2005',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w28', descr:'Йолка', comp: ['shar2_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar3_2005',1,'ny06ball7',1,'svechka2',1,'ny06ball3',1,'elka_base1',1], location:3, possible:0, accepted:0},
-  { name:'elka_w19', descr:'Йолка', comp: ['shar3_2005',3,'shar4_2005',3,'elka_vetv2',2,'shar5_2005',2,'elka_vetv1',2,'shar2_2005',1,'ny06ball1',1,'elka_base1',1,'ny06ball12',1,'ny06ball2',1], location:3, possible:0, accepted:0}
-  
+  { name:'el1', descr:'Йолка', comp: ['elka_vetv1',4,'shar3_2005',3,'shar5_2005',3,'shar2_2005',2,'ny06ball1',2,'ny06ball9',2,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'el2', descr:'Йолка', comp: ['shar1_2005',6,'shar5_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar2_2005',2,'ny06ball6',1,'ny06ball7',1,'elka_base1',1,'ny06ball5',1,'ny06ball11',1], location:5, possible:0, accepted:0},
+  { name:'nel3', descr:'Йолка', comp: ['shar3_2005',3,'elka_vetv2',3,'shar5_2005',2,'shar2_2005',2,'shar1_2005',2,'svechka3',1,'elka_vetv1',1,'shar6_2005',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'nel1', descr:'Йолка', comp: ['shar5_2005',4,'shar2_2005',4,'elka_vetv2',3,'ny06ball6',1,'elka_vetv1',1,'ny06ball9',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'gnel2', descr:'Йолка', comp: ['elka_vetv2',3,'shar2_2005',3,'shar5_2005',2,'bengal1',1,'elka_vetv1',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'gnel1', descr:'Йолка', comp: ['elka_vetv2',2,'shar5_2005',2,'elka_vetv1',2,'bengal1',1,'svechka1',1,'ny06ball3',1,'shar1_2005',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'gnel3', descr:'Йолка', comp: ['shar4_2005',6,'shar2_2005',5,'elka_vetv1',3,'shar3_2005',1,'elka_vetv2',1,'shar5_2005',1,'ny06ball3',1,'ny06ball9',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w8', descr:'Йолка', comp: ['shar4_2005',4,'elka_vetv1',3,'elka_vetv2',1,'shar5_2005',1,'bengal1',1,'ny06ball5',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w9', descr:'Йолка', comp: ['shar4_2005',3,'shar3_2005',2,'elka_vetv2',2,'elka_vetv1',2,'shar7_2005',1,'ny06ball4',1,'ny06ball10',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w2', descr:'Йолка', comp: ['shar5_2005',4,'elka_vetv2',3,'shar2_2005',3,'shar1_2005',3,'shar3_2005',1,'bengal1',1,'svechka1',1,'elka_vetv1',1,'ny06ball1',1,'ny06ball5',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w7', descr:'Йолка', comp: ['shar4_2005',4,'elka_vetv2',3,'shar5_2005',2,'shar2_2005',1,'ny06ball10',1,'elka_vetv1',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w3', descr:'Йолка', comp: ['shar2_2005',7,'elka_vetv1',4,'shar3_2005',3,'shar4_2005',1,'shar7_2005',1,'ny06ball3',1,'elka_base1',1,'ny06ball12',1], location:5, possible:0, accepted:0},
+  { name:'elka_w5', descr:'Йолка', comp: ['shar3_2005',4,'elka_vetv2',3,'shar4_2005',2,'shar2_2005',2,'elka_vetv1',1,'ny06ball1',1,'ny06ball3',1,'elka_base1',1,'ny06ball8',1], location:5, possible:0, accepted:0},
+  { name:'elka_w4', descr:'Йолка', comp: ['shar1_2005',4,'shar4_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar3_2005',1,'ny06ball6',1,'svechka1',1,'elka_base1',1,'shar8_2005',1], location:5, possible:0, accepted:0},
+  { name:'elka_w6', descr:'Йолка', comp: ['elka_vetv1',4,'shar4_2005',2,'shar3_2005',2,'shar5_2005',2,'shar1_2005',2,'ny06ball4',1,'ny06ball5',1,'elka_base1',1,'ny06ball8',1,'ny06ball11',1], location:5, possible:0, accepted:0},
+  { name:'elka_w1', descr:'Йолка', comp: ['elka_vetv2',3,'shar3_2005',2,'shar4_2005',1,'ny06ball7',1,'elka_vetv1',1,'ny06ball1',1,'ny06ball5',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w15', descr:'Йолка', comp: ['elka_vetv2',3,'shar5_2005',3,'shar3_2005',2,'shar2_2005',1,'ny06ball10',1,'elka_vetv1',1,'ny06ball3',1,'shar1_2005',1,'elka_base1',1,'ny06ball8',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w17', descr:'Йолка', comp: ['shar3_2005',3,'shar1_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar4_2005',1,'shar5_2005',1,'svechka2',1,'ny06ball3',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w12', descr:'Йолка', comp: ['elka_vetv1',4,'shar4_2005',2,'shar1_2005',2,'ny06ball6',1,'elka_base1',1,'shar8_2005',1], location:5, possible:0, accepted:0},
+  { name:'elka_w13', descr:'Йолка', comp: ['elka_vetv1',4,'shar5_2005',3,'shar1_2005',3,'shar3_2005',2,'shar2_2005',2,'shar4_2005',1,'bengal1',1,'svechka1',1,'ny06ball1',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w14', descr:'Йолка', comp: ['shar1_2005',4,'elka_vetv2',3,'shar2_2005',2,'shar4_2005',1,'ny06ball6',1,'shar5_2005',1,'bengal1',1,'elka_vetv1',1,'ny06ball5',1,'elka_base1',1,'ny06ball12',1], location:5, possible:0, accepted:0},
+  { name:'elka_w16', descr:'Йолка', comp: ['elka_vetv2',3,'shar3_2005',2,'shar2_2005',2,'shar4_2005',1,'svechka3',1,'shar5_2005',1,'ny06ball4',1,'svechka1',1,'elka_vetv1',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w26', descr:'Йолка', comp: ['elka_vetv2',3,'shar5_2005',2,'shar1_2005',2,'shar4_2005',1,'ny06ball10',1,'elka_vetv1',1,'ny06ball5',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w27', descr:'Йолка', comp: ['elka_vetv1',3,'shar3_2005',2,'shar4_2005',2,'shar5_2005',2,'elka_vetv2',1,'svechka2',1,'ny06ball9',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w24', descr:'Йолка', comp: ['elka_vetv1',4,'shar2_2005',3,'shar4_2005',2,'ny06ball7',1,'svechka1',1,'elka_base1',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+  { name:'elka_w25', descr:'Йолка', comp: ['shar4_2005',3,'elka_vetv2',3,'shar5_2005',2,'shar2_2005',2,'shar3_2005',1,'elka_vetv1',1,'ny06ball1',1,'ny06ball5',1,'elka_base1',1,'ny06ball8',1], location:5, possible:0, accepted:0},
+  { name:'elka_w23', descr:'Йолка', comp: ['shar2_2005',5,'shar3_2005',4,'elka_vetv1',3,'shar1_2005',2,'shar4_2005',1,'elka_vetv2',1,'ny06ball3',1,'elka_base1',1,'ny06ball8',1], location:5, possible:0, accepted:0},
+  { name:'elka_w21', descr:'Йолка', comp: ['elka_vetv1',3,'shar3_2005',1,'shar4_2005',1,'elka_vetv2',1,'shar5_2005',1,'ny06ball4',1,'shar2_2005',1,'svechka1',1,'shar1_2005',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w20', descr:'Йолка', comp: ['shar4_2005',4,'elka_vetv1',3,'elka_vetv2',1,'shar2_2005',1,'ny06ball10',1,'elka_base1',1,'ny06ball2',1,'shar8_2005',1], location:5, possible:0, accepted:0},
+  { name:'elka_w22', descr:'Йолка', comp: ['shar2_2005',4,'elka_vetv2',3,'shar4_2005',2,'ny06ball5',2,'shar5_2005',1,'elka_vetv1',1,'elka_base1',1,'shar8_2005',1], location:5, possible:0, accepted:0},
+  { name:'elka_w29', descr:'Йолка', comp: ['elka_vetv2',3,'shar2_2005',3,'shar5_2005',2,'shar3_2005',1,'svechka3',1,'svechka2',1,'ny06ball4',1,'elka_vetv1',1,'shar1_2005',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w28', descr:'Йолка', comp: ['shar2_2005',3,'elka_vetv2',2,'elka_vetv1',2,'shar3_2005',1,'ny06ball7',1,'svechka2',1,'ny06ball3',1,'elka_base1',1], location:5, possible:0, accepted:0},
+  { name:'elka_w19', descr:'Йолка', comp: ['shar3_2005',3,'shar4_2005',3,'elka_vetv2',2,'shar5_2005',2,'elka_vetv1',2,'shar2_2005',1,'ny06ball1',1,'elka_base1',1,'ny06ball12',1,'ny06ball2',1], location:5, possible:0, accepted:0},
+
+// Букеты
+  { name:'event_valentine_buket_big', descr:'Букет кровавых подземников', comp: ['event_valentine_reward_small',36,'event_valentine_reward_med',18,'event_valentine_reward_big',11], location:5, possible:0, accepted:0},
+  { name:'event_valentine_buket_big', descr:'Букет черепичных подземников', comp: ['event_valentine_reward_small',20,'event_valentine_reward_med',11], location:5, possible:0, accepted:0},
+  { name:'event_valentine_buket_big', descr:'Букет блеклых подземников', comp: ['event_valentine_reward_small',11], location:5, possible:0, accepted:0}
 ];
 
 //try {
