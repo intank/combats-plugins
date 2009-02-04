@@ -9,6 +9,7 @@
  * [flooder]
  * [inventory_backup]
  * [notify_handler]
+ * [recipes]
  * [top_tray] 
  * [simple_doc]
  * [walk]
