@@ -5,6 +5,7 @@
  * [chat_handler]
  * [chat_hilight]
  * [chat_private_tab]
+ * [dress]
  * [fighter_notebook]
  * [flooder]
  * [inventory_backup]
