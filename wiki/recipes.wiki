@@ -1,5 +1,6 @@
 #summary Анализ содержимого рюкзака.
 #labels Phase-Deploy
+#sidebar PluginsListNavigation
 
 = Введение =
 
