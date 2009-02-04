@@ -11,13 +11,23 @@
 {{{
 (function(){
   return {
+    parameterNumber: 12345,
+    parameterString: "qwerty",
+    parameterBool: true,
     toString: function() { // Название плагина
       return "Простейший плагин";
     },
     getProperties: function() { // запрос конфигурируемых параметров
-      return [];
+      return [
+        {name:"Параметр 1", value:this.parameterNumber},
+        {name:"Параметр 2", value:this.parameterString},
+        {name:"Параметр 3", value:this.parameterBool}
+      ];
     },
     setProperties: function(a) { // применение изменённых настроек
+      this.parameterNumber = a[0].value;
+      this.parameterString = a[1].value;
+      this.parameterBool = a[2].value;
     },
     Init: function() {
       return this;
