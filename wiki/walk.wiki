@@ -1,5 +1,6 @@
 #summary Бродилка по пещере.
 #labels Phase-Deploy
+#sidebar PluginsListNavigation
 
 = Введение =
 
