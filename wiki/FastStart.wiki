@@ -1,5 +1,6 @@
 #summary Как скачать и установить Менеджер плагинов для БК
 #labels Featured,Phase-Deploy
+#sidebar MainNavigation
 
 = Быстрый старт =
 
