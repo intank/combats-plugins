@@ -1,5 +1,6 @@
 #summary Как написать свой плагин.
 #labels Phase-Implementation,Featured
+#sidebar MainNavigation
 
 = Введение =
 
