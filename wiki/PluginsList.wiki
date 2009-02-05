@@ -1,5 +1,6 @@
 #summary Список плагинов в стандартной поставке Менеджера
 #labels Featured
+#sidebar MainNavigation
 
 = Перечень плагинов =
 
