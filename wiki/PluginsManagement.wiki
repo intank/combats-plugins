@@ -1,5 +1,6 @@
 #summary Подключение и отключение плагинов.
 #labels Phase-Deploy
+#sidebar MainNavigation
 
 = Управление плагинами =
 
