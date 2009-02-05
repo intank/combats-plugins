@@ -12,7 +12,9 @@
         s=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\recipes.js")
 
         w=window.open('about:blank');
-        w.document.writeln('<script>var security_id=opener.combats_plugins_manager.security_id;</script>');
+        if (!w.opener)
+          w.opener = top;
+        w.document.writeln('<script>var security_id="'+top.combats_plugins_manager.security_id+'";</script>');
         w.document.writeln(s);
         
         }
