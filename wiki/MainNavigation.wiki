@@ -1,0 +1,5 @@
+ * [FastStart Быстрый старт]
+ * [PluginsList Список плагинов]
+ * [PluginsManagement Управление плагинами]
+ * [HowToCreateNewPlugin Как создать свой плагин]
+ * [http://code.google.com/p/combats-plugins/downloads/list Загрузки]
