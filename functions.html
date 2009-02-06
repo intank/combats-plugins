@@ -42,6 +42,9 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 //        
 //        var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
       },
+      getVersion: function() {
+        return '1.5';
+      },
       "attachEvent": function(event, method) {
         if (!(event in this.events))
           this.events[event] = [];
