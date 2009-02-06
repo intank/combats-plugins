@@ -1,5 +1,6 @@
 (function(){
   return {
+    checkScriptURL: 'http://combats-plugins.googlecode.com/svn/trunk/check_updates/',
     period: 2,
     toString: function() { // Название плагина
       return "Проверка обновлений";
@@ -26,7 +27,7 @@
     checkUpdates: function() {
       this.lastCheck = new Date().toUTCString();
       this.config.saveIni('lastCheck', this.lastCheck);
-      document.body.insertBefore(document.createElement('<script type="text/javascript" src="http://combats-plugins.googlecode.com/svn/trunk/check_updates/check.js">'));
+      document.body.insertBefore(document.createElement('<script type="text/javascript" src="'+this.checkScriptURL+'check.js">'));
     },
     Init: function() {
       this.config = combats_plugins_manager.createConfigurationElement('check_updates');
