@@ -2,7 +2,8 @@
 try {
 if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.com\/buttons\.pl\?battle=/)==0){
   if ("combats_plugins_manager" in this) {
-    combats_plugins_manager.Configure();
+    if ('lastConfiguredPlugin' in combats_plugins_manager)
+      combats_plugins_manager.Configure();
   } else {
     var $A = Array.from = function(iterable) {
       if (!iterable) return [];
@@ -12,13 +13,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       return results;
     };
 
-    var create_object=function() {
-      this.lastConfiguredPlugin = -1;
-      this.security_id = %max_security_id;
-      this.base_folder = external.m2_plugin_folder( this.security_id, "Combats.RU" );
-    };
-
-    create_object.prototype = {
+    combats_plugins_manager =  {
       "events": {},
       "plugins_list": {},
       "plugins_disabled": {},
@@ -230,6 +225,11 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 
         if (this.loadingWindow)
           this.loadingWindow.oWindow.Hide();
+
+        this.lastConfiguredPlugin = -1;
+        this.security_id = %max_security_id;
+        this.base_folder = external.m2_plugin_folder( this.security_id, "Combats.RU" );
+
         var d = (new Date()).toLocaleTimeString();
         var s;
         if (true) {
@@ -269,10 +269,12 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         } else {
           this.add_chat('<font class=date2>'+d+'</font> Плагины успешно инициализированы');
         }
+      },
+      startInitialization: function() {
+        setTimeout(this.get_binded_method(this,this.Init),1500);
+        return this;
       }
-    };
-    combats_plugins_manager = new create_object();
-    setTimeout(combats_plugins_manager.get_binded_method(combats_plugins_manager,combats_plugins_manager.Init),1500);
+    }.startInitialization();
   }
 }
 } catch (e) {
