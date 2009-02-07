@@ -4,6 +4,7 @@
       return "Бродилка по пещере";
     },
 
+    usedObjectsCleanup: 3, // количество минут до следующей очистки списка поюзаных объектов
     mapFileName: '',
     Map: null,
     excludedItems: {},
@@ -254,8 +255,8 @@
     },
 
     "clearUsedObjects": function() {
-      this.usedObjects=new Object();
-      setTimeout(top.combats_plugins_manager.get_binded_method(this,this.clearUsedObjects),60*60*1000);
+      this.usedObjects={};
+      setTimeout(top.combats_plugins_manager.get_binded_method(this,this.clearUsedObjects),this.usedObjectsCleanup*60*1000);
       this.skip_quest = false;
     },
 
