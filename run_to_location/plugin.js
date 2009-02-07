@@ -18,8 +18,6 @@
         return [
           { name:"Запомнить переходы локации", value:this.savePathes },
           { name:"Экспорт переходов в файл", value:this.exportPathes },
-          { name:"Куда бежим:", value:locations_list },
-          { name:"Побежали!", value:this.run_to_location },
           { name:"Предпочитаемые локации", value:this.favorites.join('\n'), type:'textarea' }
         ];
       } else {
@@ -30,9 +28,12 @@
       }
     },
     setProperties: function(a) {
-      if (a.length!=5)
+      if (a.length!=3)
         return;
       this.favorites = a[2].value.split(/\s*[;,\n\r]+\s*/);
+      while(this.favorites.length && !this.favorites[0])
+        this.favorites.shift();
+      this.config.saveIni('favorites.'+this.city,this.favorites.join(';'));
     },
     analyze_step: function(new_step, from, pathes) {
       if (!(from in this.steps))
@@ -185,6 +186,40 @@
         this.mainframeHandler);
       this.try_run_to_new_location();
     },
+    locationClicked: function() {
+      if (this['debugger']) debugger;
+      if (window.event.srcElement.nodeName!='TD') return;
+
+      if (window.event.srcElement.attributes['run_to_location_all']) {
+        if (!this.locationsWindow) {
+          this.locationsWindow = combats_plugins_manager.createWindow("Локации города", 320, 480);
+
+          var locations_count = 0;
+          var locations_list = [];
+          for(var location in this.pathes) {
+            locations_list.push(location);
+          }
+          locations_list.sort();
+
+          var s = '';
+          for(var i=0; i<locations_list.length; i++) {
+            s += '<tr><td style="width:100%; height: 1em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle">'+locations_list[i]+'</td></tr>';
+          }
+          var div = document.createElement('<div style="width:100%; height:100%; overflow-y:scroll">');
+          div.innerHTML = '<table style="width: 100%">'+s+'</table>';
+          this.locationsWindow.oWindow.Insert(div);
+          div.firstChild.onclick=combats_plugins_manager.get_binded_method(this, this.locationClicked);
+        }
+        this.locationsWindow.oWindow.Show();
+      } else {
+        if (this.locationsWindow)
+          this.locationsWindow.oWindow.Hide();
+        this.run_to_location(window.event.srcElement.innerText);
+      }
+      if (this.menu)
+        this.menu.parentNode.removeChild(this.menu);
+      this.menu = null;
+    },
     selectLocation: function() {
       if (this.menu) {
         this.menu.parentNode.removeChild(this.menu);
@@ -196,22 +231,13 @@
       for(var i=0; i<this.favorites.length; i++) {
         s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.favorites[i]+'</td></tr>';
       }
+      s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle" run_to_location_all="1">Все локации города...</td></tr>';
       this.menu.innerHTML = '<table style="border: 2px solid black; width: 100%">'+s+'</table>';
       this.menu.style.cssText = 'position: absolute; z-index: 5; left: '+(window.event.clientX-window.event.offsetX)+'px; top: '+(window.event.clientY-window.event.offsetY+30)+'px; width: 200px; height: auto; background: #C7C7C7';
       top.document.body.insertBefore(this.menu);
       this.menu.attachEvent(
         'onclick',
-        combats_plugins_manager.get_binded_method(
-          this, 
-          function() {
-            if (this['debugger']) debugger;
-            if (window.event.srcElement.nodeName!='TD') return;
-
-            this.run_to_location(window.event.srcElement.innerText);
-            this.menu.parentNode.removeChild(this.menu);
-            this.menu = null;
-          }
-        )
+        combats_plugins_manager.get_binded_method(this, this.locationClicked)
       );
     },
 
@@ -320,6 +346,9 @@
       try {
         var filename = 'run_to_location\\pathes_'+this.city+'.js';
         this.pathes = top.eval('(function(){ return '+external.readFile(combats_plugins_manager.security_id,"Combats.RU",filename)+'; })()');
+        var newPathes = top.eval('(function(){ return '+external.readFile(combats_plugins_manager.security_id,"Combats.RU", 'run_to_location\\pathes_'+this.city+'.!.js')+'; })()');
+        if (newPathes)
+          combats_plugins_manager.add_chat(':idea: Внимание! Найден (но не загружен) альтернативный файл переходов: '+'run_to_location\\pathes_'+this.city+'.!.js');
         var warn_location = [];
         for(var from in this.pathes) {
           for(var i in this.pathes[from]) {
@@ -335,6 +364,10 @@
       } catch(e) {
         combats_plugins_manager.logError(this,'Не удалось загрузить маршруты перемещения по '+this.city);
       }
+      this.config = combats_plugins_manager.createConfigurationElement('run_to_location');
+      this.favorites = this.config.loadIni('favorites.'+this.city,'').split(/\s*[;,\n\r]+\s*/);
+      while(this.favorites.length && !this.favorites[0])
+        this.favorites.shift();
       return this;
     }
   }.Init();
