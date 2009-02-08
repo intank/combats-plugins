@@ -11,6 +11,7 @@
  * [inventory_backup]
  * [notify_handler]
  * [recipes]
+ * [run_to_location]
  * [top_tray] 
  * [simple_doc]
  * [walk]
