@@ -29,7 +29,7 @@ chat_hilight
 split_goods
 battle_preload
 simple_doc
-run_to_location
+check_updates
 ; == Следующие плагины так же могут быть подключены пользователем ==
 ;fast_cast
 ;chat_private_tab
