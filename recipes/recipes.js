@@ -297,8 +297,8 @@ var recipes = [
 
 // Букеты
   { name:'event_valentine_buket_big', descr:'Букет кровавых подземников', comp: ['event_valentine_reward_small',36,'event_valentine_reward_med',18,'event_valentine_reward_big',11], location:5, possible:0, accepted:0},
-  { name:'event_valentine_buket_big', descr:'Букет черепичных подземников', comp: ['event_valentine_reward_small',20,'event_valentine_reward_med',11], location:5, possible:0, accepted:0},
-  { name:'event_valentine_buket_big', descr:'Букет блеклых подземников', comp: ['event_valentine_reward_small',11], location:5, possible:0, accepted:0}
+  { name:'event_valentine_buket_med', descr:'Букет черепичных подземников', comp: ['event_valentine_reward_small',20,'event_valentine_reward_med',11], location:5, possible:0, accepted:0},
+  { name:'event_valentine_buket_small', descr:'Букет блеклых подземников', comp: ['event_valentine_reward_small',11], location:5, possible:0, accepted:0}
 ];
 
 //try {
