@@ -29,6 +29,7 @@ chat_hilight
 split_goods
 battle_preload
 simple_doc
+run_to_location
 ; == Следующие плагины так же могут быть подключены пользователем ==
 ;fast_cast
 ;chat_private_tab
@@ -42,3 +43,7 @@ simple_doc
 ;mana_donor
 ;portal_notify
 ;show_heal_speed
+;view_claims
+;view_reward
+;chat_fix_ie8
+;digger_check
