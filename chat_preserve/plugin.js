@@ -14,7 +14,7 @@
       this.config.saveIni('preserveChat', this.preserveChat.toString());
     },
     CLR2: function() {
-      if (this.clearOnMovement)
+      if (!this.preserveChat)
         this.oldCLR2.apply(top, []);
     },
     Init: function() {
