@@ -121,9 +121,9 @@ function getPluginGfg() {
                   s += '<tr><td colspan="2"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL><br/>';
                   s += '<textarea style="'+style+'" id="prop_'+i+'">'+props[i].value+"</textarea>";
                 } else
-                  throw new Exception();
+                  throw new Error('');
               } else
-                throw new Exception();
+                throw new Error('');
             } catch(e) {
               if (typeof(props[i].value)=="string")
                 style = "width:100%; "+style;
