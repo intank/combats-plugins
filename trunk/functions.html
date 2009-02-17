@@ -209,7 +209,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
             sleep += (top.frames[i].document.readyState!="complete" && top.frames[i].document.readyState!="interactive")?1:0;
           }
           if (sleep) {
-            throw new Exception('Page is not ready');
+            throw new Error('Page is not ready');
           }
         } catch(e) {
           if (!this.loadingWindow) {

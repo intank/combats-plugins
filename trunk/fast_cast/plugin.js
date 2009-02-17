@@ -174,7 +174,7 @@
               setTimeout(function(){top.cht('/main.pl');}, 0);
             }
           }
-          throw new Exception('');
+          throw new Error('');
         }
       } catch(e) {
         setTimeout(combats_plugins_manager.get_binded_method(this,this.castSpell,params,step), 1000);
