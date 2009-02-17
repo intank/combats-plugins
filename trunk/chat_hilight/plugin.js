@@ -40,7 +40,7 @@
     loadFilters: function() {
       var filterPlugin = combats_plugins_manager.plugins_list['chat_filter'];
       if (!filterPlugin) {
-        throw new Exception('Для корретной работы нужен плагин chat_filter');
+        throw new Error('Для корретной работы нужен плагин chat_filter');
       }
       if (this.clearFilterId!='')
         filterPlugin.removeFilter(this.clearFilterId);
