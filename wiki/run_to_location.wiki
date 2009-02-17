@@ -1,5 +1,5 @@
 #summary Перемещение в заданную локацию.
-#labels Featured,Phase-Deploy
+#labels Phase-Deploy
 #sidebar PluginsListNavigation
 
 = Введение =
