@@ -7,6 +7,7 @@
     'debugger': false,
     time: -1,
     removeDuplicates: true,
+    removeOldPrivate: true,
     removeOld: true,
     timeoutOld: 3,
     toString: function() {
@@ -21,18 +22,21 @@
     getProperties: function() {
       return [
         { name: "Удалять предыдущие копии", value: this.removeDuplicates },
-        { name: "Удалять устаревшие сообщения", value: this.removeOld },
+        { name: "Удалять устаревший приват", value: this.removeOldPrivate },
+        { name: "Удалять устаревший общий чат", value: this.removeOld },
         { name: "Оставлять сообщения за последние минуты:", value: this.timeoutOld }
       ];
     },
     setProperties: function(a) {
       try {
         this.removeDuplicates = a[0].value;
-        this.removeOld = a[1].value;
-        this.timeoutOld = parseInt(a[2].value);
+        this.removeOldPrivate = a[1].value;
+        this.removeOld = a[2].value;
+        this.timeoutOld = parseInt(a[3].value);
         this.save('removeDuplicates',this.removeDuplicates?'true':'false');
+        this.save('removeOldPrivate',this.removeOldPrivate?'true':'false');
         this.save('removeOld',this.removeOld?'true':'false');
-        this.save('timeoutOld',a[2].value);
+        this.save('timeoutOld',this.timeoutOld.toString());
       } catch (e) {
         alert('Ошибка настройки: "'+e.message+'"');
       }
@@ -52,7 +56,7 @@
         if (this['debugger'])
           debugger;
         if (this.removeOld) {
-          var match=eventObj.mess.match(/^<font class="?(?:sys)?date2?"?>(\d\d)\:(\d\d)<\/font>/);
+          var match=eventObj.mess.match(/^<font class="?(?:sys)?date2?"?>(?:\d+\.\d+\.\d+\s+|)(\d\d)\:(\d\d)<\/font>/);
           if (match) {
             if (match[1].charAt(0)=='0')
               match[1] = match[1].substr(1);
@@ -60,9 +64,11 @@
               match[2] = match[2].substr(1);
             var time = parseInt(match[1])*60+parseInt(match[2]);
             var timeSpan = (time-this.time+1440)%1440;
-            if (this.time<0 || timeSpan<12*60 || timeSpan>1440-this.timeoutOld) {
+            var isPrivate = this.removeOldPrivate && /private \[.*?\]/.test(eventObj.mess);
+            if (this.time<0 || timeSpan<12*60) {
               this.time = time;
-            } else {
+            }
+            if ((timeSpan>12*60 && timeSpan<=1440-this.timeoutOld) || (isPrivate && this.time!=time)) {
               eventObj.mess = '';//'Сообщение удалено '+time+'('+this.time+')';
               return;
             }
