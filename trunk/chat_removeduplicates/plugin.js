@@ -1,30 +1,22 @@
 (function() {
-  function plugin_chat_removeduplicates() {
-    this.Init();
-  }
-
-  plugin_chat_removeduplicates.prototype = {
+  return {
     'debugger': false,
     time: -1,
     removeDuplicates: true,
     removeOldPrivate: true,
     removeOld: true,
     timeoutOld: 3,
+    preserveChat: true,
     toString: function() {
-      return "Удаление повторений в чате";
-    },
-    load: function(key,def_val){
-      return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","chat_removeduplicates\\chat_removeduplicates.ini",top.getCookie('battle'),key,def_val);
-    },
-    save: function(key,val){
-      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","chat_removeduplicates\\chat_removeduplicates.ini",top.getCookie('battle'),key,val);
+      return "Управление чатом";
     },
     getProperties: function() {
       return [
         { name: "Удалять предыдущие копии", value: this.removeDuplicates },
         { name: "Удалять устаревший приват", value: this.removeOldPrivate },
         { name: "Удалять устаревший общий чат", value: this.removeOld },
-        { name: "Оставлять сообщения за последние минуты:", value: this.timeoutOld }
+        { name: "Оставлять сообщения за последние минуты:", value: this.timeoutOld },
+        { name: "Сохранять чат при переходах", value: this.preserveChat }
       ];
     },
     setProperties: function(a) {
@@ -33,21 +25,33 @@
         this.removeOldPrivate = a[1].value;
         this.removeOld = a[2].value;
         this.timeoutOld = parseInt(a[3].value);
-        this.save('removeDuplicates',this.removeDuplicates?'true':'false');
-        this.save('removeOldPrivate',this.removeOldPrivate?'true':'false');
-        this.save('removeOld',this.removeOld?'true':'false');
-        this.save('timeoutOld',this.timeoutOld.toString());
+        this.preserveChat = a[4].value;
+        this.config.saveIni('removeDuplicates',this.removeDuplicates?'true':'false');
+        this.config.saveIni('removeOldPrivate',this.removeOldPrivate?'true':'false');
+        this.config.saveIni('removeOld',this.removeOld?'true':'false');
+        this.config.saveIni('timeoutOld',this.timeoutOld.toString());
+        this.config.saveIni('preserveChat', this.preserveChat.toString());
       } catch (e) {
         alert('Ошибка настройки: "'+e.message+'"');
       }
     },
+    CLR2: function() {
+      if (!this.preserveChat)
+        this.oldCLR2.apply(top, []);
+    },
     Init: function() {
-      this.removeDuplicates = this.load('removeDuplicates','')=='true';
-      this.removeOld = this.load('removeOld','')=='true';
-      this.timeoutOld = parseInt(this.load('timeoutOld','3'));
+      this.config = combats_plugins_manager.createConfigurationElement('chat_removeduplicates');
+      this.preserveChat = this.config.loadIni('preserveChat', 'false') == 'true';
+      this.removeDuplicates = this.config.loadIni('removeDuplicates','')=='true';
+      this.removeOld = this.config.loadIni('removeOld','')=='true';
+      this.timeoutOld = parseInt(this.config.loadIni('timeoutOld','3'));
+
+      this.oldCLR2 = top.CLR2;
+      top.CLR2 = combats_plugins_manager.get_binded_method(this, this.CLR2);
       combats_plugins_manager.attachEvent(
         'onmessage',
         combats_plugins_manager.get_binded_method(this,this.processEvent));
+      return this;
     },
     processEvent: function(eventObj) {
       if (eventObj.mess=='')
@@ -100,7 +104,5 @@
       } catch(e) {
       }
     }
-  };
-
-  return new plugin_chat_removeduplicates();
+  }.Init();
 })()
