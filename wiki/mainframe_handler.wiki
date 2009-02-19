@@ -2,7 +2,7 @@
 #labels Phase-Implementation
 #sidebar PluginsListNavigation
 
-Отслеживает обновления основного фрейма игровой страницы. При каждом обновлении генерирует событие *mainframe.load*, передавая объект eventObj следующего содержания: 
+Отслеживает обновления основного фрейма игровой страницы. При каждом обновлении генерирует событие *mainframe.load*, передавая объект *eventObj* следующего содержания: 
 {{{
 var eventObj = { 'window': combats_plugins_manager.getMainFrame() };
 }}}
