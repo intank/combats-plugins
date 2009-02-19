@@ -9,6 +9,7 @@
  * [fighter_notebook]
  * [flooder]
  * [inventory_backup]
+ * [mainframe_handler]
  * [notify_handler]
  * [recipes]
  * [run_to_location]
