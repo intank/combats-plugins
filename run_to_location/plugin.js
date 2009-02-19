@@ -30,7 +30,10 @@
     setProperties: function(a) {
       if (a.length!=3)
         return;
-      this.favorites = a[2].value.split(/\s*[;,\n\r]+\s*/);
+      this.favorites = a[2].value.split(/\s*[;,\n\r]+\s*/).sort();
+      this.saveFavorites();
+    },
+    saveFavorites: function() {
       while(this.favorites.length && !this.favorites[0])
         this.favorites.shift();
       this.config.saveIni('favorites.'+this.city,this.favorites.join(';'));
@@ -186,35 +189,63 @@
         this.mainframeHandler);
       this.try_run_to_new_location();
     },
+    showAllLocationsWindow: function() {
+      if (!this.locationsWindow) {
+        this.locationsWindow = combats_plugins_manager.createWindow("Локации города", 320, 480);
+
+        var locations_count = 0;
+        this.locations_list = [];
+        for(var location in this.pathes) {
+          this.locations_list.push(location);
+        }
+        this.locations_list.sort();
+
+        var s = '';
+        for(var i=0; i<this.locations_list.length; i++) {
+          s += '<tr><td style="width:100%; height: 1em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle"><input id="run_to_location_check'+i+'" style="float:right; cursor:default" type="checkbox"'+(this.isInFavorites(this.locations_list[i])?' CHECKED':'')+' />'+this.locations_list[i]+'</td></tr>';
+        }
+        var div = document.createElement('<div style="width:100%; height:100%; overflow-y:scroll">');
+        div.innerHTML = '<table style="width: 100%">'+s+'</table>';
+        this.locationsWindow.oWindow.Insert(div);
+        div.firstChild.onclick=combats_plugins_manager.get_binded_method(this, this.locationClicked);
+      }
+      this.locationsWindow.oWindow.Show();
+    },
+    isInFavorites: function(locationName) {
+      for(var i=0; i<this.favorites.length; i++)
+        if (this.favorites[i]==locationName)
+          return true;
+      return false;
+    },
     locationClicked: function() {
       if (this['debugger']) debugger;
-      if (window.event.srcElement.nodeName!='TD') return;
-
-      if (window.event.srcElement.attributes['run_to_location_all']) {
-        if (!this.locationsWindow) {
-          this.locationsWindow = combats_plugins_manager.createWindow("Локации города", 320, 480);
-
-          var locations_count = 0;
-          var locations_list = [];
-          for(var location in this.pathes) {
-            locations_list.push(location);
+      var element = window.event.srcElement;
+      if (element.nodeName=='INPUT') {
+        var match = element.id.match(/^run_to_location_check(\d+)$/);
+        if (!match)
+          return;
+        var locationName = this.locations_list[parseInt(match[1])];
+        for(var i=0; i<this.favorites.length; i++)
+          if (this.favorites[i]==locationName) {
+            this.favorites.splice(i,1);
+            locationName = '';
+            break;
           }
-          locations_list.sort();
-
-          var s = '';
-          for(var i=0; i<locations_list.length; i++) {
-            s += '<tr><td style="width:100%; height: 1em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle">'+locations_list[i]+'</td></tr>';
-          }
-          var div = document.createElement('<div style="width:100%; height:100%; overflow-y:scroll">');
-          div.innerHTML = '<table style="width: 100%">'+s+'</table>';
-          this.locationsWindow.oWindow.Insert(div);
-          div.firstChild.onclick=combats_plugins_manager.get_binded_method(this, this.locationClicked);
+        if (locationName) {
+          this.favorites.push(locationName);
+          this.favorites.sort();
         }
-        this.locationsWindow.oWindow.Show();
+        this.saveFavorites();
+        return;
+      }
+      if (element.nodeName!='TD') return;
+
+      if (element.attributes['run_to_location_all']) {
+        this.showAllLocationsWindow();
       } else {
         if (this.locationsWindow)
           this.locationsWindow.oWindow.Hide();
-        this.run_to_location(window.event.srcElement.innerText);
+        this.run_to_location(element.innerText);
       }
       if (this.menu)
         this.menu.parentNode.removeChild(this.menu);
