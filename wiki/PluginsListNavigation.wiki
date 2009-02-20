@@ -16,3 +16,4 @@
  * [top_tray] 
  * [simple_doc]
  * [walk]
+ * [PluginsList Полный перечень плагинов]
