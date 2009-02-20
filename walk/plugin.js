@@ -7,6 +7,7 @@
     usedObjectsCleanup: 3, // количество минут до следующей очистки списка поюзаных объектов
     mapFileName: '',
     Map: null,
+	defaultDungeonName: '',
     excludedItems: {},
     alwaysItems: {},
 
@@ -132,6 +133,7 @@
 		{ name: "Список исключенных из автокликера объектов", value: this.excludedObjects, type:"textarea"},
 		{ name: "Список объектов, на которые нужно кликать <b>всегда</b>", value: items[1].join("\n"), type:"textarea"},
 		{ name: "Предметы, которые не нужно поднимать", value: items[0].join("\n"), type:"textarea"},
+		{ name: "Название подземелья в <b>'+this.cityName+'</b>, если не удалось определить автоматически", value: this.defaultDungeonName },
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -154,6 +156,7 @@
         items = a[10].value.split(/\s*[\n\r;]+\s*/);
 	for(var i=0; i<items.length; i++)
           this.excludedItems[items[i]] = true;
+	this.defaultDungeonName = a[11].value;
 
 	this.save('forced',this.forced?"yes":"no");
 	this.save('ignoreWall',this.ignoreWall?"yes":"no");
@@ -166,6 +169,7 @@
 	this.save('exclude',this.excludedObjects.replace(/\s*[\n\r]+\s*/g,";"));
 	this.save('alwaysItems',a[9].value.replace(/\s*[\n\r]+\s*/g,";"));
 	this.save('excludedItems',a[10].value.replace(/\s*[\n\r]+\s*/g,";"));
+	this.save(this.cityName+'.defaultDungeonName',this.defaultDungeonName);
     },
 
     "clearLog": function() {
@@ -620,14 +624,23 @@
     },
 
     "updateMap": function(enforce) {
-      this.dungeonName = top.frames['activeusers'].document.getElementById('room').innerText.replace(/\s*\(\d+\)$/,'')
-      var mapFileName = 'walk\\'+this.dungeonName+'.js';
+      this.dungeonName = top.frames['activeusers'].document.getElementById('room').innerText.replace(/\s*\(\d+\)$/,'');
+      if (!this.dungeonName)
+        this.dungeonName = this.defaultDungeonName;
+      var mapFileName = 'walk\\'+this.cityName+'-'+this.dungeonName+'.js';
       if (enforce || this.mapFileName!=mapFileName) {
         // this.addLog('loading map file');
         var s = external.readFile(
           top.combats_plugins_manager.security_id,
           "Combats.RU",
           mapFileName) || '';
+        if (!s) {
+          mapFileName = 'walk\\'+this.dungeonName+'.js';
+          var s = external.readFile(
+            top.combats_plugins_manager.security_id,
+            "Combats.RU",
+            mapFileName) || '';
+        }
         if (s) {
           this.Map = eval('(function(){ return '+s+' })()');
           this.mapFileName = mapFileName;
@@ -968,6 +981,7 @@
 	this.skip_quest=false;
 	this.usedObjects=new Object();
 	this.sys_msg = '';
+	this.cityName = top.location.hostname.replace(/^(.+?)\..+$/,'$1');
 
 	this.clearLog();
 
@@ -994,6 +1008,7 @@
 	this.minHP=parseInt(this.load('minHP','95'));
 	this.minMana=parseInt(this.load('minMana','95'));
 	this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
+	this.defaultDungeonName=this.load(this.cityName+'.defaultDungeonName','');
 	var items=this.load('alwaysItems','Блеклый подземник;Черепичный подземник;Кровавый подземник').split(/;/);
 	this.alwaysItems = {};
 	for(var i=0; i<items.length; i++)
