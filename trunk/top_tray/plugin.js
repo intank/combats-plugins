@@ -1,9 +1,5 @@
 (function() {
-  plugin_top_tray = function() {
-    this.Init();
-  }
-
-  plugin_top_tray.prototype = {
+  return {
     panel: null,
     buttons: [],
     toString: function() {
@@ -82,6 +78,15 @@
       
       return button;
     },
+    removeButton: function(button) {
+      for (var i in this.buttons)
+        if (this.buttons[i]==button) {
+          this.panel.removeChild(button);
+          this.buttons.splice(i,1);
+          this.adjustButtons();
+          break;
+        }
+    },
     adjustButtons: function() {
 /*
       var offsetLeft = 0;
@@ -93,8 +98,7 @@
     },
     Init: function() {
       this.createPanel();
+      return this;
     }
-  };
-
-  return new plugin_top_tray();
+  }.Init();
 })()

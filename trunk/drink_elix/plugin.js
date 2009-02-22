@@ -3,6 +3,7 @@
     NO_ELIX: 1,
     DRINK_OK: 2,
     DRINK_UNKNOWN: 3,
+    criticalTime: 180, // 3 минуты
     toString: function() {
       return "Выпивание эликсира";
     },
@@ -127,10 +128,13 @@
           this.checkEffectsHandler = combats_plugins_manager.get_binded_method(this, this.timerFunction);
         }
         combats_plugins_manager.attachEvent('mainframe.load',this.loadHandler);
-        this.checkEffectsTimer = setTimeout(this.checkEffectsHandler, 2*60*1000);
+        this.timerFunction();
       } else if (this.loadHandler) {
         combats_plugins_manager.detachEvent('mainframe.load',this.loadHandler);
-        clearTimeout(this.checkEffectsTimer);
+        if (this.checkEffectsTimer) {
+          clearTimeout(this.checkEffectsTimer);
+          this.checkEffectsTimer = null;
+        }
       }
     },
     startDrinkElix: function(potions, attempt) {
@@ -139,14 +143,14 @@
       }
       var objName = potions[attempt];
 
-//      this.AJAX.open('GET', '/main.pl?use='+objName+'&n=-1&'+Math.random(), false);
-//      this.AJAX.send('');
-//      var s = this.AJAX.responseText;
-      var s = '<FONT COLOR=red><B>Свиток не найден в вашем рюкзаке</B></FONT>';
+      this.AJAX.open('GET', '/main.pl?use='+objName+'&n=-1&'+Math.random(), false);
+      this.AJAX.send('');
+      var s = this.AJAX.responseText;
+//      var s = '<FONT COLOR=red><B>Свиток не найден в вашем рюкзаке</B></FONT>';
       match = s.match(/<FONT COLOR=red>(.*?)<\/FONT>/i);
       if (match && match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
         combats_plugins_manager.add_chat(match[1]);
-        return this.startDrinkElix(potions, attempt);
+        return this.startDrinkElix(potions, attempt+1);
       } else if (match) {
         combats_plugins_manager.add_chat(match[1]);
         return this.DRINK_OK;
@@ -155,37 +159,46 @@
       return this.DRINK_UNKNOWN;
     },
     timerFunction: function() {
-/*
+//*
+      if (this.checkEffectsTimer) {
+        clearTimeout(this.checkEffectsTimer);
+      }
       combats_plugins_manager.add_chat('проверяем эффекты');
-      var nextIteration = 30; // следующий запрос через 30 секунд, если что-то пойдёт не так
+      var nextIteration = 15; // следующий запрос через 30 секунд, если что-то пойдёт не так
       try {
+        if (top.Battle.bInBattle)
+          return;
         this.AJAX.open('GET', '/main.pl?edit=3&'+Math.random(), false);
         this.AJAX.send('');
         var s = this.AJAX.responseText;
-        var images = s.match(/<IMG\s+[^>]*src="http\:\/\/img\.combats\.com\/i\/misc\/icons\/(ele_addict_|icon_pot_).*?\.gif"[^>]*onmouseover='fastshow\(".*?"[^>]*>/g);
-        for(var i=0; i<images.length; i++) {
-          var match = images[i].match(/<IMG\s+[^>]*src="http\:\/\/img\.combats\.com\/i\/misc\/icons\/((?:ele_addict_|icon_pot_).*?)\.gif"[^>]*onmouseover='fastshow\(".*?Осталось\:\s*(?:(\d+)\s*мин\.\s*)?(?:(\d+)\s*сек\.).*?"[^>]*>/);
-          if (match) {
-            var time = (parseFloat(match[2]) || 0)*60 + (parseFloat(match[3]) || 0);
-            if (match[1].match(/^icon_pot_/) && time<this.criticalTime) { // пузырёк
-              if (match[1] in this.effects) {
-                var effect = this.effects[match[1]];
-                var result = this.startDrinkElix(this.elix[effect], 0);
-                combats_plugins_manager.add_chat('результат: '+result);
-                switch (result) {
-                case this.NO_ELIX: // у нас нет нужного элика, сваливаем
-                  break;
-                case this.DRINK_UNKNOWN: // результат не распознан, нужно повторить через некоторое время
-                  nextIteration = 15;
-                  break;
-                case this.DRINK_OK: // элик выпит
-                  break;
+        var images = s.match(/<IMG[^>]*?http\:\/\/img\.combats\.com\/i\/misc\/icons\/(?:ele_addict_|icon_pot_).*?\.gif[^>]*onmouseover=(["']).*?\1[^>]*>/gmi);
+        if (images)
+          for(var i=0; i<images.length; i++) {
+            var match = images[i].match(/http\:\/\/img\.combats\.com\/i\/misc\/icons\/((?:ele_addict_|icon_pot_).*?)\.gif[^>]*onmouseover='fastshow\(".*?Осталось\:\s*(?:\d+\s*нед\.\s*)?(?:\d+\s*дн\.\s*)?(?:(\d+)\s*ч\.\s*)?(?:(\d+)\s*мин\.\s*)?(?:(\d+)\s*сек\.)?.*?"[^>]*>/);
+            if (match) {
+              var time = (parseFloat(match[2]) || 0)*3600 + (parseFloat(match[3]) || 0)*60 + (parseFloat(match[4]) || 0);
+              if (match[1].match(/^icon_pot_/) && time<this.criticalTime) { // пузырёк
+                combats_plugins_manager.add_chat(match[1]+': осталось '+time+' сек');
+                if (match[1] in this.effects) {
+                  var effect = this.effects[match[1]];
+                  var result = this.startDrinkElix(this.elix[effect], 0);
+                  combats_plugins_manager.add_chat('результат: '+result);
+                  switch (result) {
+                  case this.NO_ELIX: // у нас нет нужного элика, сваливаем
+                    break;
+                  case this.DRINK_UNKNOWN: // результат не распознан, нужно повторить через некоторое время
+                    nextIteration = 10;
+                    break;
+                  case this.DRINK_OK: // элик выпит
+                    break;
+                  }
                 }
+              } else if (match[1].match(/^ele_addict_/)) { // пристрастие
               }
             }
           }
-        }
-        nextIteration = 2*60; // следующий запрос через 2 минуты
+        if (nextIteration==15)
+          nextIteration = 2*60; // следующий запрос через 2 минуты
       } finally {
         if (this.active) {
           combats_plugins_manager.add_chat('след. проверка через '+nextIteration+' сек');
@@ -207,22 +220,28 @@
       this.maxHP = 0;
       return false;
     },
+    forceDrinkElix: function(disableElix) {
+      disableElix = disableElix || {};
+
+      if (this.maxHP-this.currentHP>500 && !disableElix['pot_cureHP250_20'])
+        objName = 'pot_cureHP250_20';
+      else if (!disableElix['pot_cureHP100_20'])
+        objName = 'pot_cureHP100_20';
+      if (!objName)
+        return '';
+      this.AJAX.open('GET', '/main.pl?use='+objName+'&n=-1&'+Math.random(), false);
+      this.AJAX.send('');
+      return this.AJAX.responseText;
+    },
     drinkElix: function(iteration, disableElix) {
       var time = (new Date().valueOf() - this.drinkTime.valueOf());
       iteration = iteration || 0;
       disableElix = disableElix || {};
       var objName;
       if (time>5000 && iteration<2 && this.currentHP/this.maxHP*100<this.autoDrinkLevel) {
-        if (this.maxHP-this.currentHP>500 && !disableElix['pot_cureHP250_20'])
-          objName = 'pot_cureHP250_20';
-        else if (!disableElix['pot_cureHP100_20'])
-          objName = 'pot_cureHP100_20';
-        if (!objName)
+        var s = this.forceDrinkElix(disableElix);
+        if (!s)
           return;
-        this.drinkTime = new Date();
-        this.AJAX.open('GET', '/main.pl?use='+objName+'&n=-1&'+Math.random(), false);
-        this.AJAX.send('');
-        var s = this.AJAX.responseText;
         match = s.match(/<FONT COLOR=red>(.*?)<\/FONT>/i);
         if (match && match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
           disableElix[objName] = true;
@@ -230,6 +249,7 @@
         }
         else
         {
+          this.drinkTime = new Date();
           if (match) {
             combats_plugins_manager.add_chat(match[1]);
           }
