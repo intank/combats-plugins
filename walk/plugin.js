@@ -133,7 +133,7 @@
 		{ name: "Список исключенных из автокликера объектов", value: this.excludedObjects, type:"textarea"},
 		{ name: "Список объектов, на которые нужно кликать <b>всегда</b>", value: items[1].join("\n"), type:"textarea"},
 		{ name: "Предметы, которые не нужно поднимать", value: items[0].join("\n"), type:"textarea"},
-		{ name: "Название подземелья в <b>'+this.cityName+'</b>, если не удалось определить автоматически", value: this.defaultDungeonName },
+		{ name: "Название подземелья в <b>"+this.cityName+"</b>, если не удалось определить автоматически", value: this.defaultDungeonName },
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -195,7 +195,7 @@
             mtime = 0;
           this.StartStepTimer(this.do_step, mtime);
         }
-		this.setCurrentSettings();
+	this.setCurrentSettings();
     },
 
     "StartStepTimer": function(do_step, sec) {

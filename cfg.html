@@ -85,10 +85,13 @@ function getPluginGfg() {
   if ("getProperties" in plugin) {
     props = plugin.getProperties();
   }
-  var s = '';
-  if (plugin_index!='.') {
-    var s = '<a href="http://code.google.com/p/combats-plugins/wiki/'+plugin_index+'" target=_blank title="Возможно, не все плагины имеют документацию. Будьте снисходительны.">Документация</a>';
+  var helpURL;
+  if (plugin_index=='.') {
+    helpURL = 'http://code.google.com/p/combats-plugins/wiki/PluginsManagement';
+  } else {
+    helpURL = 'http://code.google.com/p/combats-plugins/wiki/'+plugin_index;
   }
+  var s = '<a href="'+helpURL+'" target=_blank title="Возможно, не все плагины имеют документацию. Будьте снисходительны.">Документация</a>';
   if (props!=null) {
     if (typeof(props)!='object') {
       s += props;
@@ -104,15 +107,21 @@ function getPluginGfg() {
           if (typeof(props[i].value)=="boolean") {
             s += '<tr><td colspan="2"><input type=checkbox style="'+style+'"'+(props[i].value?' CHECKED':'')+' id="prop_'+i+'"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
           } else if (typeof(props[i].value)=="object") {
-            s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
-            s += '<td><select id="prop_'+i+'">\n';
             if ('length' in props[i].value) {
+              s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
+              s += '<td><select id="prop_'+i+'">\n';
               for (var j=0; j<props[i].value.length; j++) {
                 if (j in props[i].value)
                   s += '<option value="'+j+'"'+(j==props[i].value.selected?' SELECTED':'')+'>'+props[i].value[j]+'</option>\n';
               }
+              s += '</select>';
+            } else {
+              s += '<tr><td colspan="2"><DIV style="border: 1px solid black;">';
+              for (var j in props[i].value) {
+                s += '<DIV><input type="checkbox" id="prop_'+i+'.'+j+'"'+(props[i].value[j]?' CHECKED':'')+'> <LABEL FOR="prop_'+i+'.'+j+'" style="cursor:pointer">'+j+'</LABEL></DIV>';
+              }
+              s += '</DIV>';
             }
-            s += '</select>';
           } else {
             try {
               if ("type" in props[i]) {
@@ -121,9 +130,9 @@ function getPluginGfg() {
                   s += '<tr><td colspan="2"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL><br/>';
                   s += '<textarea style="'+style+'" id="prop_'+i+'">'+props[i].value+"</textarea>";
                 } else
-                  throw new Error('');
+                  throw new Error();
               } else
-                throw new Error('');
+                throw new Error();
             } catch(e) {
               if (typeof(props[i].value)=="string")
                 style = "width:100%; "+style;
