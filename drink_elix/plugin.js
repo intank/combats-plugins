@@ -146,7 +146,6 @@
       this.AJAX.open('GET', '/main.pl?use='+objName+'&n=-1&'+Math.random(), false);
       this.AJAX.send('');
       var s = this.AJAX.responseText;
-//      var s = '<FONT COLOR=red><B>Свиток не найден в вашем рюкзаке</B></FONT>';
       match = s.match(/<FONT COLOR=red>(.*?)<\/FONT>/i);
       if (match && match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
         combats_plugins_manager.add_chat(match[1]);
@@ -223,12 +222,14 @@
     forceDrinkElix: function(disableElix) {
       disableElix = disableElix || {};
 
+      var objName;
       if (this.maxHP-this.currentHP>500 && !disableElix['pot_cureHP250_20'])
         objName = 'pot_cureHP250_20';
       else if (!disableElix['pot_cureHP100_20'])
         objName = 'pot_cureHP100_20';
       if (!objName)
         return '';
+      disableElix[objName] = true;
       this.AJAX.open('GET', '/main.pl?use='+objName+'&n=-1&'+Math.random(), false);
       this.AJAX.send('');
       return this.AJAX.responseText;
@@ -237,14 +238,12 @@
       var time = (new Date().valueOf() - this.drinkTime.valueOf());
       iteration = iteration || 0;
       disableElix = disableElix || {};
-      var objName;
       if (time>5000 && iteration<2 && this.currentHP/this.maxHP*100<this.autoDrinkLevel) {
         var s = this.forceDrinkElix(disableElix);
         if (!s)
           return;
         match = s.match(/<FONT COLOR=red>(.*?)<\/FONT>/i);
         if (match && match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
-          disableElix[objName] = true;
           this.drinkElix(iteration, disableElix);
         }
         else
