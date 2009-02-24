@@ -1,6 +1,7 @@
 #summary Перечень плагинов, имеющих описание.
 
  * [auto_answerer]
+ * [autopass_bugag]
  * [chat_context_menu]
  * [chat_handler]
  * [chat_hilight]
