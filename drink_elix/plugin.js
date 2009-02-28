@@ -3,6 +3,10 @@
     NO_ELIX: 1,
     DRINK_OK: 2,
     DRINK_UNKNOWN: 3,
+    spellsRequired: {
+      'spell_powerHPup5': 'Жажда Жизни +5',
+      'food_l11_e': 'Жесткая Рыба'
+    },
     criticalTime: 180, // 3 минуты
     toString: function() {
       return "Выпивание эликсира";
@@ -69,6 +73,15 @@
         'pot_base_50_mana_regen',
         'pot_base_50_ggmanaregen'
       ]
+    },
+    addicts: {
+      'ele_addict_magicresist_10' : 'def',
+      'ele_addict_magicresist' : 'defmag',
+      'ele_addict_speedHP' : 'reg',
+      'ele_addict_str' : 'srt',
+      'ele_addict_dex' : 'dex',
+      'ele_addict_inst' : 'inst',
+      'ele_addict_intel' : 'intel'
     },
     effects: {
       'icon_pot_base_100_allmag1' : 'defmag',
@@ -148,59 +161,86 @@
       var s = this.AJAX.responseText;
       match = s.match(/<FONT COLOR=red>(.*?)<\/FONT>/i);
       if (match && match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
-        combats_plugins_manager.add_chat(match[1]);
+        this.addChat(match[1]);
         return this.startDrinkElix(potions, attempt+1);
       } else if (match) {
-        combats_plugins_manager.add_chat(match[1]);
+        this.addChat(match[1]);
         return this.DRINK_OK;
       }
-      combats_plugins_manager.add_chat('пили '+objName+'. результат неизвестен');
+      this.addChat('пили '+objName+'. результат неизвестен');
       return this.DRINK_UNKNOWN;
     },
+    addChat: function(s) {
+      combats_plugins_manager.add_chat(s);
+    },
+    prolongEffect: function(effect) {
+      var nextIteration = 0;
+      var result = this.startDrinkElix(this.elix[effect], 0);
+      this.addChat('результат: '+result);
+      switch (result) {
+      case this.NO_ELIX: // у нас нет нужного элика, сваливаем
+        break;
+      case this.DRINK_UNKNOWN: // результат не распознан, нужно повторить через некоторое время
+        nextIteration = 10;
+        break;
+      case this.DRINK_OK: // элик выпит
+        break;
+      }
+      return nextIteration;
+    },
     timerFunction: function() {
-//*
       if (this.checkEffectsTimer) {
         clearTimeout(this.checkEffectsTimer);
       }
-      combats_plugins_manager.add_chat('проверяем эффекты');
-      var nextIteration = 15; // следующий запрос через 30 секунд, если что-то пойдёт не так
+      this.addChat('проверяем эффекты');
+      var nextIteration = 0;
+      var isError = true;
       try {
-        if (top.Battle.bInBattle)
+        if (top.Battle.bInBattle) {
+          isError = false;
           return;
+        }
         this.AJAX.open('GET', '/main.pl?edit=3&'+Math.random(), false);
         this.AJAX.send('');
         var s = this.AJAX.responseText;
-        var images = s.match(/<IMG[^>]*?http\:\/\/img\.combats\.com\/i\/misc\/icons\/(?:ele_addict_|icon_pot_).*?\.gif[^>]*onmouseover=(["']).*?\1[^>]*>/gmi);
-        if (images)
+        var images = s.match(/<IMG[^>]*?\/misc\/icons\/(?:ele_addict_|icon_pot_).*?\.gif[^>]*onmouseover=(["']).*?\1[^>]*>/gmi);
+        
+        // TODO: сюда же надо притулить проверку this.spellsRequired
+        if (images && images.length) {
+          this.addChat('Всего: '+images.length+' эффектов');
           for(var i=0; i<images.length; i++) {
-            var match = images[i].match(/http\:\/\/img\.combats\.com\/i\/misc\/icons\/((?:ele_addict_|icon_pot_).*?)\.gif[^>]*onmouseover='fastshow\(".*?Осталось\:\s*(?:\d+\s*нед\.\s*)?(?:\d+\s*дн\.\s*)?(?:(\d+)\s*ч\.\s*)?(?:(\d+)\s*мин\.\s*)?(?:(\d+)\s*сек\.)?.*?"[^>]*>/);
+            var match = images[i].match(/\/misc\/icons\/((?:ele_addict_|icon_pot_).*?)\.gif[^>]*onmouseover='fastshow\(".*?Осталось\:\s*(?:\d+\s*нед\.\s*)?(?:\d+\s*дн\.\s*)?(?:(\d+)\s*ч\.\s*)?(?:(\d+)\s*мин\.\s*)?(?:(\d+)\s*сек\.)?.*?"[^>]*>/);
             if (match) {
               var time = (parseFloat(match[2]) || 0)*3600 + (parseFloat(match[3]) || 0)*60 + (parseFloat(match[4]) || 0);
-              if (match[1].match(/^icon_pot_/) && time<this.criticalTime) { // пузырёк
-                combats_plugins_manager.add_chat(match[1]+': осталось '+time+' сек');
-                if (match[1] in this.effects) {
-                  var effect = this.effects[match[1]];
-                  var result = this.startDrinkElix(this.elix[effect], 0);
-                  combats_plugins_manager.add_chat('результат: '+result);
-                  switch (result) {
-                  case this.NO_ELIX: // у нас нет нужного элика, сваливаем
-                    break;
-                  case this.DRINK_UNKNOWN: // результат не распознан, нужно повторить через некоторое время
-                    nextIteration = 10;
-                    break;
-                  case this.DRINK_OK: // элик выпит
-                    break;
+              if (match[1].match(/^icon_pot_/)) { // пузырёк
+                if (time<this.criticalTime) {
+                  this.addChat(match[1]+': осталось '+time+' сек');
+                  if (match[1] in this.effects) {
+                    var effect = this.effects[match[1]];
+                    nextIteration = this.prolongEffect(effect) || nextIteration;
                   }
+                } else if (time<this.criticalTime+2*60 && (!nextIteration || nextIteration>time-(this.criticalTime+10))) {
+                  nextIteration=time-(this.criticalTime+10);
                 }
               } else if (match[1].match(/^ele_addict_/)) { // пристрастие
+                if (match[1] in this.addicts) {
+                  var effect = this.addicts[match[1]];
+                  nextIteration = this.prolongEffect(effect) || nextIteration;
+                }
               }
             }
           }
-        if (nextIteration==15)
-          nextIteration = 2*60; // следующий запрос через 2 минуты
+          if (!nextIteration)
+            nextIteration = 2*60; // следующий запрос через 2 минуты
+        } else {
+          this.addChat('Не вижу активных эффектов');
+        }
+        isError = false;
       } finally {
         if (this.active) {
-          combats_plugins_manager.add_chat('след. проверка через '+nextIteration+' сек');
+          if (!nextIteration)
+            nextIteration = 7; // следующий запрос через 7 секунд, если что-то пошло не так
+          this.addChat((isError?'Ошибка при проверке.':'')+'след. проверка через '+nextIteration+' сек');
           this.checkEffectsTimer = setTimeout(this.checkEffectsHandler, nextIteration*1000);
         } else {
           this.checkEffectsTimer = null;
@@ -250,7 +290,7 @@
         {
           this.drinkTime = new Date();
           if (match) {
-            combats_plugins_manager.add_chat(match[1]);
+            this.addChat(match[1]);
           }
 /*
           if (this.checkHP(s))
