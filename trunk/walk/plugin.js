@@ -134,6 +134,13 @@
 		{ name: "Список объектов, на которые нужно кликать <b>всегда</b>", value: items[1].join("\n"), type:"textarea"},
 		{ name: "Предметы, которые не нужно поднимать", value: items[0].join("\n"), type:"textarea"},
 		{ name: "Название подземелья в <b>"+this.cityName+"</b>, если не удалось определить автоматически", value: this.defaultDungeonName },
+		{ name: "Включать вывод системных сообщений", value: {
+		    'length': 3,
+		    0: 'Никогда',
+		    1: 'Только если с командой',
+		    2: 'Всегда',
+		    'selected': this.sysMode
+		  } },
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -157,6 +164,7 @@
 	for(var i=0; i<items.length; i++)
           this.excludedItems[items[i]] = true;
 	this.defaultDungeonName = a[11].value;
+	this.sysMode = a[12].value.selected;
 
 	this.save('forced',this.forced?"yes":"no");
 	this.save('ignoreWall',this.ignoreWall?"yes":"no");
@@ -170,6 +178,7 @@
 	this.save('alwaysItems',a[9].value.replace(/\s*[\n\r]+\s*/g,";"));
 	this.save('excludedItems',a[10].value.replace(/\s*[\n\r]+\s*/g,";"));
 	this.save(this.cityName+'.defaultDungeonName',this.defaultDungeonName);
+	this.save('sysMode',this.sysMode.toString());
     },
 
     "clearLog": function() {
@@ -299,22 +308,25 @@
             this.doHideMap();
           return;
         }
-		var doc_inner=d.body.innerHTML.toString(); // ----------- Added by Solt
-		var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
-		var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
+	var doc_inner=d.body.innerHTML.toString(); // ----------- Added by Solt
+	var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
+	var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
         tables = d.getElementsByTagName('TABLE');
-	    if(!top.ChatSys && ('DungMap' in d.all)) top.bottom.sw_sys(); //--------------- Включаем системки
+	if(!top.ChatSys && ('DungMap' in d.all) && (this.sysMode==2 
+	   || this.sysMode==1 && (d.body.innerHTML.match(/<TABLE cellpadding=0>([\s\S]+?)<\/TABLE>/i)||['',''])[1].length>100))
+		top.bottom.sw_sys(); //--------------- Включаем системки
 		
-		if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
-			top.Chat.am(this.sys_msg + '<i>'+Red_str[1]+'<i>');
-			this.sys_msg='';
-		}
+	if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
+		top.Chat.am(this.sys_msg + '<i>'+Red_str[1]+'<i>');
+		this.sys_msg='';
+	}
 
         if (tables.length<2 || tables[0].cells.length<2 
           || tables[0].cells[1].getElementsByTagName('A').length!=1 
-		  || tables[0].cells[1].getElementsByTagName('A')[0].href.search(/\?out=/)<0) {
+	  || tables[0].cells[1].getElementsByTagName('A')[0].href.search(/\?out=/)<0)
+	{
           return;
-		}
+	}
 
 	var redText = tables[0].rows(1).cells(0).innerText;
         if (redText.search('У вас слишком много таких объектов')>=0) {
@@ -1018,6 +1030,7 @@
 	for(var i=0; i<items.length; i++)
           this.excludedItems[items[i]] = true;
 	this.forcedStepTime = parseFloat(this.load('forcedStepTime','0'));
+	this.sysMode=parseInt(this.load('sysMode','2')) || 2;
 	if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );
 		
