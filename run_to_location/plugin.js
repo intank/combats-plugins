@@ -75,6 +75,27 @@
       this.search_step_to(next);
     },
     search_step_to: function(location) {
+      var waitInterval = (combats_plugins_manager.getMainFrame().progressEnd-combats_plugins_manager.getMainFrame().progressAt)*combats_plugins_manager.getMainFrame().progressInterval;
+      if (waitInterval>0) {
+        if (this.timer)
+          clearTimeout(this.timer);
+        this.timer = setTimeout(
+          combats_plugins_manager.get_binded_method(this, this.search_step_to, location), 
+          waitInterval+500);
+        return;
+      }
+
+      try {
+        this.search_step_node(location);
+      } catch(e) {
+        if (this.timer)
+          clearTimeout(this.timer);
+        this.timer = setTimeout(
+          combats_plugins_manager.get_binded_method(this, this.search_step_to, location),
+          500);
+      }
+    },
+    search_step_node: function(location) {
       var doc = combats_plugins_manager.getMainFrame().document;
       var moveto = doc.getElementById('moveto');
       this.step_node = null;
@@ -101,10 +122,27 @@
           }
         }
       }
+
       if (this.step_node) {
-        setTimeout(
-          combats_plugins_manager.get_binded_method(this, this.click_step_node), 
-          (combats_plugins_manager.getMainFrame().progressEnd-combats_plugins_manager.getMainFrame().progressAt)*combats_plugins_manager.getMainFrame().progressInterval+500);
+        if (this.prev_location == this.current_location) {
+          if (++this.click_attempt>this.attempts_limit) {
+            combats_plugins_manager.detachEvent('mainframe.load',
+              this.mainframeHandler);
+            combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>');
+            this.new_location = '';
+            return;
+          }
+        } else {
+          this.click_attempt = 0;
+          this.prev_location = this.current_location;
+        }
+        this.step_attempt = 0;
+        this.step_node.click();
+        if ('chat_sender' in combats_plugins_manager.plugins_list) {
+          setTimeout(
+            function() { combats_plugins_manager.plugins_list.chat_sender.refreshChat(); },
+            1500);
+        }
       } else {
         if (++this.step_attempt>this.attempts_limit) {
           combats_plugins_manager.detachEvent('mainframe.load',
@@ -116,27 +154,6 @@
         setTimeout(
           combats_plugins_manager.get_binded_method(this, this.try_run_to_new_location),
           3500);
-      }
-    },
-    click_step_node: function() {
-      if (this.prev_location == this.current_location) {
-        if (++this.click_attempt>this.attempts_limit) {
-          combats_plugins_manager.detachEvent('mainframe.load',
-            this.mainframeHandler);
-          combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>');
-          this.new_location = '';
-          return;
-        }
-      } else {
-        this.click_attempt = 0;
-        this.prev_location = this.current_location;
-      }
-      this.step_attempt = 0;
-      this.step_node.click();
-      if ('chat_sender' in combats_plugins_manager.plugins_list) {
-        setTimeout(
-          function() { combats_plugins_manager.plugins_list.chat_sender.refreshChat(); },
-          1500);
       }
     },
     check_complete: function() {

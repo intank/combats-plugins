@@ -8,7 +8,7 @@
       return "Обработка основного фрейма";
     },
     onloadHandler: function() {
-      var eventObj = { window: top.frames[3] };
+      var eventObj = { 'window': top.combats_plugins_manager.getMainFrame() };
       top.combats_plugins_manager.fireEvent('mainframe.load', eventObj);
     },
     Init: function() {

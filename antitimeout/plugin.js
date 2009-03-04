@@ -62,7 +62,7 @@
 	  },
 
 	  addChat: function(msg) {
-	  	combats_plugins_manager.add_chat(msg);
+	  	combats_plugins_manager.add_sys(msg);
 	  },
 
 	  autoKick: function() {
@@ -160,6 +160,29 @@
 								||
 								Mode_percent && (Less && me.nHP/me.nMaxHP*100<=lvl || More && me.nHP/me.nMaxHP*100>=lvl)
 							);
+						}
+					}else if(j=='enemy_cnt'){              //-----------------------обработка своего уровня HP
+						var Less=(Res[j].indexOf('<')>=0);
+						var More=(Res[j].indexOf('>')>=0);
+						var cnt = parseFloat(Res[j].replace(/^.*?(\d+).*?$/,'$1'));
+						if (!isNaN(cnt)) {
+							var groups = {};
+							var myGroup = '';
+							var warriors = oBattle.oGroupsLayer.innerHTML.match(/<SPAN\s+class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/g);
+							for(var k=0; k<warriors.length; k++) {
+								warriors[k] = warriors[k].match(/<SPAN\s+class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/);
+								if (warriors[k]) {
+									groups[warriors[k][1]] = (groups[warriors[k][1]] || 0) + 1;
+									if (warriors[k][2]==oBattle.sMyLogin) {
+										myGroup = warriors[k][1];
+									}
+								}
+							}
+							var enemies = 0;
+							for(var k in groups) {
+								enemies += (k==myGroup)?0:groups[k];
+							}
+							CheckRes = CheckRes && (Less && enemies<cnt || More && enemies>cnt);
 						}
 					}else{                             //-----------------------обработка тактик для приема
 						currRes=parseInt(oBattle.arrRes[j].innerHTML);

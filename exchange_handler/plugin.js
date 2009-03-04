@@ -15,12 +15,17 @@
   }
 
   plugin_exchange_handler.prototype = {
+    fixTransferHang: true,
     toString: function() {
       return "Обработка передач";
     },
     new_User_Exchange_Confirm: function( sScript ){
       var eventObj = { sScript: sScript };
       top.combats_plugins_manager.fireEvent('exchange.confirm',eventObj)
+      if (this.fixTransferHang && top.User.Exchange.bIsLoading) {
+        top.User.Exchange.bIsLoading = false;
+        top.User.Exchange.sScript = '';
+      }
       this.old_User_Exchange_Confirm.apply(top.User.Exchange,[ eventObj.sScript ]);
     },
     new_User_Exchange_ConfirmDlg: function( oRoot ){
