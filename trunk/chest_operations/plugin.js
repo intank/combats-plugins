@@ -23,6 +23,9 @@
     toString: function() {
       return "Работа с сундуком";
     },
+    addChat: function(s) {
+      combats_plugins_manager.add_chat(s);
+    },
     parseItems: function(innerHTML) {
       var result = [];
       var matches = innerHTML.match(/<A\s+[^>]*?href="[^"]*?&amp;(?:to_box|from_box)=(\d+)[^"]*"[^>]*>(?:В инвентарь|В сундук)<\/A>[\s\S]*?<A\s+[^>]*?HREF="\/encicl\/object\/(.*?)\.html"[^>]*?>([^<]+?)(?:\s+\(x(\d+)\)|)<\/A>/ig);
@@ -46,21 +49,21 @@
       if (this.AJAX.readyState != 4)
         return;
       if (this.AJAX.status!=200) {
-        combats_plugins_manager.add_chat('Ошибка сервера при перекладывании предметов из инвентаря в сундук');
+        this.addChat('Ошибка сервера при перекладывании предметов из инвентаря в сундук');
         this.refreshChest();
         return;
       }
       var responseText = this.AJAX.responseText;
       var match = responseText.match(/<FONT COLOR=red><B>(Предмет ".*?" перенесен из инвентаря|)([^<]*?)</i);
       if (match) {
-        combats_plugins_manager.add_chat('<i>'+(match[1] || match[2])+'</i>');
+        this.addChat('<i>'+(match[1] || match[2])+'</i>');
         if (match[1])
           setTimeout(combats_plugins_manager.get_binded_method(this,this.moveNextItem),10);
         else
           this.refreshChest();
         return;
       }
-      combats_plugins_manager.add_chat('Не определён результат перекладывания предметов из инвентаря в сундук');
+      this.addChat('Не определён результат перекладывания предметов из инвентаря в сундук');
       this.refreshChest();
     },
     moveNextItem: function() {
@@ -79,7 +82,7 @@
         this.AJAX.open('GET','/house.pl?room=2&from_box='+this.currentItem.index+'&sd4='+this.sd4+'&'+Math.random());
         this.AJAX.send('');
       } else {
-        combats_plugins_manager.add_chat(':ura: Перекладывание завершено');
+        this.addChat(':ura: Перекладывание завершено');
         this.refreshChest();
       }
     },
