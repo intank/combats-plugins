@@ -196,6 +196,63 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
         return null;
       },
+      getHTTPRequestProcessor: function() {
+        return {
+          timeoutValue: 10*1000, // 10 сек
+          AJAX: null,
+
+          // обработчики событий
+          timeoutTimer: null,
+          onBadStatus: null,
+          onComplete: null,
+          onTimeout: null,
+
+          timeoutHandler: function() {
+            if (this.timeoutTimer)
+              return;
+            this.timeoutTimer = null;
+            this.AJAX.abort();
+            this.AJAX = null;
+            if (this.onTimeout)
+              this.onTimeout();
+          },
+          readyStateChangeHandler: function() {
+            if (!this.AJAX || this.AJAX.readyState != 4)
+              return;
+
+            clearTimeout(this.timeoutTimer)
+            this.timeoutTimer = null;
+
+            try {
+              if (this.AJAX.status!=200) {
+                if (this.onBadStatus)
+                  this.onBadStatus(this.AJAX);
+                return;
+              }
+              if (this.onComplete)
+                this.onComplete(this.AJAX);
+            } finally {
+              this.AJAX = null;
+            }
+          },
+          startRequest: function(method, URL, data) {
+            this.AJAX = combats_plugins_manager.getHTTPRequest();
+            this.AJAX.onreadystatechange = 
+              combats_plugins_manager.get_binded_method(this,this.readyStateChangeHandler);
+            this.AJAX.open(method, URL, true);
+            this.AJAX.send(data);
+            this.timeoutTimer = setTimeout(
+              combats_plugins_manager.get_binded_method(this,this.timeoutHandler),
+              this.timeoutValue);
+          },
+          GET: function(URL) {
+            this.startRequest('GET', URL, '');
+          },
+          PUT: function(URL,data) {
+            this.startRequest('PUT', URL, data);
+          }
+        };
+      },
       add_sys: function(s) {
         top.Chat.am(s);
       },

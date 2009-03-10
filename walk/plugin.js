@@ -220,16 +220,17 @@
       
     "stop_it": function() {
         if(this.Direction) {
-          img=window.frames[3].document.all("i"+this.Direction);
-          img.src=img.src.replace(/b\.gif$/,".gif");
+          var img=window.frames[3].document.getElementById("i"+this.Direction);
+          if (img) img.src=img.src.replace(/b\.gif$/,".gif");
         }
         this.Direction=0;
-        window.frames[3].document.all("td_stop").style.backgroundColor="red";
+        var td=window.frames[3].document.all("td_stop")
+        if (td) td.style.backgroundColor="red";
         if(this.steptimer!=null){
           clearTimeout(this.steptimer);
           this.steptimer=null;
         }
-		this.setCurrentSettings();
+	this.setCurrentSettings();
     },
       
     "do_step": function() {
@@ -282,21 +283,21 @@
     },
 
     "setCurrentSettings": function() {
+      try {
         this.en_click=top.frames[3].document.all['en_click'].checked;
 	this.mat_click=top.frames[3].document.all['mat_click'].checked;
-//        this.ignoreWall=top.frames[3].document.all['ignoreWall'].checked;
         this.autoPilot=top.frames[3].document.all['autoPilot'].checked;
         this.autoAttack=top.frames[3].document.all['autoAttack'].checked;
         this.showMap=top.frames[3].document.all['showMap'].checked;
-		
-        t=this.Direction;
+      } catch(e) {
+      }
+      var t=this.Direction;
 	t=this.en_click ? (t | 8):(t & 247);
 	t=this.mat_click ? (t | 16):(t & 239);
 	t=this.ignoreWall ? (t | 32):(t & 223);
 	t=this.autoPilot ? (t | 64):(t & 191);
 	t=this.autoAttack ? (t | 128):(t & 127);
 		
-	//alert(t.toString(2));
 	document.cookie = "walkSettings=" + t + ";";
     },
 
@@ -872,6 +873,16 @@
       }
     },
 
+    "stopAll": function(position) {
+      position = position || (top.frames[3].arrMap ? this.getMapPosition(this.Map, top.frames[3].arrMap) : null);
+      this.stop_it();
+      this.oneStepMode = false;
+      this.nextPosition = null;
+      this.prevPosition = null;
+      this.destination = null;
+      combats_plugins_manager.fireEvent('dungeon_walk.finish', {position:position});
+    },
+
     "checkEnemy": function() {
       if (!top.frames[3].arrLayers[1] || !top.frames[3].arrLayers[1][0])
         return true;
@@ -929,11 +940,7 @@
         {
           if (floor==this.destination.floor && this.position.x==this.destination.x && this.position.y==this.destination.y) {
             if (this.oneStepMode || !this.destination.d || this.checkDirection(this.destination.d)) {
-              this.oneStepMode = false;
-              this.nextPosition = null;
-              this.prevPosition = null;
-              this.destination = null;
-              combats_plugins_manager.fireEvent('dungeon_walk.finish', {position:this.position});
+              this.stopAll(this.position);
             }
           } else if (floor==this.destination.floor
             && ((!this.prevPosition || (this.position.x==this.prevPosition.x && this.position.y==this.prevPosition.y))
