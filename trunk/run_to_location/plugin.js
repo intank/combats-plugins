@@ -75,13 +75,14 @@
       this.search_step_to(next);
     },
     search_step_to: function(location) {
-      var waitInterval = (combats_plugins_manager.getMainFrame().progressEnd-combats_plugins_manager.getMainFrame().progressAt)*combats_plugins_manager.getMainFrame().progressInterval;
-      if (waitInterval>0) {
+      if (this.check_complete())
+        return;
+      if (combats_plugins_manager.getMainFrame().progressEnd-combats_plugins_manager.getMainFrame().progressAt>0) {
         if (this.timer)
           clearTimeout(this.timer);
         this.timer = setTimeout(
           combats_plugins_manager.get_binded_method(this, this.search_step_to, location), 
-          waitInterval+500);
+          500);
         return;
       }
 
@@ -157,6 +158,7 @@
       }
     },
     check_complete: function() {
+      this.current_location = top.frames['activeusers'].document.getElementById('room').innerText.replace(/\s*\(.*$/,'');
       if (this.current_location==this.new_location) {
         combats_plugins_manager.detachEvent('mainframe.load',
           this.mainframeHandler);
@@ -166,7 +168,6 @@
       return false;
     },
     try_run_to_new_location: function() {
-      this.current_location = top.frames['activeusers'].document.getElementById('room').innerText.replace(/\s*\(.*$/,'');
       if (this.check_complete())
         return;
 
@@ -196,17 +197,18 @@
     },
     run_to_location: function(new_location) {
       this.step_attempt = 0;
-      if (typeof(new_location)=='string')
-        this.new_location = new_location;
-      else
-        this.new_location = new_location[0].value[new_location[0].value.selected];
       if (!this.mainframeHandler) {
         this.mainframeHandler = combats_plugins_manager.get_binded_method(
           this, this.try_run_to_new_location);
       }
+      if (!this.new_location)
+        combats_plugins_manager.attachEvent('mainframe.load',
+          this.mainframeHandler);
+      if (typeof(new_location)=='string')
+        this.new_location = new_location;
+      else
+        this.new_location = new_location[0].value[new_location[0].value.selected];
       this.prev_location = '';
-      combats_plugins_manager.attachEvent('mainframe.load',
-        this.mainframeHandler);
       this.try_run_to_new_location();
     },
     showAllLocationsWindow: function() {
