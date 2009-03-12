@@ -19,9 +19,9 @@
       if (d.location.pathname != '/dungeon.pl')
         return;
       var fieldsets = d.getElementsByTagName('FIELDSET');
-      if (!fieldsets)
+      if (!fieldsets || fieldsets.length<=0)
         return;
-      var children =fieldsets[0].children;
+      var children=fieldsets[0].children;
       if (children.length==2 && children[0].nodeName=="LEGEND" && /^Награда\:/.test(children[0].innerText)) {
         this.save('state', encodeURIComponent(children[0].innerText + "\r\n" + children[1].innerText));
       }
