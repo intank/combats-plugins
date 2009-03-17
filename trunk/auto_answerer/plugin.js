@@ -50,8 +50,8 @@
       this.standardResponse = a[3].value;
       this.extendedQuery = a[4].value;
       this.extendedResponse = a[5].value;
-      this.conversation_timeout = a[6].value;
-      this.afk_timeout = a[7].value;
+      this.conversation_timeout = parseFloat(a[6].value);
+      this.afk_timeout = parseFloat(a[7].value);
       this.ignore_multi = a[8].value;
       this.ignore_remote = a[9].value;
 
