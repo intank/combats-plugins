@@ -49,7 +49,7 @@
     setProperties: function(a) {
       this.phrases = a[0].value.split('\r\n');
       this.mode=parseInt(a[1].value.selected);
-      this.period=a[3].value;
+      this.period=parseFloat(a[3].value);
       this.active=a[4].value;
       for(var i=0; i<this.phrases.length; i++) {
         this.save(location.host,"msg"+i,this.phrases[i]);
