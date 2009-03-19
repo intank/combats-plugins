@@ -68,8 +68,8 @@
       this.save('standardResponse',this.enQuoteText(this.standardResponse));
       this.save('standardQuery',this.extendedQuery);
       this.save('autoResponse',this.enQuoteText(this.extendedResponse));
-      this.save('conversation_timeout',this.conversation_timeout);
-      this.save('afk_timeout',this.afk_timeout);
+      this.save('conversation_timeout',this.conversation_timeout.toString());
+      this.save('afk_timeout',this.afk_timeout.toString());
       this.save('ignore_multi',this.ignore_multi.toString());
       this.save('ignore_remote',this.ignore_remote.toString());
       for (var i=0; i<this.extendedModeVariants; i++) {
