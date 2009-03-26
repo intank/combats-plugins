@@ -37,12 +37,14 @@
         matches[i] = matches[i].match(/<TD[^>]*?>[\s\n\r]*?(?:<span\s*[^>]*>|)<IMG [^>]*?SRC="[^"]*?\/items\/([^"]*?)\.gif"[^>]*?>[\s\n\r]*?(?:<small\s*[^>]*><B>x(\d+)<\/B><\/small><\/SPAN>[\s\n\r]*?|)<BR><a href="(shop.pl\?sl=[^"]*?)">продать за .*? кр.<\/a><\/TD>[\s\n\r]*<TD[^>]*><A HREF="\/encicl\/object\/.*?\.html"[^>]*>([^<]+?)(?:\s*\(x\d+\)|)<\/a>/i);
         if (!matches[i])
           continue;
-        result.push({
-          img: matches[i][1],
-          name: matches[i][4],
-          link: matches[i][3].replace(/&amp;/g, '&'),
-          count: matches[i][2]
-        });
+        if (matches[i][3].indexOf(matches[i][1])>=0) {
+          result.push({
+            img: matches[i][1],
+            name: matches[i][4],
+            link: matches[i][3].replace(/&amp;/g, '&'),
+            count: (matches[i][2] || 1)
+          });
+        }
       }
       return result;
     },
@@ -54,6 +56,7 @@
         return;
       if (this.AJAX.status!=200) {
         this.addChat('Ошибка сервера при продаже предметов');
+        this.autoSellComplete = true;
         this.refreshShop();
         return;
       }
@@ -63,10 +66,13 @@
         this.addChat('<i>'+(match[1] || match[2])+'</i>');
         if (match[1])
           setTimeout(combats_plugins_manager.get_binded_method(this,this.moveNextItem),10);
-        else
+        else {
+          this.autoSellComplete = true;
           this.refreshShop();
+        }
         return;
       }
+      this.autoSellComplete = true;
       this.addChat('Не определён результат продажи предметов');
       this.refreshShop();
     },
@@ -81,22 +87,22 @@
         this.AJAX.open('GET',this.currentItem.link, true);
         this.AJAX.send('');
       } else {
+        this.autoSellComplete = true;
         this.addChat(':ura: Сдача в гос завершена');
         this.refreshShop();
       }
     },
-    moveSelected: function() {
-      this.window.oWindow.Hide();
+    moveSelected: function(auto) {
+      if (!auto && this.window) this.window.oWindow.Hide();
       for(var i=this.itemsToMove.length-1; i>=0; i--)
-        if (!top.document.getElementById('sell_to_shop_check'+i).checked) {
+        if (!auto && !top.document.getElementById('sell_to_shop_check'+i).checked) {
           this.itemsToMove.splice(i,1);
         }
       this.currentItem = null;
       this.moveNextItem();
     },
-    analizeChest: function(window) {
-      var d = window.document;
-      var match = d.body.innerHTML.match(/<B>Отдел "Скупка"<\/B>/);
+    analizeChest: function(innerHTML, auto) {
+      var match = innerHTML.match(/<B>Отдел "Скупка"<\/B>/);
       if (!match)
         return;
       var params = {
@@ -104,11 +110,8 @@
         max: parseInt(match[2]),
         exchangeLimit: parseInt(match[3])
       };
-      var tables = window.document.getElementsByTagName('TABLE');
-      var tableInventory = tables[3];
 
-//      var itemsChest = this.parseItems(tableChest.innerHTML);
-      var itemsInventory = this.parseItems(tableInventory.innerHTML);
+      var itemsInventory = this.parseItems(innerHTML);
 
       var autoMoveItems = [];
       for(var i in itemsInventory) {
@@ -118,38 +121,74 @@
       }
 
       if (autoMoveItems.length>0) {
-        this.sd4 = window.sd4 || this.searchSD4(window.document.documentElement.innerHTML);
         this.itemsToMove = autoMoveItems;
-        if (!this.window) {
-          this.window = combats_plugins_manager.createWindow("Продать вещи", 320, 480);
+        if (!auto) {
+          this.sd4 = this.searchSD4(innerHTML);
+          if (!this.window) {
+            this.window = combats_plugins_manager.createWindow("Продать вещи", 320, 480);
+          }
+          var s = '';
+          for(var i in autoMoveItems) {
+            s += '<tr><td style="width:100%; height: 1em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle"><input id="sell_to_shop_check'+i+'" style="float:right; cursor:default; vertical-align: middle; height:100%; border: 0" type="checkbox" CHECKED /><img src="http://img.combats.com/i/items/'+autoMoveItems[i].img+'.gif" alt="" style="vertical-align: middle"/>'+autoMoveItems[i].name+'('+autoMoveItems[i].count+')</td></tr>';
+          }
+          var div = document.createElement('<div style="width:100%; height:100%; overflow-y:scroll">');
+          div.innerHTML = '<button>Продать выделенное</button><table style="width: 100%">'+s+'</table>';
+          this.window.oWindow.Insert(div);
+          div.firstChild.onclick=combats_plugins_manager.get_binded_method(this, this.moveSelected, false);
+          this.window.oWindow.Show();
+        } else {
+          this.moveSelected(true);
         }
-        var s = '';
-        for(var i in autoMoveItems) {
-          s += '<tr><td style="width:100%; height: 1em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle"><input id="sell_to_shop_check'+i+'" style="float:right; cursor:default; vertical-align: middle; height:100%; border: 0" type="checkbox" CHECKED /><img src="http://img.combats.com/i/items/'+autoMoveItems[i].img+'.gif" alt="" style="vertical-align: middle"/>'+autoMoveItems[i].name+'('+autoMoveItems[i].count+')</td></tr>';
-        }
-        var div = document.createElement('<div style="width:100%; height:100%; overflow-y:scroll">');
-        div.innerHTML = '<button>Продать выделенное</button><table style="width: 100%">'+s+'</table>';
-        this.window.oWindow.Insert(div);
-        div.firstChild.onclick=combats_plugins_manager.get_binded_method(this, this.moveSelected);
-        this.window.oWindow.Show();
+      } else {
+        this.autoSellComplete = true;
       }
     },
     searchSD4: function(s) {
-      var match = s.match(/sd4=(\d+)/);
+      var match = s.match(/\bsd4\s*=\s*(\d+)/);
       if (match)
         return match[1];
+    },
+    autoSell: function() {
+      this.sd4 = this.searchSD4(combats_plugins_manager.getMainFrame().document.documentElement.innerHTML);
+      this.autoSellComplete = false;
+      var counter = 0;
+      var requestProcessor = combats_plugins_manager.getHTTPRequestProcessor();
+      requestProcessor.onComplete = combats_plugins_manager.get_binded_method(
+        this,
+        function(AJAX) {
+          try {
+            this.analizeChest(AJAX.responseText, true);
+          } catch(e) {
+            combats_plugins_manager.logError(this, e);
+          }
+        });
+      requestProcessor.onBadResult = 
+      requestProcessor.onTimeout = combats_plugins_manager.get_binded_method(
+        this,
+        function() {
+          try {
+            // перезапустить
+            if (counter++<5)
+              requestProcessor.GET('/shop.pl?sd4='+this.sd4+'&sale='+Math.random());
+            else
+              this.autoSellComplete = true;
+          } catch(e) {
+            combats_plugins_manager.logError(this, e);
+          }
+        });
+      requestProcessor.GET('/shop.pl?sd4='+this.sd4+'&sale='+Math.random());
     },
     mainframeLoad: function(eventObj) {
       if (eventObj.window.location.pathname!='/shop.pl' 
           || !eventObj.window.location.search.match(/(\?|&)sale=/)) 
         return;
       if (this.autoPrompt)
-        this.analizeChest(eventObj.window);
+        this.analizeChest(eventObj.window.document.documentElement.innerHTML);
       else {
         var button = eventObj.window.document.createElement('BUTTON');
         button.innerText = "Автоматическая продажа предметов";
         button.onclick = 
-          combats_plugins_manager.get_binded_method(this,this.analizeChest,eventObj.window);
+          combats_plugins_manager.get_binded_method(this,this.analizeChest,eventObj.window.document.documentElement.innerHTML);
         eventObj.window.document.body.insertBefore(
           button,eventObj.window.document.body.firstChild);
       }

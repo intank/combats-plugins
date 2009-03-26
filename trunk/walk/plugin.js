@@ -4,7 +4,7 @@
       return "Бродилка по пещере";
     },
 
-    usedObjectsCleanup: 3, // количество минут до следующей очистки списка поюзаных объектов
+    usedObjectsCleanup: 10, // количество минут до следующей очистки списка поюзаных объектов
     mapFileName: '',
     Map: null,
 	defaultDungeonName: '',
@@ -141,6 +141,10 @@
 		    2: 'Всегда',
 		    'selected': this.sysMode
 		  } },
+		{ name: "Минимальное время обновления (сек)", value: this.randomWaitTimeMin },
+		{ name: "Случайная составляющая времени обновления (сек)", value: this.randomWaitTimeMax },
+		{ name: "Кликать по объектам по умолчанию", value: this.auto_en_click },
+		{ name: "Собирать ингридиенты по умолчанию", value: this.auto_mat_click },
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -165,6 +169,10 @@
           this.excludedItems[items[i]] = true;
 	this.defaultDungeonName = a[11].value;
 	this.sysMode = a[12].value.selected;
+	this.randomWaitTimeMin = a[13].value;
+	this.randomWaitTimeMax = a[14].value;
+	this.auto_en_click = a[15].value;
+	this.auto_mat_click = a[16].value;
 
 	this.save('forced',this.forced?"yes":"no");
 	this.save('ignoreWall',this.ignoreWall?"yes":"no");
@@ -179,6 +187,10 @@
 	this.save('excludedItems',a[10].value.replace(/\s*[\n\r]+\s*/g,";"));
 	this.save(this.cityName+'.defaultDungeonName',this.defaultDungeonName);
 	this.save('sysMode',this.sysMode.toString());
+	this.save('randomWaitTimeMin',this.randomWaitTimeMin.toString());
+	this.save('randomWaitTimeMax',this.randomWaitTimeMax.toString());
+	this.save('auto_en_click',this.auto_en_click.toString());
+	this.save('auto_mat_click',this.auto_mat_click.toString());
     },
 
     "clearLog": function() {
@@ -312,7 +324,7 @@
 	var doc_inner=d.body.innerHTML.toString(); // ----------- Added by Solt
 	var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
 	var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
-        tables = d.getElementsByTagName('TABLE');
+        var tables = d.getElementsByTagName('TABLE');
 	if(!top.ChatSys && ('DungMap' in d.all) && (this.sysMode==2 
 	   || this.sysMode==1 && (d.body.innerHTML.match(/<TABLE cellpadding=0>([\s\S]+?)<\/TABLE>/i)||['',''])[1].length>100))
 		top.bottom.sw_sys(); //--------------- Включаем системки
@@ -329,7 +341,7 @@
           return;
 	}
 
-	var redText = tables[0].rows(1).cells(0).innerText;
+	var redText = tables[0].cells[0].innerText;
         if (redText.search('У вас слишком много таких объектов')>=0) {
           this.skip_quest = true;
 	  this.skip_mat_click = true;
@@ -372,8 +384,8 @@
                 || (!this.skip_mat_click && img.src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest)
                 || (!this.skip_mat_click && (match = img.alt.match(/'(.*?)'/)) && (match[1] in this.alwaysItems)))
             {
-              if (!(img.alt.replace(/^.*?'(.*)'.*?$/,'$1') in this.excludedItems)) {
-                top.frames[3].location = link.href;
+              if (!(img.alt.replace(/^.*?'(.*)'.*?$/,'$1') in this.excludedItems) && !link.href.match(/#$/)) {
+                top.frames[3].location = link.href+'&rnd='+Math.random();
                 return;
               }
             }
@@ -656,6 +668,26 @@
         }
         if (s) {
           this.Map = eval('(function(){ return '+s+' })()');
+          this.availableCells = {}
+          for(var floor in this.Map) {
+            this.availableCells[floor] = [];
+            for(var i in this.Map[floor]) {
+              this.availableCells[floor][i] = [];
+              for(var j in this.Map[floor][i]) {
+                if (this.Map[floor][i][j].constructor === Array) {
+                  this.availableCells[floor][i][j] = this.Map[floor][i][j][0];
+                  for(var obj in this.Map[floor][i][j])
+                    if (this.Map[floor][i][j][obj]==='') {
+                      this.availableCells[floor][i][j] = '';
+                      break;
+                    }
+                  this.Map[floor][i][j] = this.Map[floor][i][j][0];
+                } else {
+                  this.availableCells[floor][i][j] = this.Map[floor][i][j];
+                }
+              }
+            }
+          }
           this.mapFileName = mapFileName;
         } else {
           this.Map = null;
@@ -785,72 +817,122 @@
       this.makeStep();
     },
 
-    "createPath": function() {
-      // this.addLog('createPath');
+    isPointOnTheWay: function(startPoint, stopPoint, checkPoint) {
+      // this.addLog('isPointOnTheWay');
       var floor = this.getCurrentFloor();
-      var _map = this.Map ? this.Map[floor] : null;
-      if (_map) {
-        // this.addLog('floor found');
-        var Map = [];
-        var wave = [];
-        for(var i in _map) {
-          Map[i] = [];
-          wave[i] = [];
-          for(var j in _map[i]) {
-            Map[i][j] = _map[i][j]
-            wave[i][j] = 0;
-          }
-        }
-        var completeObj = {};
-        var currLen = 1;
-        wave[this.destination.y][this.destination.x] = currLen;
-        try {
-          waveIsOk = true;
-          while(waveIsOk) {
-            waveIsOk = false;
-            for(var ii in Map) {
-              i = parseInt(ii)
-              for(var jj in Map[i]) {
-                j = parseInt(jj)
-                if (!wave[i][j] && Map[i][j]) {
-                  if (Map[i][j].indexOf('1')<0 && wave[i-1][j]==currLen)
-                    wave[i][j]=currLen+1;
-                  if (Map[i][j].indexOf('3')<0 && wave[i][j+1]==currLen)
-                    wave[i][j]=currLen+1;
-                  if (Map[i][j].indexOf('5')<0 && wave[i+1][j]==currLen)
-                    wave[i][j]=currLen+1;
-                  if (Map[i][j].indexOf('7')<0 && wave[i][j-1]==currLen)
-                    wave[i][j]=currLen+1;
+      var Map = this.Map ? this.Map[floor] : null;
+      if (!Map)
+        return null;
 
-                  if (wave[i][j]==currLen+1) {
-                    waveIsOk = true;
-                    if (i==this.position.y && j==this.position.x) {
-                      throw completeObj;
-                    }
-                  }
+      var wave = this.prepareWave(Map, stopPoint);
+      
+      var startPointX = startPoint.x;
+      var startPointY = startPoint.y;
+      try {
+        var currLen = this.runWave(wave, Map, startPointX, startPointY);
+        if (!currLen)
+          return null;
+
+        // this.addLog('path found');
+        var stopPointX = stopPoint.x;
+        var stopPointY = stopPoint.y;
+        var checkPointX = checkPoint.x;
+        var checkPointY = checkPoint.y;
+        while(currLen>0) {
+          if (startPointY==checkPointY && startPointX==checkPointX)
+            return true;
+          var cell = Map[startPointY][startPointX];
+          if (cell.indexOf('1')<0 && wave[startPointY-1][startPointX]==currLen) {
+            startPointY -= 1;
+          } else if (cell.indexOf('3')<0 && wave[startPointY][startPointX+1]==currLen) {
+            startPointX += 1;
+          } else if (cell.indexOf('5')<0 && wave[startPointY+1][startPointX]==currLen) {
+            startPointY += 1;
+          } else if (cell.indexOf('7')<0 && wave[startPointY][startPointX-1]==currLen) {
+            startPointX -= 1;
+          }
+          currLen--;
+        }
+        return false;
+      } catch(e) {
+        // this.addLog('exception');
+      }
+    },
+
+    prepareWave: function(Map, stopPoint) {
+      // this.addLog('floor found');
+      var wave = [];
+      for(var i in Map) {
+        wave[i] = [];
+        for(var j in Map[i])
+          wave[i][j] = 0;
+      }
+      wave[stopPoint.y][stopPoint.x] = 1; // стартовая точка
+      return wave;
+    },
+
+    "runWave": function(wave, Map, startPointX, startPointY) {
+      var currLen = 1;
+      var waveIsOk = true;
+      while(waveIsOk) {
+        waveIsOk = false;
+        for(var ii in Map) {
+          i = parseInt(ii)
+          for(var jj in Map[i]) {
+            j = parseInt(jj)
+            if (!wave[i][j] && Map[i][j]) {
+              if (Map[i][j].indexOf('1')<0 && wave[i-1][j]==currLen)
+                wave[i][j]=currLen+1;
+              if (Map[i][j].indexOf('3')<0 && wave[i][j+1]==currLen)
+                wave[i][j]=currLen+1;
+              if (Map[i][j].indexOf('5')<0 && wave[i+1][j]==currLen)
+                wave[i][j]=currLen+1;
+              if (Map[i][j].indexOf('7')<0 && wave[i][j-1]==currLen)
+                wave[i][j]=currLen+1;
+
+              if (wave[i][j]==currLen+1) {
+                waveIsOk = true;
+                if (i==startPointY && j==startPointX) {
+                  return currLen;
                 }
               }
             }
-            currLen++;
-          }
-          return null;
-        } catch (e) {
-          if (e == completeObj) {
-            // this.addLog('path found');
-            var x = this.position.x;
-            var y = this.position.y;
-	    var cell = Map[y][x];
-            if (cell.indexOf('1')<0 && wave[y-1][x]==currLen) {
-              return {x:x,y:y-1,d:1};
-            } else if (cell.indexOf('3')<0 && wave[y][x+1]==currLen) {
-              return {x:x+1,y:y,d:3};
-            } else if (cell.indexOf('5')<0 && wave[y+1][x]==currLen) {
-              return {x:x,y:y+1,d:5};
-            } else if (cell.indexOf('7')<0 && wave[y][x-1]==currLen) {
-              return {x:x-1,y:y,d:7};
-            }
           }
         }
+        currLen++;
+      }
+      return null;
+    },
+    
+    "createPath": function(startPoint, stopPoint) {
+      // this.addLog('createPath');
+      var floor = this.getCurrentFloor();
+      var Map = this.Map ? this.Map[floor] : null;
+      if (!Map)
+        return null;
+
+      var wave = this.prepareWave(Map, stopPoint);
+      
+      var startPointX = startPoint.x;
+      var startPointY = startPoint.y;
+      try {
+        var currLen = this.runWave(wave, Map, startPointX, startPointY);
+        if (!currLen)
+          return null;
+
+        // this.addLog('path found');
+        var cell = Map[startPointY][startPointX];
+        if (cell.indexOf('1')<0 && wave[startPointY-1][startPointX]==currLen) {
+          return {x:startPointX,y:startPointY-1,d:1};
+        } else if (cell.indexOf('3')<0 && wave[startPointY][startPointX+1]==currLen) {
+          return {x:startPointX+1,y:startPointY,d:3};
+        } else if (cell.indexOf('5')<0 && wave[startPointY+1][startPointX]==currLen) {
+          return {x:startPointX,y:startPointY+1,d:5};
+        } else if (cell.indexOf('7')<0 && wave[startPointY][startPointX-1]==currLen) {
+          return {x:startPointX-1,y:startPointY,d:7};
+        }
+      } catch (e) {
+        // this.addLog('exception');
       }
     },
     
@@ -894,7 +976,7 @@
           combats_plugins_manager.fireEvent('dungeon_walk.enemy', {units:units});
           this.StartStepTimer(function(){
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
-          }, 10);
+          }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
           return false;
         }
       }
@@ -914,14 +996,22 @@
       if (this.forcedStepTime && mtime>this.forcedStepTime)
         mtime = this.forcedStepTime;
       if (this.checkEnemy()) {
-        this.StartStepTimer(function(){
-          try {
-            this.checkEnemy();
-          } catch(e) {
-          }
-          // this.addLog('step forward');
-          top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
-        },mtime+0.1);
+        var stepObj = { enable: true };
+        combats_plugins_manager.fireEvent('dungeon_walk.before_step', stepObj);
+        if (stepObj.enable) {
+          this.StartStepTimer(function(){
+            try {
+              this.checkEnemy();
+            } catch(e) {
+            }
+            // this.addLog('step forward');
+            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
+          },mtime+0.1);
+        } else {
+          this.StartStepTimer(function(){
+            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+          }, 6);
+        }
       }
     },
     
@@ -951,7 +1041,7 @@
             if (this.oneStepMode) {
               this.doStep();
             } else {
-              var path = this.createPath();
+              var path = this.createPath({ x:this.position.x, y:this.position.y }, { x:this.destination.x, y:this.destination.y });
               if (path) {
                 if (this.checkDirection(path.d)) {
                   this.prevPosition = { x:this.position.x, y:this.position.y };
@@ -967,10 +1057,11 @@
               }
             }
           } else {
+            // шаг удался, но оказались в неожиданном месте
             this.nextPosition = null;
             this.prevPosition = null;
             this.destination = null;
-            combats_plugins_manager.fireEvent('dungeon_walk.finish', { position:this.position });
+            combats_plugins_manager.fireEvent('dungeon_walk.finish', { position:null });
           }
         } else {
           // this.addLog('position is unknown');
@@ -1000,7 +1091,7 @@
 	this.skip_quest=false;
 	this.usedObjects=new Object();
 	this.sys_msg = '';
-	this.cityName = top.location.hostname.replace(/^(.+?)\..+$/,'$1');
+	this.cityName = top.combats_plugins_manager.cityName;
 
 	this.clearLog();
 
@@ -1038,6 +1129,11 @@
           this.excludedItems[items[i]] = true;
 	this.forcedStepTime = parseFloat(this.load('forcedStepTime','0'));
 	this.sysMode=parseInt(this.load('sysMode','2')) || 2;
+	this.randomWaitTimeMin=parseInt(this.load('randomWaitTimeMin','10')) || 10;
+	this.randomWaitTimeMax=parseInt(this.load('randomWaitTimeMax','0')) || 0;
+	this.en_click = this.auto_en_click = this.load('auto_en_click','false')=='true';
+	this.mat_click = this.auto_mat_click = this.load('auto_mat_click','false')=='true';
+
 	if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );
 		

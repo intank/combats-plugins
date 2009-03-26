@@ -46,6 +46,13 @@
 			external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"Method"+(i+1),Methods[i]);
 		}
 		this.LoadMethods();
+		this.checkActive();
+	  },
+	  
+	  checkActive: function() {
+		if (this.active) {
+			this.onloadHandler();
+		}
 	  },
 	
 	  clearKickTimer: function() {
@@ -63,6 +70,17 @@
 
 	  addChat: function(msg) {
 	  	combats_plugins_manager.add_sys(msg);
+	  },
+
+	  Fix: function(){
+	    try {
+	      var sURL = top.Battle.oQuery.sURL;
+	      top.Battle.SetScript(sURL);
+	      top.Battle.nRequests = 0;
+	      top.Battle.oBattle.Send( null, true );
+	    } catch(e) {
+	      this.addChat('Ошибка инициализации поединка');
+	    }
 	  },
 
 	  autoKick: function() {
@@ -83,7 +101,7 @@
 			if( top.Battle.oBattle.nRequests ) { //------------------- Если занято, обновляем и ждем minTime сек
 				this.BusyCount+=this.minTime;
 				//this.addChat('Busy '+this.BusyCount+'sec.');
-				top.Battle.oBattle.Send( null, true ); //Reload (??)
+				this.Fix(); //Reload (??)
 				if(this.totalRefreshTime && this.BusyCount>this.totalRefreshTime){
 					//this.addChat('Reloading all');
 					top.location=top.location;
