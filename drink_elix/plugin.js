@@ -193,6 +193,7 @@
     },
     startRequest: function() {
       if (this.requestsQueue.length<=0) {
+        this.isDrinkingElix = false;
         return;
       }
       var requestInfo = this.requestsQueue[0];
@@ -200,7 +201,6 @@
       requestInfo.AJAX.onComplete = combats_plugins_manager.get_binded_method(
         this,
         function(AJAX) {
-          this.isDrinkingElix = false;
           try {
             if (!requestInfo.onComplete(AJAX))
               this.dequeueRequest();
@@ -212,7 +212,6 @@
       requestInfo.AJAX.onTimeout = combats_plugins_manager.get_binded_method(
         this,
         function() {
-          this.isDrinkingElix = false;
           try {
             if (!requestInfo.onTimeout())
               this.dequeueRequest();
@@ -225,7 +224,6 @@
         requestInfo.AJAX.onBadResult = combats_plugins_manager.get_binded_method(
           this,
           function() {
-            this.isDrinkingElix = false;
             try {
               if (!requestInfo.onBadResult())
                 this.dequeueRequest();
@@ -236,7 +234,6 @@
           });
       } else
         requestInfo.AJAX.onBadResult = requestInfo.AJAX.onTimeout;
-      this.isDrinkingElix = true;
       requestInfo.AJAX.startRequest(
         requestInfo.method,
         requestInfo.URL,
@@ -252,6 +249,7 @@
         onBadResult : onBadResult
       });
       if (this.requestsQueue.length==1) {
+        this.isDrinkingElix = true;
         this.startRequest();
       }
     },
@@ -432,7 +430,6 @@
 // == Проверка выпивания эликов жизни ==
     drinkHPElixHandler: function(disableElix, AJAX) {
       this.isDrinkingHP = false;
-      this.isDrinkingElix = false;
       var s = AJAX.responseText;
       if (!s)
         return;
@@ -463,7 +460,6 @@
       if (this.isDrinkingHP)
         return;
       this.isDrinkingHP = true;
-      this.isDrinkingElix = true;
       disableElix[objName] = true;
       
       this.queueRequest(
@@ -498,16 +494,21 @@
         this.drinkElix();
     },
     mainframeLoad: function() {
-      if ((!this.dungeonOnly || top.frames[3].location.pathname.match(/\/dungeon\d*\.pl/)) 
-          && this.checkHP(top.frames[3].document.documentElement.innerHTML))
-      {
-        this.drinkElix();
+      var inBattle = (top.frames[3].location.pathname.match(/^\/battle\d*\.pl/)!=null);
+      
+      try {
+        if ((!this.dungeonOnly || top.frames[3].location.pathname.match(/^\/dungeon\d*\.pl/)) 
+            && this.checkHP(top.frames[3].document.documentElement.innerHTML))
+        {
+          if (this.wasInBattle) {
+            this.drinkTime = new Date(new Date().valueOf()-3000);
+          } else {
+            this.drinkElix();
+          }
+        }
+      } finally {
+        this.wasInBattle = inBattle;
       }
-/*
-      else {
-        this.checkHPviaAJAX();
-      }
-*/
     },
     Init: function() {
       this.drinkTime = new Date();

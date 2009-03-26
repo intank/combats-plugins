@@ -13,11 +13,12 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       return results;
     };
 
-    combats_plugins_manager =  {
+    combats_plugins_manager = {
       "events": {},
       "plugins_list": {},
       "plugins_disabled": {},
       "silent": true,
+      "cityName": top.location.hostname.replace(/^(.+?)\..+$/,'$1'),
       "toString": function() {
         return "Плагины Combats.RU";
       },
