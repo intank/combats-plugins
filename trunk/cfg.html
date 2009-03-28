@@ -50,6 +50,11 @@ function getProps() {
       props[i].value = parseInt(element.value);
     } else if (prop_type=="float") {
       props[i].value = parseFloat(element.value);
+    } else if (prop_type=="object" && element==null) {
+      for (var j in props[i].value) {
+        var element = document.getElementById('prop_'+i+'.'+j);
+        props[i].value[j] = (element!=null && element.checked);
+      }
     } else if (prop_type=="object" && !is_function(element.value)) {
       props[i].value.selected = element.value;
     } else if (prop_type!="function" && prop_type!="object") {
@@ -86,12 +91,14 @@ function getPluginGfg() {
     props = plugin.getProperties();
   }
   var helpURL;
+  var s = '';
   if (plugin_index=='.') {
     helpURL = 'http://code.google.com/p/combats-plugins/wiki/PluginsManagement';
   } else {
     helpURL = 'http://code.google.com/p/combats-plugins/wiki/'+plugin_index;
+    s = 'Псевдоним: <b>'+plugin_index+'</b>. ';
   }
-  var s = '<a href="'+helpURL+'" target=_blank title="Возможно, не все плагины имеют документацию. Будьте снисходительны.">Документация</a>';
+  s += '<a href="'+helpURL+'" target=_blank title="Возможно, не все плагины имеют документацию. Будьте снисходительны.">Документация</a>';
   if (props!=null) {
     if (typeof(props)!='object') {
       s += props;
@@ -99,7 +106,7 @@ function getPluginGfg() {
       s += '<form onsubmit="return false"><table style="width:100%; overflow:scroll; white-space:normal; table-layout:fixed"><colgroup><col/><col style="width:66%"/></colgroup>';
       for(var i=0; i<props.length; i++) {
         if (is_function(props[i].value)) {
-          s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\">";
+          s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\" id=\"prop_"+i+"\">";
         } else {
           var style = '';
           if ('style' in props[i])
