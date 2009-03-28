@@ -23,20 +23,31 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         return "Плагины Combats.RU";
       },
       "getProperties": function() {
-        var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
-        while (s && !s.slice(-1).charCodeAt(0)) {
-          s = s.slice(0,-1);
+        var cfg_object = {};
+        for(var i=0;i<this.combats_plugins.length;i++) {
+          var match = this.combats_plugins[i].match(/^\s*(.*?)\s*=\s*(true|false|yes|no)\s*([#;].*|)$/)
+          if (match && match[1]) {
+            cfg_object[match[1]] = (match[2].toLowerCase()=='true' || match[2].toLowerCase()=='yes');
+          }
         }
+
         return [
           { name: "\"Тихие\" ошибки плагинов", value: this.silent },
           { name: "Загрузить новый плагин", value: this.loadCustomPlugin },
-          { name: "Перечень загружаемых плагинов", value: s, type:'textarea', style:"width:100%" }
+          { name: "Перечень загружаемых плагинов", value: cfg_object }
         ];
       },
       "setProperties": function(a) {
         this.silent=a[0].value;
-//        
-//        var s = external.readFile( this.security_id, "Combats.RU", "combats_plugins.ini");
+        var plugins=[];
+        for(var i=0;i<this.combats_plugins.length;i++) {
+          var match = this.combats_plugins[i].match(/^\s*(.*?)\s*=\s*(true|false|yes|no)\s*([#;].*|)$/)
+          if (match && match[1]) {
+            this.combats_plugins[i] = match[1]+'='+a[2].value[match[1]].toString()+'';
+          }
+        }
+        var s = this.combats_plugins.join('\r\n');
+        external.writeFile( this.security_id, "Combats.RU", "combats_plugins.ini", s);
       },
       getVersion: function() {
         return '1.6';
@@ -297,9 +308,9 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
             external.writeFile( this.security_id, "Combats.RU", "combats_plugins.ini", s);
             this.add_chat('<font class=date2>'+d+'</font> Первый запуск менеджера. Использованы настройки плагинов "по умолчанию"');
           }
-          var combats_plugins = s.split(/[\x0A\x0D]+/);
+          this.combats_plugins = s.split(/[\x0A\x0D]+/);
         } else {
-	  var combats_plugins = [];
+	  this.combats_plugins = [];
 	  var configuration = new ActiveXObject("Microsoft.XMLDOM");
 	  configuration.loadXML(external.readFile(this.security_id, "Combats.RU", 'config.xml'));
 	  if (configuration.parseError.errorCode != 0) {
@@ -310,17 +321,22 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 	    this.user = root.selectSingleNode('user[@name="'+top.mylogin+'"]');
 	    var plugins_names = this.user.selectNodes('profile[@name=//@loadprofile]/loadplugin/@name');
 	    for(i=0;i<plugins_names.length;i++)
-	      combats_plugins.push(plugins_names[i].nodeValue);
+	      this.combats_plugins.push(plugins_names[i].nodeValue);
 	  }
         }
 
+        var plugins_count = 0;
         var errCount=0;
         this.plugins_list['.']=this;
-        for(i=0;i<combats_plugins.length;i++) {
-          s = combats_plugins[i].replace(/^\s*(.*?)\s*(?:[#;].*)?$/,'$1');
-          if (s) {
-            errCount += this.loadPlugin(s);
+        for(i=0;i<this.combats_plugins.length;i++) {
+          var match = this.combats_plugins[i].match(/^\s*(.*?)\s*=\s*(true|false|yes|no)\s*(?:[#;].*)?$/)
+          if (match && match[1] && (match[2].toLowerCase()=='true' || match[2].toLowerCase()=='yes')) {
+            plugins_count++;
+            errCount += this.loadPlugin(match[1]);
           }
+        }
+        if (!plugins_count) {
+          this.add_chat(':idea: Ни один плагин не был загружен. Пожалуйста, удалите файл combats_plugins.ini, чтобы создать новый список загружаемых плагинов.');
         }
         if (errCount>0) {
           this.add_chat('<font class=date2>'+d+'</font> Всего ошибок: '+errCount);
