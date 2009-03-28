@@ -1,5 +1,8 @@
 (function(){
   return {
+    toString: function() {
+      return 'Просмотр заявок в хаотах';
+    },
     onLoad: function() {
       var doc = combats_plugins_manager.getMainFrame().document;
       if (doc.location.pathname=='/zayavka.pl' && doc.location.search.match(/\?level=haos/)) {

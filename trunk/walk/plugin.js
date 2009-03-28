@@ -145,6 +145,7 @@
 		{ name: "Случайная составляющая времени обновления (сек)", value: this.randomWaitTimeMax },
 		{ name: "Кликать по объектам по умолчанию", value: this.auto_en_click },
 		{ name: "Собирать ингридиенты по умолчанию", value: this.auto_mat_click },
+		{ name: "Всегда отказываться от спорных предметов", value: this.mat_abandon_contest },
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -169,10 +170,11 @@
           this.excludedItems[items[i]] = true;
 	this.defaultDungeonName = a[11].value;
 	this.sysMode = a[12].value.selected;
-	this.randomWaitTimeMin = a[13].value;
-	this.randomWaitTimeMax = a[14].value;
+	this.randomWaitTimeMin = Math.max(10,parseFloat(a[13].value) || 0);
+	this.randomWaitTimeMax = parseFloat(a[14].value) || 0;
 	this.auto_en_click = a[15].value;
 	this.auto_mat_click = a[16].value;
+	this.mat_abandon_contest = a[17].value;
 
 	this.save('forced',this.forced?"yes":"no");
 	this.save('ignoreWall',this.ignoreWall?"yes":"no");
@@ -191,6 +193,7 @@
 	this.save('randomWaitTimeMax',this.randomWaitTimeMax.toString());
 	this.save('auto_en_click',this.auto_en_click.toString());
 	this.save('auto_mat_click',this.auto_mat_click.toString());
+	this.save('mat_abandon_contest',this.mat_abandon_contest.toString());
     },
 
     "clearLog": function() {
@@ -325,8 +328,7 @@
 	var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
 	var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
         var tables = d.getElementsByTagName('TABLE');
-	if(!top.ChatSys && ('DungMap' in d.all) && (this.sysMode==2 
-	   || this.sysMode==1 && (d.body.innerHTML.match(/<TABLE cellpadding=0>([\s\S]+?)<\/TABLE>/i)||['',''])[1].length>100))
+	if(!top.ChatSys && ('DungMap' in d.all) && (this.sysMode==2 || this.sysMode==1 && tables[1].rows>1))
 		top.bottom.sw_sys(); //--------------- Включаем системки
 		
 	if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
@@ -375,11 +377,12 @@
         }
 		  
 // ---------- try drop ----------
-        for(i=0;i<d.links.length;i++) {
-          link=d.links(i);
+        var links = d.getElementsByTagName('A');
+        for(i=0;i<links.length;i++) {
+          link=links(i);
+          var img = link.children[0];
+          var match;
           if (link.href.search(/dungeon\d*\.pl\?get=/)>=0) {
-            var img = link.children[0];
-            var match;
             if (this.mat_click && !this.skip_mat_click 
                 || (!this.skip_mat_click && img.src.search(/mater\d\d\d\.gif/)>=0 && !this.skip_quest)
                 || (!this.skip_mat_click && (match = img.alt.match(/'(.*?)'/)) && (match[1] in this.alwaysItems)))
@@ -388,6 +391,15 @@
                 top.frames[3].location = link.href+'&rnd='+Math.random();
                 return;
               }
+            }
+          } else if (link.href=='' && link.onclick!=null && img!=null && img.nodeName=='IMG' && this.mat_abandon_contest) {
+            match = link.outerHTML.match(/'rollconfirm\(".*?",".*?","(.*?)"\)'/);
+            if (!this.usedObjects[match[1]]) {
+              link.click();
+	      this.usedObjects[match[1]]=true;
+//              d.forms['slform'].submit();
+              d.forms['slform'].elements['pass'].click();
+              return;
             }
           }
         }
@@ -1133,6 +1145,7 @@
 	this.randomWaitTimeMax=parseInt(this.load('randomWaitTimeMax','0')) || 0;
 	this.en_click = this.auto_en_click = this.load('auto_en_click','false')=='true';
 	this.mat_click = this.auto_mat_click = this.load('auto_mat_click','false')=='true';
+	this.mat_abandon_contest = this.load('mat_abandon_contest','false')=='true';
 
 	if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );

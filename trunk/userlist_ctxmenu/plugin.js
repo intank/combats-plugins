@@ -1,7 +1,7 @@
 (function (){
   return {
     toString: function() {
-      return "Контектсное меню в списке игроков";
+      return "Контекстное меню в списке игроков";
     },
 
     ctxMenuHandler: function(){
