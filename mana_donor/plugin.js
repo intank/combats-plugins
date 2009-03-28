@@ -39,12 +39,9 @@
     },
 
     manaReady: function() {
+      this.clearTimer();
       if (!this.active)
         return;
-      if (this.timer) {
-        clearTimeout(this.timer);
-        this.timer = null;
-      }
       this.timer = setTimeout( // защита от лагов
         combats_plugins_manager.get_binded_method(this,this.manaReady),
         5000
@@ -53,28 +50,39 @@
         top.cht('/dungeon.pl?path=1.107.4&rnd='+Math.random());
       } else {
         var d = combats_plugins_manager.getMainFrame().document;
-        if (d.body.innerHTML.search('http://img.combats.ru/i/images/300x225/mn_bg_portal.jpg')<0)
+        if (d.body.innerHTML.search('http://img.combats.com/i/images/300x225/mn_bg_portal.jpg')<0)
           return;
         top.cht('/main.pl?path=donate_mana&num='+this.donate_mana+'&rnd='+Math.random());
       }
     },
 
-    onloadHandler: function() {
+    clearTimer: function() {
       if (this.timer) {
         clearTimeout(this.timer);
         this.timer = null;
       }
-      if (!this.active)
+    },
+
+    onloadHandler: function() {
+      if (!this.active) {
+        this.clearTimer();
         return;
+      }
       try {
         var d = combats_plugins_manager.getMainFrame().document;
-        if (d.body.innerHTML.search('http://img.combats.ru/i/images/300x225/mn_bg_portal.jpg')<0)
+        if (d.body.innerHTML.search('http://img.combats.com/i/images/300x225/mn_bg_portal.jpg')<0)
           return;
         var match = this.match = d.body.innerHTML.match(/top\.setMana\((.*?),(.*?),(.*?)\)/);
         if (match) { // top.setMana(546.6,840,300)
-          this.speed = parseFloat(match[2])/3000*parseFloat(match[3]);
-          this.timeOut = Math.max(0,10+(this.donate_mana-parseFloat(match[1]))/speed*60);
+          this.timeOut = Math.max(
+            0,
+            (this.donate_mana-parseFloat(match[1])) / parseFloat(match[2])*1800/parseFloat(match[3])*100
+          );
+          if (this.timeOut>10) {
+            this.timeOut += 10;
+          }
 
+          this.clearTimer();
           this.timer = setTimeout(
             combats_plugins_manager.get_binded_method(this,this.manaReady),
             this.timeOut*1000
@@ -98,7 +106,7 @@
       for(i=0; i<ione.childNodes.length; i++) {
         if (ione.childNodes[i].tagName=='DIV') {
           var firstChild = ione.childNodes[i].firstChild;
-          if (firstChild.tagName=='IMG' && firstChild.src.match(/\.gif$/)) // проверку на портал сделать
+          if (firstChild && firstChild.tagName=='IMG' && firstChild.src.match(/\.gif$/) && firstChild.src.indexOf('mn_dun_telep_exit')<0) // проверку на портал сделать
             gungeons.push(firstChild);
         }
       }
@@ -112,6 +120,7 @@
         "mainframe.load",
         combats_plugins_manager.get_binded_method(this,this.onloadHandler)
       );
+      return this;
     }
   }.Init();
 })()
