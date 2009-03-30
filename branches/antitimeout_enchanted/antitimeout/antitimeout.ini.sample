@@ -1,0 +1,65 @@
+; method1 .. method20 задают используемые приемы в порядке приоритета
+; синтаксис:
+; method1=название_приема  необходимый_минимум_тактик
+;
+; название_приема - можно подглядеть, нажав правой кнопкой по любому приему и заглянув в контекстном меню в свойства картинки,
+;    например ярость - http://img.combats.ru/i/misc/icons/hp_enrage.gif, значит прием зовется hp_enrage
+;
+; необходимый_минимум_тактик - числа, задающие минимум каждой тактики, имеющейся в наличии чтобы прием был использован.
+;    Задаются в виде: тактика:число,..., enemy:Имях[ур],my_effect где 
+;    hit-удары, krit-криты, counter-контрудары, block-блоки, parry-парирования, hp-урон, spirit-дух,
+;    например если надо сэкономить тактики для отмены (2удара,2блока), то для приема обреченность строка будет выглядеть так:
+;  method1=multi_doom hit:4,block:5
+;    enemy - описание текущего врага, против которого надо использовать прием. 
+;            в качестве имени достаточно только часть, например "Дарья", уровень можно указывать как вместе с имене, так и без
+;            перечислять врагов можно разделяя символом | (длинное двоеточие)
+;            пример1:
+;  method2=spirit_13_prot_100 	spirit:8,enemy: Проклятье
+;            призрачный удар будет использован при наличии 8 духа и только если против стоит ПГ
+;            пример2:
+;  method3=spirit_12_prot_100 	spirit:8,enemy:Маньяк[8]|Убийца|Атаман | [7]
+;            призрачный топор будет использован если есть 8 духа и напротив стоит Пустынник Маньяк 8ур, или любой Убийца или любой Атаман, или кто угодно 7ур
+;    my_effect - текущие эффекты на себе. Если надо, чтобы прием НЕ срабатывал при наличии какого-либо эффекта, достаточно поставить "-" перед названием
+;            пример1:
+;  method5=hp_cleance			my_effect:ggvod|ggyad|wis_fire_flamming08
+;            очиститься кровью сработает только при гнильной водянке, ядовитой испарине, или пожирающем пламени
+;            пример2
+;  method3=block_magicshield 	my_effect:-block_magicshield|-bot_defend_all_ma1
+;            магическая защита не сработает если уже стоит магическая защита, или воля бездны
+
+
+
+
+[Soltik]
+autotime=12
+refresh=5
+
+method1=hit_restrike 		spirit:10		 			; прорыв
+method2=multi_doom 			enemy:Атаман|Проклятье[8]	; обреченка
+method3=block_magicshield 	enemy:Проклятье|Дарьяна		; магическая
+method4=block_fullshield 								; полная
+method5=hp_defence 			 							; стойкость
+method6=hp_enrage 			 							; ярость
+method7=hp_circleshield 	 							; круговая
+method8=parry_prediction 	 							; предвидение
+method9=spirit_13_prot_100 	spirit:8,enemy: Проклятье	; призрачный удар
+method10=spirit_12_prot_100 spirit:8,enemy:Маньяк|Убийца|Атаман |Вася[6]		; призрачный топор
+method11=hit_empower 	 	hit:7						; усиленные
+
+[Rikky Tiki]
+autotime=10
+refresh=5
+
+method1=hit_restrike 		spirit:10	; прорыв
+method2=multi_doom 			enemy:Мокрица|Кольчатый	 	; обреченка
+
+method3=block_magicshield 	block:6,enemy:Кольчатый|Гусениц|Паразит|Моль|Рогоносец, my_effect:-block_magicshield|-bot_defend_all_ma1 ; магическая
+
+method4=block_fullshield 	block:6,my_effect:-bot_defend_all_ma1			; полная
+method5=hp_cleance			my_effect:ggvod|ggyad|wis_fire_flamming08 ; очиститься
+method6=hp_enrage 			hp:6 		; ярость
+method7=hp_defence 			hp:6 		; стойкость
+method8=hp_circleshield 	hp:11 		; круговая
+method9=parry_prediction 	 			; предвидение
+method10=parry_supreme					; превосходство
+
