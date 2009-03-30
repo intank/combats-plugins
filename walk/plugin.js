@@ -87,6 +87,11 @@
           }
         }
       },
+      '0/1044_kv7870496581': {
+        priority: 6, 
+        title: '[11]',
+        style: { backgroundColor: '#200020' } 
+      },
       '0/1041_rk0170592363': { 
         style: { backgroundColor: '#A04000' } 
       },
@@ -328,7 +333,7 @@
 	var cur_time = (new Date()).toLocaleTimeString(); // ------------ Added by Solt
 	var loc="http://"+d.location.hostname+d.location.pathname; // ------------ Added by Solt
         var tables = d.getElementsByTagName('TABLE');
-	if(!top.ChatSys && ('DungMap' in d.all) && (this.sysMode==2 || this.sysMode==1 && tables[1].rows>1))
+	if(!top.ChatSys && ('DungMap' in d.all) && (this.sysMode==2 || this.sysMode==1 && tables[1].rows.length>1))
 		top.bottom.sw_sys(); //--------------- Включаем системки
 		
 	if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
@@ -665,14 +670,16 @@
       if (!this.dungeonName)
         this.dungeonName = this.defaultDungeonName;
       var mapFileName = 'walk\\'+this.cityName+'-'+this.dungeonName+'.js';
+      this.addLog('Грузим: '+mapFileName);
       if (enforce || this.mapFileName!=mapFileName) {
-        // this.addLog('loading map file');
+        this.addLog('loading map file');
         var s = external.readFile(
           top.combats_plugins_manager.security_id,
           "Combats.RU",
           mapFileName) || '';
         if (!s) {
           mapFileName = 'walk\\'+this.dungeonName+'.js';
+          this.addLog('Грузим: '+mapFileName);
           var s = external.readFile(
             top.combats_plugins_manager.security_id,
             "Combats.RU",
@@ -708,7 +715,7 @@
     },
 
     "doShowMap": function() {
-      // this.addLog('doShowMap');
+      this.addLog('doShowMap');
       if (this.mapTargetMenu)
         this.mapTargetMenu.style.display = 'none';
       var b = top.frames[3].document.getElementById('showMap');
@@ -724,15 +731,18 @@
         }
 
         var floor = this.getCurrentFloor();
+        this.addLog('floor: '+floor);
+        if (!this.Map) this.addLog('no map');
         var Map = this.Map ? this.Map[floor] : null;
         if (!Map) {
           this.updateMap(true);
+          if (!this.Map) this.addLog('no map');
           Map = this.Map ? this.Map[floor] : null;
         }
         while (this.div.firstChild)
           this.div.removeChild(this.div.firstChild);
         if (Map) {
-          // this.addLog('floor found');
+          this.addLog('floor found');
           this.div.style.width = ''+((Map[0].length-8)*15)+'px';
           this.div.style.height = ''+((Map.length-8)*15)+'px';
           var selectMapTarget = combats_plugins_manager.get_binded_method(this,this.selectMapTarget);
@@ -1158,6 +1168,8 @@
 		
 		this.Direction=(t & 7);
 	}
+	
+//	alert('Свежак!');
 	return this;
     }
   }.Init();
