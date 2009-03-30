@@ -14,7 +14,7 @@
 	  getProperties: function() {
 	  	var Methods = [];
 		for(i=1;i<=20;i++){ // считывание приемов
-			var t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"Method"+i,"");
+			var t=this.readIni("Method"+i,"");
 			if (t) {
 				Methods.push(t);
 			}
@@ -25,6 +25,7 @@
 			{ name:"Время автоудара (сек)", value: this.autotime },
 			{ name:"Время обновления (сек)", value: this.minTime },
 			{ name:"Время перезагрузки при зависании (сек)", value: this.totalRefreshTime },
+			{ name: 'Использовать оружие', value: this.useWeapon },
 			{ name:"Правила", value:Methods.join('\n'), type: 'textarea' }
 		];
 	  },
@@ -34,12 +35,14 @@
 		this.autotime=parseFloat(a[1].value);
 		this.minTime=parseFloat(a[2].value);
 		this.totalRefreshTime=parseFloat(a[3].value);
+		this.useWeapon=a[4].value;
 
 		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"autotime",""+this.autotime);
 		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"refresh",""+this.minTime);
 		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"totalRefreshTime",""+this.totalRefreshTime);
+		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"useWeapon",""+this.useWeapon);
 
-		var Methods = a[4].value.split(/[\n\r]+/);
+		var Methods = a[5].value.split(/[\n\r]+/);
 		for(var i=0;i<20;i++) {
 			if (!Methods[i])
 				Methods[i] = '';
@@ -70,6 +73,16 @@
 
 	  addChat: function(msg) {
 	  	combats_plugins_manager.add_sys(msg);
+	  },
+
+	  readIni: function(param, def) {
+		return external.m2_readIni(
+			top.combats_plugins_manager.security_id,
+			"Combats.RU",
+			"antitimeout\\antitimeout.ini",
+			top.getCookie('battle'),
+			param,
+			def);
 	  },
 
 	  Fix: function(){
@@ -143,23 +156,57 @@
 						CheckRes=CheckEnemy ? CheckRes:false;
 					}else if(j=='my_effect'){                             //-----------------------обработка своих эффектов
 						//this.addChat(Res[j]);
-						CheckEffect=false;
-						if(Res[j].indexOf('-')>=0)
-							CheckEffect=true;
-						myEff=Res[j].split(/\s*\|\s*/);
+
+						if (typeof(Res[j])=='string') {
+							var c=Res[j].split(/\s*\|\s*/);
+							Res[j]={};
+							for(var k in c) {
+								c[k] = c[k].match(/^([^\:]+)(?:\:(.*?)|)$/);
+								if (c[k][1].indexOf('-')==0) {
+									c[k][1] = c[k][1].slice(1);
+									Res[j][c[k][1]] = {
+										positive: false
+									};
+								} else {
+									if (c[k][2]) {
+										var func_str = this.readIni(c[k][2],'null');
+										var func;
+										func = eval('func='+func_str);
+										Res[j][c[k][1]] = {
+											positive: true,
+											'function': func
+										};
+									} else {
+										Res[j][c[k][1]] = {
+											positive: true
+										};
+									}
+								}
+							}
+						}
+
 						for(k in oBattle.arrUsers){
 							if(oBattle.arrUsers[k].sName==oBattle.sMyLogin){
 								me=oBattle.arrUsers[k];
 								break;
 							}
 						}
-						
-						for(k in me.arrEffects){
-							CheckEffect=(Res[j].indexOf(me.arrEffects[k].sID)>=0) ? true:CheckEffect;
-							CheckEffect=(Res[j].indexOf('-'+me.arrEffects[k].sID)>=0) ? false:CheckEffect;
-							//this.addChat(k+'-'+me.arrEffects[k].sID+'-'+CheckEffect);
+						var myEff = {};
+						for(var k in me.arrEffects){
+							myEff[me.arrEffects[k].sID] = me.arrEffects[k];
 						}
-						CheckRes=CheckEffect ? CheckRes:false;
+						
+						CheckEffect = false;
+						for(var k in Res[j]){
+							if (!(k in myEff) && !Res[j][k].positive 
+							    || (k in myEff) && Res[j][k].positive && (Res[j][k]['function']==null || Res[j][k]['function'](myEff[k].sTitle)))
+							{
+								CheckEffect = true;
+								break;
+							}
+						}
+
+						CheckRes &= CheckEffect;
 					}else if(j=='my_hp'){              //-----------------------обработка своего уровня HP
 						var Less=(Res[j].indexOf('<')>=0);
 						var More=(Res[j].indexOf('>')>=0);
@@ -219,7 +266,7 @@
 			}
 			
 			//this.addChat("T="+this.timeAttack);
-			if(this.timeAttack>=this.autotime){ //------------ Наносим удар если пора
+			if(this.timeAttack>=this.autotime && this.useWeapon){ //------------ Наносим удар если пора
 				this.addChat('<b>Attack</b>');
 				oBattle.Attack();
 				this.timeAttack=0;
@@ -259,7 +306,7 @@
 	  LoadMethods: function() {
 	  	this.MethodPriority = [];
 		for(i=1;i<=20;i++){ // считывание приемов
-			t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"Method"+i,"");
+			var t=this.readIni("Method"+i,"");
 			if(a=t.match(/(\S+)\s*([^;]*).*/)){ // ----- отделяем прием от параметров
 				var Method=new Object();
 				Method['id']= a[1];
@@ -268,11 +315,24 @@
 					Method['Res']={};
 					for(j in b){
 						c=b[j].split(/\s*:\s*/); // ----------- отделяем название параметра от величины
-						Method['Res'][c[0]]=c[1];
+						Method['Res'][c[0]]=c.slice(1).join(':');
 					}
 				}
 				if(Method['id'])
 					this.MethodPriority.push(Method);
+			}
+		}
+		this.scripts = [];
+		for(i=1;i<=20;i++){ // считывание скриптов
+			var t=this.readIni("Script"+i,"");
+			if (!t) continue;
+			try {
+				var s = external.readFile( top.combats_plugins_manager.security_id, 'Combats.RU', 'antitimeout\\'+t+'.js');
+			        if (!t) continue;
+				this.scripts[i] =top.eval(s);
+			} catch(e) {
+				e.message = 'загрузка скрипта №'+i+': '+e.message;
+		        	combats_plugins_manager.logError(this,e);
 			}
 		}
 	  },
@@ -280,16 +340,18 @@
 	  init: function() {
 		
 		this.active = false; //----------- плагин активен
-		var t = external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"autotime","90");
+		var t = this.readIni("autotime","90");
 		this.autotime = parseFloat(t); //----------- время в секундах до самостоятельного удара
-		var t = external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"refresh","10");
+		var t = this.readIni("refresh","10");
 		this.minTime = parseFloat(t); // --------- минимальное время в секундах для обновления
-		var t = external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"totalRefreshTime","45");
+		var t = this.readIni("totalRefreshTime","45");
 		this.totalRefreshTime = parseFloat(t) || 0; // --------- время в секундах для полного обновления окна при зависании
-
+		this.useWeapon = this.readIni("useWeapon","true")!='false';
+		
 		this.LoadMethods();
 
-		top.combats_plugins_manager.attachEvent('mainframe.load',top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
+		top.combats_plugins_manager.attachEvent('mainframe.load',
+			top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
 		this.onloadHandler();
 		return this;
 	  }
