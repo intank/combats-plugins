@@ -43,7 +43,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         for(var i=0;i<this.combats_plugins.length;i++) {
           var match = this.combats_plugins[i].match(/^\s*(.*?)\s*=\s*(true|false|yes|no)\s*([#;].*|)$/)
           if (match && match[1]) {
-            this.combats_plugins[i] = match[1]+'='+a[2].value[match[1]].toString()+'';
+            this.combats_plugins[i] = match[1]+'='+a[2].value[match[1]].toString()+match[3];
           }
         }
         var s = this.combats_plugins.join('\r\n');
@@ -83,7 +83,19 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         var pluginName=prompt("Введите название плагина (имя папки с плагином)","");
         if (!pluginName)
           return;
-        this.loadPlugin(pluginName);
+        if (this.loadPlugin(pluginName)==0) { // кол-во ошибок == 0
+          var isKnown = false;
+          for(var i=0;i<this.combats_plugins.length;i++) {
+            var match = this.combats_plugins[i].match(/^\s*(.*?)\s*=\s*(true|false|yes|no)\s*([#;].*|)$/)
+            if (match && match[1]==pluginName) {
+              isKnown = true;
+              break;
+            }
+          }
+          if (!isKnown) {
+            this.combats_plugins.push(pluginName+'=false');
+          }
+        }
       },
       "createWindow": function(title, width, height, cancelHandler) {
         oWindow = /*this.oWindow ||*/ top.Window.New( { bNoResize: true } );
@@ -162,6 +174,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
             this.addLog(messages);
           }
         } else {
+          errCount++;
           var messages = '<font class=date2>'+d+'</font> Плагин "'+pluginName+'" не загружен: файл "'+pluginName+'\\plugin.js" не найден или пуст';
           this.add_chat(messages);
           this.addLog(messages);
