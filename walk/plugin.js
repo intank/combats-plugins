@@ -980,13 +980,25 @@
         var direction = {'север':1,'восток':3,'юг':5,'запад':7}[match[1]];
         if (direction==d)
           return true;
-        if (direction==1 && d==3 || direction==3 && d==5 || direction==5 && d==7 || direction==7 && d==1) {
-          // turn right;
-          setTimeout("top.frames[3].location=top.frames[3].location.pathname+'?rnd="+Math.random()+"&path=rr';",100);
-          return false;
+
+        var stepObj = { enable: true };
+        combats_plugins_manager.fireEvent('dungeon_walk.before_step', stepObj);
+        if (stepObj.enable) {
+          var turn_id;
+          if (direction==1 && d==3 || direction==3 && d==5 || direction==5 && d==7 || direction==7 && d==1)
+            turn_id='rr';// turn right
+          else
+            turn_id='rl';// turn left
+
+          this.StartStepTimer(function(){
+            // this.addLog('rotate');
+            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path='+turn_id;
+          },0.1);
+        } else {
+          this.StartStepTimer(function(){
+            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+          }, 2);
         }
-        // turn left;
-        setTimeout("top.frames[3].location=top.frames[3].location.pathname+'?rnd="+Math.random()+"&path=rl';",100);
         return false;
       }
     },
