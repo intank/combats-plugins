@@ -1,5 +1,6 @@
 (function(){
   return {
+    sd4: top.sd4,
     autoPrompt: true,
     autoMoveItems: {},
     getProperties: function() {
@@ -123,7 +124,6 @@
       if (autoMoveItems.length>0) {
         this.itemsToMove = autoMoveItems;
         if (!auto) {
-          this.sd4 = this.searchSD4(innerHTML);
           if (!this.window) {
             this.window = combats_plugins_manager.createWindow("Продать вещи", 320, 480);
           }
@@ -143,13 +143,7 @@
         this.autoSellComplete = true;
       }
     },
-    searchSD4: function(s) {
-      var match = s.match(/\bsd4\s*=\s*(\d+)/);
-      if (match)
-        return match[1];
-    },
     autoSell: function() {
-      this.sd4 = this.searchSD4(combats_plugins_manager.getMainFrame().document.documentElement.innerHTML);
       this.autoSellComplete = false;
       var counter = 0;
       var requestProcessor = combats_plugins_manager.getHTTPRequestProcessor();

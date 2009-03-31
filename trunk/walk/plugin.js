@@ -4,6 +4,7 @@
       return "Бродилка по пещере";
     },
 
+    imageObjSrc: top.combats_plugins_manager.base_folder+'/walk/object.png',
     usedObjectsCleanup: 10, // количество минут до следующей очистки списка поюзаных объектов
     mapFileName: '',
     Map: null,
@@ -688,10 +689,13 @@
         if (s) {
           this.Map = eval('(function(){ return '+s+' })()');
           this.availableCells = {}
+          this.objects = {};
           for(var floor in this.Map) {
             this.availableCells[floor] = [];
+            this.objects[floor] = [];
             for(var i in this.Map[floor]) {
               this.availableCells[floor][i] = [];
+              this.objects[floor][i] = [];
               for(var j in this.Map[floor][i]) {
                 if (this.Map[floor][i][j].constructor === Array) {
                   this.availableCells[floor][i][j] = this.Map[floor][i][j][0];
@@ -700,9 +704,11 @@
                       this.availableCells[floor][i][j] = '';
                       break;
                     }
+                  this.objects[floor][i][j] = this.Map[floor][i][j].slice(1).join('\n');
                   this.Map[floor][i][j] = this.Map[floor][i][j][0];
                 } else {
                   this.availableCells[floor][i][j] = this.Map[floor][i][j];
+                  this.objects[floor][i][j] = '';
                 }
               }
             }
@@ -734,10 +740,12 @@
         this.addLog('floor: '+floor);
         if (!this.Map) this.addLog('no map');
         var Map = this.Map ? this.Map[floor] : null;
+        var availableCells = this.availableCells ? this.availableCells[floor] : null;
         if (!Map) {
           this.updateMap(true);
           if (!this.Map) this.addLog('no map');
           Map = this.Map ? this.Map[floor] : null;
+          availableCells = this.availableCells ? this.availableCells[floor] : null;
         }
         while (this.div.firstChild)
           this.div.removeChild(this.div.firstChild);
@@ -749,11 +757,15 @@
           for(var i=4; i<Map.length-4; i++)
             for(var j=4; j<Map[i].length-4; j++) {
               if (Map[i][j]) {
-                var cell = top.document.createElement('<div style="position: absolute; width:17px; height:17px; background: url(http://img.combats.com/i/sprites/map/'+Map[i][j]+'.gif) no-repeat center center; left:'+(j*15-60)+'px; top:'+(i*15-60)+'px">');
+                var cell = top.document.createElement('<div style="position: absolute; width:17px; height:17px; background: url(http://img.combats.com/i/sprites/map/'+Map[i][j]+'.gif) no-repeat center center; overflow: hidden; left:'+(j*15-60)+'px; top:'+(i*15-60)+'px">');
                 this.div.insertBefore(cell, null);
-                cell.onclick = selectMapTarget;
-                cell.mapX = j;
-                cell.mapY = i;
+                if (availableCells[i][j]) {
+                  cell.onclick = selectMapTarget;
+                  cell.mapX = j;
+                  cell.mapY = i;
+                } else {
+                  cell.innerHTML = '<img src="'+this.imageObjSrc+'" alt="Препятствие" style="position:absolute; left:2px; top:2px;"/>';
+                }
               }
             }
           var arrMap = top.frames[3].arrMap;
@@ -833,6 +845,8 @@
     
     "runToPont": function(position) {
       // this.addLog('runToPont');
+      if (!this.availableCells[position.floor][position.y][position.x])
+        return;
       this.oneStepMode = false;
       this.Direction=0;
       this.destination = position;
@@ -929,7 +943,7 @@
     "createPath": function(startPoint, stopPoint) {
       // this.addLog('createPath');
       var floor = this.getCurrentFloor();
-      var Map = this.Map ? this.Map[floor] : null;
+      var Map = this.availableCells ? this.availableCells[floor] : null;
       if (!Map)
         return null;
 
