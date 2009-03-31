@@ -12,7 +12,7 @@
     trySelect: -1,
     div: "",
     oReq: null,
-    sd4: '',
+    sd4: top.sd4,
     toString: function() {
       return "Надевание комплектов";
     },
@@ -101,9 +101,6 @@
       var document = top.combats_plugins_manager.getMainFrame().document;
       if (document.location.pathname!='/main.pl')
         return this.sequencePlayStop(false);
-
-      if (this.sd4=='')
-        this.sd4 = document.parentWindow.sd4;
 
       action = action.split(':');
       var location = null;
@@ -227,10 +224,12 @@
         if (top.dress.div in d.all) {
           if (top.dress.inDungeon) {
             var imgs = d.all[top.dress.div].getElementsByTagName('img');
-            imgs[2+top.dress.selected].filters.Glow.Enabled = '0';
-            imgs[2+top.dress.trySelect].filters.Glow.Enabled = '1';
-            imgs[2+top.dress.trySelect].filters.Glow.color = '#40FF40';
-            imgs[2+top.dress.trySelect].filters.Glow.Strength = '5';
+            var old_id = top.dress.selected==6?1:2+top.dress.selected;
+            var new_id = top.dress.trySelect==6?1:2+top.dress.trySelect;
+            imgs[old_id].filters.Glow.Enabled = '0';
+            imgs[new_id].filters.Glow.Enabled = '1';
+            imgs[new_id].filters.Glow.color = '#40FF40';
+            imgs[new_id].filters.Glow.Strength = '5';
           } else {
             d.body.removeChild(d.all[top.dress.div]);
             top.dress.div = "";
@@ -315,9 +314,9 @@
           for(i=0;i<6;i++) {
             dress_coords = coords[i].split(',');
             innerHTML += '<img id="img_dress_'+i+'_'+s+'" src="file:///'+combats_plugins_manager.base_folder+'dress/icon.gif" alt="'+dress.complect[i].name+'" style="position:absolute; left:'+(dress_coords[0]-7)+'; top:'+(dress_coords[1]-7)+'; width:16px; height:16px; cursor:pointer; filter:Glow(color='+(dress.selected==i?'#40FF40':'#FF80FF')+',Strength=5,Enabled='+(dress.selected==i?1:0)+')" onclick="top.combats_plugins_manager.plugins_list.dress.click('+i+')" onmouseover="document.images.img_dress_'+i+'_'+s+'.filters.Glow.'+(dress.selected==i?'color=\'#FF80FF\'':'Enabled=1')+'" onmouseout="document.images.img_dress_'+i+'_'+s+'.filters.Glow.'+(dress.selected==i?'color=\'#40FF40\'':'Enabled=0')+'">';
-            map.appendChild(d.createElement('<AREA SHAPE=CIRCLE COORDS="'+coords[i]+'" alt="'+dress.complect[i].name+'" onclick="top.combats_plugins_manager.plugins_list.dress.click('+i+')" onmouseover="document.images.img_dress_'+i+'_'+s+'.filters.Glow.'+(dress.selected==i?'color=\'#FF80FF\'':'Enabled=1')+'" onmouseout="document.images.img_dress_'+i+'_'+s+'.filters.Glow.'+(dress.selected==i?'color=\'#40FF40\'':'Enabled=0')+'">'));
+            map.appendChild(d.createElement('<AREA SHAPE=CIRCLE COORDS="'+coords[i]+'" alt="'+dress.complect[i].name+'" onclick="top.combats_plugins_manager.plugins_list.dress.click('+i+')" >'));
           }
-          map.appendChild(d.createElement('<AREA SHAPE=CIRCLE COORDS="'+coords[6]+'" alt="Снять всё" onclick="top.combats_plugins_manager.plugins_list.dress.click(6)" onmouseover="document.images.img_dress_6_'+s+'.filters.Glow.'+(dress.selected==6?'color=\'#FF80FF\'':'Enabled=1')+'" onmouseout="document.images.img_dress_6_'+s+'.filters.Glow.'+(dress.selected==6?'color=\'#40FF40\'':'Enabled=0')+'">'));
+          map.appendChild(d.createElement('<AREA SHAPE=CIRCLE COORDS="'+coords[6]+'" alt="Снять всё" onclick="top.combats_plugins_manager.plugins_list.dress.click(6)" >'));
           
           var img = d.createElement('<img src="file:///'+combats_plugins_manager.base_folder+'dress/dress.gif" id="dress_img_'+s+'" usemap="#dress_map_'+s+'">');
           var div = d.createElement('<div id="dress_div_'+s+'" style="position:absolute; left:100; top:30; width:100px; height:100px; z-index:100"></div>');
