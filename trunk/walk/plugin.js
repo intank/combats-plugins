@@ -133,8 +133,8 @@
 		{ name: "Отображать монстров на радаре", value: this.showUnits },
 		{ name: "Отображать объекты на радаре", value: this.showObjects },
 		{ name: "Скрывать карту, если открыто не подземелье", value: this.autoHideMap },
-		{ name: "Минимум HP для автонападения", value: this.minHP},
-		{ name: "Минимум маны для автонападения", value: this.minMana},
+		{ name: "Минимум HP для автонападения (%)", value: this.minHP},
+		{ name: "Минимум маны для автонападения (%)", value: this.minMana},
 		{ name: "Принудительное время ожидания шага", value: this.forcedStepTime},
 		{ name: "Список исключенных из автокликера объектов", value: this.excludedObjects, type:"textarea"},
 		{ name: "Список объектов, на которые нужно кликать <b>всегда</b>", value: items[1].join("\n"), type:"textarea"},
@@ -162,8 +162,8 @@
 	this.showUnits=a[2].value;
 	this.showObjects=a[3].value;
 	this.autoHideMap=a[4].value;
-	this.minHP=parseFloat(a[5].value) || 95;
-	this.minMana=parseFloat(a[6].value) || 95;
+	this.minHP=Math.max(0, Math.min(parseFloat(a[5].value) || 95, 100));
+	this.minMana=Math.max(0, Math.min(parseFloat(a[6].value) || 95, 100));
 	this.forcedStepTime = parseFloat(a[7].value) || 0;
 	this.excludedObjects=a[8].value;
         this.alwaysItems = {};
