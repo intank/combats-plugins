@@ -4,7 +4,9 @@
       return "Бродилка по пещере";
     },
 
-    imageObjSrc: top.combats_plugins_manager.base_folder+'/walk/object.png',
+    markDanger: top.combats_plugins_manager.base_folder+'/walk/danger1.png',
+    markObstacle: top.combats_plugins_manager.base_folder+'/walk/stop.png',
+    markUseful: top.combats_plugins_manager.base_folder+'/walk/object.png',
     usedObjectsCleanup: 10, // количество минут до следующей очистки списка поюзаных объектов
     mapFileName: '',
     Map: null,
@@ -702,9 +704,11 @@
                   for(var obj in this.Map[floor][i][j])
                     if (this.Map[floor][i][j][obj]==='') {
                       this.availableCells[floor][i][j] = '';
+                      this.Map[floor][i][j].splice(obj,1);
                       break;
                     }
-                  this.objects[floor][i][j] = this.Map[floor][i][j].slice(1).join('\n');
+                  if (this.Map[floor][i][j].length>1)
+                    this.objects[floor][i][j] = this.Map[floor][i][j].slice(1).join('\n');
                   this.Map[floor][i][j] = this.Map[floor][i][j][0];
                 } else {
                   this.availableCells[floor][i][j] = this.Map[floor][i][j];
@@ -741,11 +745,13 @@
         if (!this.Map) this.addLog('no map');
         var Map = this.Map ? this.Map[floor] : null;
         var availableCells = this.availableCells ? this.availableCells[floor] : null;
+        var objects = this.objects ? this.objects[floor] : null;
         if (!Map) {
           this.updateMap(true);
           if (!this.Map) this.addLog('no map');
           Map = this.Map ? this.Map[floor] : null;
           availableCells = this.availableCells ? this.availableCells[floor] : null;
+          objects = this.objects ? this.objects[floor] : null;
         }
         while (this.div.firstChild)
           this.div.removeChild(this.div.firstChild);
@@ -763,8 +769,15 @@
                   cell.onclick = selectMapTarget;
                   cell.mapX = j;
                   cell.mapY = i;
+                  if (objects[i][j]) {
+                    cell.innerHTML = '<img src="'+this.markUseful+'" alt="'+objects[i][j]+'" style="position:absolute; left:2px; top:2px;"/>';
+                  }
                 } else {
-                  cell.innerHTML = '<img src="'+this.imageObjSrc+'" alt="Препятствие" style="position:absolute; left:2px; top:2px;"/>';
+                  if (objects[i][j]) {
+                    cell.innerHTML = '<img src="'+this.markUseful+'" alt="'+objects[i][j]+'" style="position:absolute; left:2px; top:2px;"/>';
+                  } else {
+                    cell.innerHTML = '<img src="'+this.markObstacle+'" alt="Препятствие" style="position:absolute; left:2px; top:2px;"/>';
+                  }
                 }
               }
             }
