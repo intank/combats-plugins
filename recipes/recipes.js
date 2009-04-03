@@ -17,7 +17,7 @@ var components = [
   {id:'mater8', count:0, used:0, name:'Троекорень', is_material:true},
   {id:'mater9', count:0, used:0, name:'Корень змеиного дерева', is_material:true},
   {id:'mater10', count:0, used:0, name:'Кора змеиного дерева', is_material:true},
-  {id:'mater11', count:0, used:0, name:'Кожа общего врага', is_material:true},
+  {id:'mater11', count:0, used:0, name:'Кожа Общего Врага', is_material:true},
   {id:'mater12', count:0, used:0, name:'Сталь', is_material:true},
   {id:'mater13', count:0, used:0, name:'Кристалл тысячи ответов', is_material:true},
   {id:'mater14', count:0, used:0, name:'Сгусток эфира', is_material:true},
@@ -37,7 +37,13 @@ var components = [
   {id:'mater28', count:0, used:0, name:'Лучистый рубин', is_material:true},
   {id:'mater29', count:0, used:0, name:'Лучистый топаз', is_material:true},
   {id:'mater30', count:0, used:0, name:'Шепот гор', is_material:true},
-  {id:'mater31', count:0, used:0, name:'Эссенция праведного гнева', is_material:true}
+  {id:'mater31', count:0, used:0, name:'Эссенция праведного гнева', is_material:true},
+  {id:'mater294',count:0, used:0, name:'Слезы лунного мерцания', is_material:true},
+  {id:'mater295',count:0, used:0, name:'Чешуйчатая шкура', is_material:true},
+  {id:'mater296',count:0, used:0, name:'Самородок мерцающего металла', is_material:true},
+  {id:'mater298',count:0, used:0, name:'Древний мох', is_material:true},
+  {id:'mater299',count:0, used:0, name:'Черное масло', is_material:true},
+  {id:'mater300',count:0, used:0, name:'Бурая шкура', is_material:true}
 ];
 
 var locations = [
@@ -47,7 +53,8 @@ var locations = [
   'Фонтан зачарованных гор в ПТП',
   'Лаборатория в Бездне',
   'Наковальня в Бездне',
-  'Цветочный магазин'
+  'Цветочный магазин',
+  'Прочие места'
 ];
 
 oOptions = document.all['locations'].options;
@@ -298,7 +305,11 @@ var recipes = [
 // Букеты
   { name:'event_valentine_buket_big', descr:'Букет кровавых подземников', comp: ['event_valentine_reward_small',36,'event_valentine_reward_med',18,'event_valentine_reward_big',11], location:5, possible:0, accepted:0},
   { name:'event_valentine_buket_med', descr:'Букет черепичных подземников', comp: ['event_valentine_reward_small',20,'event_valentine_reward_med',11], location:5, possible:0, accepted:0},
-  { name:'event_valentine_buket_small', descr:'Букет блеклых подземников', comp: ['event_valentine_reward_small',11], location:5, possible:0, accepted:0}
+  { name:'event_valentine_buket_small', descr:'Букет блеклых подземников', comp: ['event_valentine_reward_small',11], location:5, possible:0, accepted:0},
+  
+// Разное
+  { name:'dispell1', descr:'Снять Проклятье', comp: ['mater294',1,'mater298',5], location:6, possible:0, accepted:0 },
+  { name:'naruchi41', descr:'Наручи Неотвратимого Возмездия', comp:['mater300',5, 'mater299',3, 'mater296',6, 'mater298',7, 'mater295',8], location:6, possible:0, accepted:0 }
 ];
 
 //try {
