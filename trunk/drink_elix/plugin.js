@@ -501,7 +501,7 @@
             && this.checkHP(top.frames[3].document.documentElement.innerHTML))
         {
           if (this.wasInBattle) {
-            this.drinkTime = new Date(new Date().valueOf()-3000);
+//            this.drinkTime = new Date(new Date().valueOf()-3000);
           } else {
             this.drinkElix();
           }

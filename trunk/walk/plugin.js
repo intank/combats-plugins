@@ -90,6 +90,18 @@
           }
         }
       },
+      '0/1181_fuyfuyf': {
+        priority: 6, 
+        style: { backgroundColor: '#800080' } 
+      },
+      '0/1176_aghoaaga': {
+        priority: 4, 
+        style: { backgroundColor: '#EF00EF' } 
+      },
+      '0/1178_ewwtyy': {
+        priority: 4, 
+        style: { backgroundColor: '#EF00EF' } 
+      },
       '0/1044_kv7870496581': {
         priority: 6, 
         title: '[11]',

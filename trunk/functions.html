@@ -52,6 +52,19 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       getVersion: function() {
         return '1.7';
       },
+      serialize: function(obj) {
+        if (obj===null) {
+          return 'null';
+        } else if (typeof(obj)=='object') {
+          var props = [];
+          for(var prop in obj) {
+            props.push('"'+prop+'": "'+(obj[prop]===null?'null':obj[prop].toString().replace(/(["\\])/g,'\\$1'))+'" /*'+typeof(obj[prop])/*.constructor.toString().replace(/[\n\r]+/g,' ')*/+'*/')
+          }
+          return '{'+props.join(', ')+'} /*'+typeof(obj)+'*/';
+        } else {
+          return '"'+obj.toString().replace(/(["\\])/g,'\\$1')+'" /*'+typeof(obj)+'*/';
+        }
+      },
       "attachEvent": function(event, method) {
         if (!(event in this.events))
           this.events[event] = [];
