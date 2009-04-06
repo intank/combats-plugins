@@ -100,23 +100,30 @@
 	    }
 	  },
 
-	  getEnemyCount: function() {
-		var groups = {};
-		var myGroup = '';
+	  scanGroups: function() {
+		if (this.groupsRefreshed) return;
+		this.groups = {};
+		this.myGroup = '';
 		var oBattle = top.Battle.oBattle;
-		var warriors = oBattle.oGroupsLayer.innerHTML.match(/<SPAN\s+class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/g);
+		var warriors = oBattle.oGroupsLayer.innerHTML.match(/<SPAN\s+(?:style="TEXT-DECORATION\:\s*underline"\s+|)class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/g);
 		for(var k=0; k<warriors.length; k++) {
-			warriors[k] = warriors[k].match(/<SPAN\s+class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/);
+			warriors[k] = warriors[k].match(/<SPAN\s+(?:style="TEXT-DECORATION\:\s*(underline)"\s+|)class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/);
 			if (warriors[k]) {
-				groups[warriors[k][1]] = (groups[warriors[k][1]] || 0) + 1;
-				if (warriors[k][2]==oBattle.sMyLogin) {
-					myGroup = warriors[k][1];
+				if (!this.groups[warriors[k][2]]) this.groups[warriors[k][2]] = []
+				this.groups[warriors[k][2]].push({name:warriors[k][3],group:warriors[k][2],ready:(warriors[k][1]!='')});
+				if (warriors[k][3]==oBattle.sMyLogin) {
+					this.myGroup = warriors[k][2];
 				}
 			}
 		}
+		this.groupsRefreshed = true;
+	  },
+
+	  getEnemyCount: function() {
+		this.scanGroups();
 		var enemies = 0;
-		for(var k in groups) {
-			enemies += (k==myGroup)?0:groups[k];
+		for(var k in this.groups) {
+			enemies += (k==this.myGroup)?0:this.groups[k].length;
 		}
 		return enemies;
 	  },
@@ -227,6 +234,8 @@
 			}
 			this.enemy = oBattle.arrUsers[oBattle.sEnemy];
 			var diag_str = combats_plugins_manager.serialize(this.me)+combats_plugins_manager.serialize(this.enemy);
+			this.groupsRefreshed = false;
+
 			//------ Приемы
 			for(i=0;i<this.MethodPriority.length;i++){
 				id=this.MethodPriority[i].id;
@@ -236,7 +245,9 @@
 					continue;
 				}
 
-				Res=this.MethodPriority[i].Res;
+				var oMethod = oBattle.arrMethods[id].oMethod;
+				var Res=this.MethodPriority[i].Res;
+				var sName = this.enemy.sName;
 				//this.addChat(i+'-'+id);
 				CheckRes=true;
 				for(j in Res){
@@ -247,15 +258,15 @@
 						//this.addChat(en);
 						for(k in en){
 							//this.addChat(k+'-'+en[k]);
-							en_a=en[k].match(/([А-я ]*)(\[\s*(\d+)\s*\])?/);
-							enName=en_a[1].replace(/(.*?)\s+/, "$1");
+							en_a=en[k].match(/([А-яЁёa-zA-Z ]*)(\[\s*(\d+)\s*\]|)/);
+							enName=en_a[1].replace(/^\s*(.*?)\s*$/, "$1");
 							enLevel=en_a[3] ? en_a[3] : 0;
 							//this.addChat("Name '"+enName+"', Level '"+enLevel+"', ");
 							
 							if(enName && enLevel)
-								CheckEnemy=(this.enemy.sName.indexOf(enName)>=0 && this.enemy.nLevel==enLevel) ? true:CheckEnemy;
+								CheckEnemy=(sName.indexOf(enName)>=0 && this.enemy.nLevel==enLevel) ? true:CheckEnemy;
 							else if(enName)
-								CheckEnemy=(this.enemy.sName.indexOf(enName)>=0) ? true:CheckEnemy;
+								CheckEnemy=(sName.indexOf(enName)>=0) ? true:CheckEnemy;
 							else
 								CheckEnemy=(this.enemy.nLevel==enLevel) ? true:CheckEnemy;
 
@@ -288,6 +299,25 @@
 						CheckRes = CheckRes && this.checkEff(this.enemy, oMethodEff);
 					}else if(j=='enemy_boss' && this.enemy){            //-----------------------обработка своих эффектов
 						CheckRes = CheckRes && (this.enemy.nMaxHP=='100');
+					}else if(j=='enemy_ready'){                             //-----------------------обработка своих эффектов
+						this.scanGroups();
+						for(var k in this.groups) {
+							if (k==this.myGroup) continue;
+							for(var l in this.groups[k]) {
+								if (this.groups[k][l].name==sName) {
+									CheckRes = CheckRes && this.groups[k][l].ready;
+									break;
+								}
+							}
+						}
+					}else if(j=='all_enemies_ready'){                             //-----------------------обработка своих эффектов
+						this.scanGroups();
+						for(var k in this.groups) {
+							if (k==this.myGroup) continue;
+							for(var l in this.groups[k]) {
+								CheckRes = CheckRes && this.groups[k][l].ready;
+							}
+						}
 					}else if(j=='enemy_hp' && this.enemy){              //-----------------------обработка своего уровня HP
 						var Less=(Res[j].indexOf('<')>=0);
 						var More=(Res[j].indexOf('>')>=0);
@@ -340,7 +370,7 @@
 				}
 				
 				if(CheckRes){
-					this.addChat('<b>'+oBattle.arrMethods[id].oMethod.sText+'</b> '+(this.diagnostics?diag_str:''));
+					this.addChat('<b>'+oMethod.sText+'</b> '+(this.diagnostics?diag_str:''));
 					var oButton = top.Battle.oBattle.arrMethods[id];
 					oButton.click();
 					if (oButton.oMethod.bSelectTarget) {
@@ -367,7 +397,7 @@
 				oBattle.Attack();
 				this.timeAttack=0;
 			} else {
-				this.addChat('too early to kick');
+				this.addChat('too early to kick'+(this.diagnostics?diag_str:''));
 			}
 //			if(this.autotime)
 			this.setKickTimer(this.minTime*1000);

@@ -105,6 +105,8 @@ function getPluginGfg() {
     } else {
       s += '<form onsubmit="return false"><table style="width:100%; overflow:scroll; white-space:normal; table-layout:fixed"><colgroup><col/><col style="width:66%"/></colgroup>';
       for(var i=0; i<props.length; i++) {
+        if (!props[i])
+          continue;
         if (is_function(props[i].value)) {
           s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\" id=\"prop_"+i+"\">";
         } else {
