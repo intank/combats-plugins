@@ -441,6 +441,7 @@
         if (match) {
           this.addChat(match[1]);
         }
+        top.frames[3].location = '/main.pl?'+Math.random();
       }
     },
     drinkHPElixTimeoutHandler: function() {
@@ -478,7 +479,7 @@
         return;
       }
       var time = (new Date().valueOf() - this.drinkTime.valueOf());
-      if (time>5000) {
+      if (time>2000) {
         if (this.currentHP/this.maxHP*100<this.autoDrinkLevel) {
           this.addChat('Надо выпить. Не хватает '+(this.maxHP-this.currentHP)+'HP. Прошло '+(time/1000)+' сек');
           this.forceDrinkElix(disableElix);
@@ -501,6 +502,7 @@
             && this.checkHP(top.frames[3].document.documentElement.innerHTML))
         {
           if (this.wasInBattle) {
+            setTimeout(function(){top.frames[3].location = '/main.pl?'+Math.random();},10);
 //            this.drinkTime = new Date(new Date().valueOf()-3000);
           } else {
             this.drinkElix();
