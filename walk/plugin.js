@@ -682,7 +682,7 @@
     "getCurrentFloor": function() {
       // this.addLog('getCurrentFloor');
       try {
-        var match = top.frames[3].document.getElementsByTagName('table')[0].cells[1].innerHTML.match(/^(.*?)(?:(Этаж\s+\d+)(?:\S*)|)(?=\s*-[^-]+$)/);
+        var match = top.frames[3].document.getElementsByTagName('table')[0].cells[1].innerHTML.match(/^(.*?)(?:(Этаж\s+\d+)(?:\S*)|)(?=\s*-[^-]+?&nbsp;|&nbsp;)/);
         return match ? (match[2] ? match[2] : match[1]) : '';
       } catch(e) {
       }
