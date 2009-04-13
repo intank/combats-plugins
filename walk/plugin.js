@@ -15,6 +15,38 @@
     alwaysItems: {},
 
     "bots": {
+      '0/1209_qplghuk': {
+        ids: {
+          79: {
+            style: { backgroundColor: '#CFCF00', border: '1px solid red' } 
+          }
+        }
+      },
+      '0/1212_aizpldd': {
+        ids: {
+          2: {
+            style: { backgroundColor: '#CFCF00', border: '1px solid red' } 
+          }
+        }
+      },
+      '0/1207_zlqnggk': {
+        ids: {
+          130: {
+            style: { backgroundColor: '#CFCF00', border: '1px solid red' } 
+          }
+        }
+      },
+      '0/1206_pzzlqik': {
+        ids: {
+          132: {
+            style: { backgroundColor: '#CFCF00', border: '1px solid red' } 
+          }
+        }
+      },
+      '0/1213_baloszh': {
+        style: { backgroundColor: '#CFCF00', border: '1px solid red' } 
+      },
+      
       '1/1040a_dr8472409823': {
         priority: 3, 
         style: { backgroundColor: '#EF00EF' }
@@ -436,7 +468,7 @@
 	for (var i=0; i<7; i++){
 		tab+='<tr>';
 		for (var j=0; j<7; j++)
-			tab+='<td style="width: 7px; height: 7px;"></td>';
+			tab+='<td style="width: 7px; height: 7px; cursor: default">&nbsp;</td>';
 		tab+='</tr>';
 	}
 	tab+='</table>';
