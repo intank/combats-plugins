@@ -50,19 +50,21 @@
       var hot_keys = combats_plugins_manager.plugins_list['hot_keys'];
       if (!hot_keys)
         return alert('К сожалению, не найден плагин hot_keys.\nНевозможно задать горячую клавишу.');
-      hot_keys.showAssignDialog(combats_plugins_manager.get_binded_method(
-        this,
-        function(result) {
-          if (result) {
-            if (this.hotKey)
-              hot_keys.removeKeyHandler(this.hotKey);
-            this.hotKey = result;
-            hot_keys.setKeyHandler(this.hotKey, combats_plugins_manager.get_binded_method(
-              this,
-              this.doAttack
-            ));
-          }
-        })
+      hot_keys.showAssignDialog(
+        this.hotKey,
+        combats_plugins_manager.get_binded_method(
+          this,
+          function(result) {
+            if (result) {
+              if (this.hotKey)
+                hot_keys.removeKeyHandler(this.hotKey);
+              this.hotKey = result;
+              hot_keys.setKeyHandler(this.hotKey, combats_plugins_manager.get_binded_method(
+                this,
+                this.doAttack
+              ));
+            }
+          })
       );
     },
     doAttack: function() {
@@ -154,8 +156,6 @@
         }
       }
 
-      var attackCount = oBattle.arrAttack.length;
-      var attack = (this.attack==0)?Math.floor(Math.random()*5):this.block;
       oBattle.Attack();
     },
     Init: function() {

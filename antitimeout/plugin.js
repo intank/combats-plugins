@@ -237,8 +237,8 @@
 			this.groupsRefreshed = false;
 
 			//------ ѕриемы
-			for(i=0;i<this.MethodPriority.length;i++){
-				id=this.MethodPriority[i].id;
+			for(var i=0;i<this.MethodPriority.length;i++){
+				var id=this.MethodPriority[i].id;
 				
 				if (typeof(top.Battle.oBattle.arrMethods[id])!='object' || !top.Battle.oBattle.arrMethods[id].oMethod.bEnable) {
 					diag_str += ', skip: '+id;
@@ -250,11 +250,13 @@
 				var sName = this.enemy.sName;
 				//this.addChat(i+'-'+id);
 				CheckRes=true;
-				for(j in Res){
+				for(var jj in Res){
+					var j = Res[jj].param;
+					var value = Res[jj].value;
 					if(j=='enemy' && this.enemy){                                //-------------ќбработка врага
 						CheckEnemy=false;
-						//this.addChat(j+'-'+Res[j]);
-						en=Res[j].split(/\s*\|\s*/);
+						//this.addChat(j+'-'+value);
+						en=value.split(/\s*\|\s*/);
 						//this.addChat(en);
 						for(k in en){
 							//this.addChat(k+'-'+en[k]);
@@ -274,26 +276,26 @@
 						}
 						CheckRes = CheckEnemy ? CheckRes:false;
 					}else if(j=='my_effect'){                             //-----------------------обработка своих эффектов
-						//this.addChat(Res[j]);
+						//this.addChat(value);
 
 						if (!this.oMethodMyEff)
 							this.oMethodMyEff = [];
 						var oMethodEff = this.oMethodMyEff[i]
 						if (!oMethodEff) {
 							this.oMethodMyEff[i] = oMethodEff = 
-								this.createMethodEff(Res[j]);
+								this.createMethodEff(value);
 						}
 
 						CheckRes = CheckRes && this.checkEff(this.me, oMethodEff);
 					}else if(j=='enemy_effect' && this.enemy){                             //-----------------------обработка своих эффектов
-						//this.addChat(Res[j]);
+						//this.addChat(value);
 
 						if (!this.oMethodEnemyEff)
 							this.oMethodEnemyEff = [];
 						var oMethodEff = this.oMethodEnemyEff[i]
 						if (!oMethodEff) {
 							this.oMethodEnemyEff[i] = oMethodEff = 
-								this.createMethodEff(Res[j]);
+								this.createMethodEff(value);
 						}
 
 						CheckRes = CheckRes && this.checkEff(this.enemy, oMethodEff);
@@ -319,10 +321,10 @@
 							}
 						}
 					}else if(j=='enemy_hp' && this.enemy){              //-----------------------обработка своего уровн€ HP
-						var Less=(Res[j].indexOf('<')>=0);
-						var More=(Res[j].indexOf('>')>=0);
-						var Mode_percent=(Res[j].indexOf('%')>=0);
-						var lvl = parseFloat(Res[j].replace(/^.*?(\d+).*?$/,'$1'));
+						var Less=(value.indexOf('<')>=0);
+						var More=(value.indexOf('>')>=0);
+						var Mode_percent=(value.indexOf('%')>=0);
+						var lvl = parseFloat(value.replace(/^.*?(\d+).*?$/,'$1'));
 						if (!isNaN(lvl)) {
 							CheckRes = CheckRes && (
 								!Mode_percent && (Less && this.enemy.nHP<=lvl || More && this.enemy.nHP>=lvl)
@@ -331,10 +333,10 @@
 							);
 						}
 					}else if(j=='my_hp'){              //-----------------------обработка своего уровн€ HP
-						var Less=(Res[j].indexOf('<')>=0);
-						var More=(Res[j].indexOf('>')>=0);
-						var Mode_percent=(Res[j].indexOf('%')>=0);
-						var lvl = parseFloat(Res[j].replace(/^.*?(\d+).*?$/,'$1'));
+						var Less=(value.indexOf('<')>=0);
+						var More=(value.indexOf('>')>=0);
+						var Mode_percent=(value.indexOf('%')>=0);
+						var lvl = parseFloat(value.replace(/^.*?(\d+).*?$/,'$1'));
 						if (!isNaN(lvl)) {
 							CheckRes = CheckRes && (
 								!Mode_percent && (Less && this.me.nHP<=lvl || More && this.me.nHP>=lvl)
@@ -343,10 +345,10 @@
 							);
 						}
 					}else if(j=='my_mana'){              //-----------------------обработка своего уровн€ HP
-						var Less=(Res[j].indexOf('<')>=0);
-						var More=(Res[j].indexOf('>')>=0);
-						var Mode_percent=(Res[j].indexOf('%')>=0);
-						var lvl = parseFloat(Res[j].replace(/^.*?(\d+).*?$/,'$1'));
+						var Less=(value.indexOf('<')>=0);
+						var More=(value.indexOf('>')>=0);
+						var Mode_percent=(value.indexOf('%')>=0);
+						var lvl = parseFloat(value.replace(/^.*?(\d+).*?$/,'$1'));
 						if (!isNaN(lvl)) {
 							CheckRes = CheckRes && (
 								!Mode_percent && (Less && this.me.nMagic<=lvl || More && this.me.nMagic>=lvl)
@@ -355,17 +357,22 @@
 							);
 						}
 					}else if(j=='enemy_cnt'){              //-----------------------обработка своего уровн€ HP
-						var Less=(Res[j].indexOf('<')>=0);
-						var More=(Res[j].indexOf('>')>=0);
-						var cnt = parseFloat(Res[j].replace(/^.*?(\d+).*?$/,'$1'));
+						var Less=(value.indexOf('<')>=0);
+						var More=(value.indexOf('>')>=0);
+						var cnt = parseFloat(value.replace(/^.*?(\d+).*?$/,'$1'));
 						if (!isNaN(cnt)) {
 							var enemies = this.getEnemyCount();
 							CheckRes = CheckRes && (Less && enemies<cnt || More && enemies>cnt);
 						}
 					}else{                             //-----------------------обработка тактик дл€ приема
-						currRes=parseInt(oBattle.arrRes[j].innerHTML);
-						//this.addChat(j+'-'+Res[j]+'?'+currRes);
-						CheckRes=( (currRes>=parseInt(Res[j])) ? CheckRes : false);
+						if (j in oBattle.arrRes) {
+							currRes=parseInt(oBattle.arrRes[j].innerHTML);
+							//this.addChat(j+'-'+value+'?'+currRes);
+							CheckRes=( (currRes>=parseInt(value)) ? CheckRes : false);
+						} else {
+							this.addChat(id+', unknown: '+j);
+							CheckRes=false;
+						}
 					}
 				}
 				
@@ -444,10 +451,10 @@
 				Method['id']= a[1];
 				if(a[2]){
 					b=a[2].split(/\s*,\s*/); // ---------- раздел€ем параметры
-					Method['Res']={};
+					Method['Res']=[];
 					for(j in b){
 						c=b[j].split(/\s*:\s*/); // ----------- отдел€ем название параметра от величины
-						Method['Res'][c[0]]=c.slice(1).join(':');
+						Method['Res'].push({param:c[0],value:c.slice(1).join(':')});
 					}
 				}
 				if(Method['id'])
