@@ -27,17 +27,18 @@
       }
       callback(result);
     },
-    showAssignDialog: function(callback) {
+    showAssignDialog: function(value, callback) {
       top.Window.Prompt(
         function(result) {
           this.assignDialogHandler(result, callback);
         },
         this,
         'Нажмите желаемую комбинацию клавиш, не пытайтесь править строку ввода',
-        '',
+        value,
         'Назначаем горячую клавишу'
       );
       top.Window.oPrompt.oValue.readOnly = true;
+      setTimeout(function(){top.Window.oPrompt.oValue.focus();},10);
       this.assignDalogActive = true;
     },
     parseKeyId: function(keyId) {

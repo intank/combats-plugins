@@ -19,9 +19,9 @@
       var loc = top.combats_plugins_manager.getMainFrame().location;
       if (loc.pathname!='/dungeon.pl')
         return false;
-      if (!loc.search.match(/[\?&]start=/))
-        return false;
-      return true;
+      return (loc.search.match(/[\?&]start=/))
+        && ('REQUEST' in top.frames[3].document.forms) 
+        && ('start' in top.frames[3].document.forms['REQUEST']);
     },
     onloadHandler: function() {
       try {
