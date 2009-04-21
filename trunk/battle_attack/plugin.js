@@ -33,7 +33,7 @@
             selected: this.match
           }
         },
-        { name: 'Задать гарячую клавишу', value: this.setHotKey }
+        { name: 'Задать горячую клавишу', value: this.setHotKey }
       ];
     },
     setProperties: function(a) {
