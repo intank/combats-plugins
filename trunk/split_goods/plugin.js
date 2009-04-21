@@ -1,12 +1,8 @@
 (function() {
-  function plugin_split_goods() {
-  }
-
-  plugin_split_goods.prototype = {
+  return {
     toString: function() {
       return "Деление товара на пачки";
     },
-
 
     isUnstack: function(node) {
       if (node.tagName=="A")
@@ -114,6 +110,4 @@
       }
     }
   };
-
-  return new plugin_split_goods();
 })()

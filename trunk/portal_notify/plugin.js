@@ -1,5 +1,5 @@
 (function() {
-  portal_notify = {
+  return {
     toString: function() {
       return "Напоминание о доступности портала";
     },
@@ -23,8 +23,7 @@
       top.combats_plugins_manager.attachEvent(
         'mainframe.load',
         top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
+      return this;
     }
-  };
-
-  return portal_notify.Init();
+  }.Init();
 })()

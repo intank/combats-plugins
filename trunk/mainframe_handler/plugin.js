@@ -1,9 +1,5 @@
 (function() {
-  plugin_mainframe_handler = function() {
-    this.Init();
-  }
-
-  plugin_mainframe_handler.prototype = {
+  return {
     toString: function() {
       return "Обработка основного фрейма";
     },
@@ -15,8 +11,7 @@
       frames[3].frameElement.attachEvent(
         "onload",
         top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
+      return this;
     }
-  };
-
-  return new plugin_mainframe_handler();
+  }.Init();
 })()

@@ -43,7 +43,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         for(var i=0;i<this.combats_plugins.length;i++) {
           var match = this.combats_plugins[i].match(/^\s*(.*?)\s*=\s*(true|false|yes|no)\s*([#;].*|)$/)
           if (match && match[1]) {
-            this.combats_plugins[i] = match[1]+'='+a[2].value[match[1]].toString()+match[3];
+            this.combats_plugins[i] = match[1]+'='+(match[1] in a[2].value?a[2].value[match[1]].toString():false)+match[3];
           }
         }
         var s = this.combats_plugins.join('\r\n');
@@ -108,6 +108,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           if (!isKnown) {
             this.combats_plugins.push(pluginName+'=false');
           }
+          this.CfgDiv.contentWindow.loadPluginsList();
         }
       },
       "createWindow": function(title, width, height, cancelHandler) {

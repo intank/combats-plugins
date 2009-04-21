@@ -27,7 +27,11 @@ function loadPluginsList() {
 
 function switchUnconfigurable() {
   showUnconfigurable=!showUnconfigurable;
+  var selected = document.getElementById('index').value;
   loadPluginsList();
+  if (document.getElementById('index').value != selected) {
+    getPluginGfg();
+  }
 }
 
 function disablePlugin(plugin_index) {

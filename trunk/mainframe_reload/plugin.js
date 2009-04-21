@@ -24,10 +24,9 @@
               if (this.hotKey)
                 hot_keys.removeKeyHandler(this.hotKey);
               this.hotKey = result;
-              hot_keys.setKeyHandler(this.hotKey, combats_plugins_manager.get_binded_method(
-                this,
-                this.doReload
-              ));
+              hot_keys.setKeyHandler(this.hotKey, 
+                combats_plugins_manager.get_binded_method(this,this.doReload),
+                this.toString());
             }
           })
       );
@@ -41,10 +40,9 @@
       if (this.hotKey) {
         var hot_keys = combats_plugins_manager.plugins_list['hot_keys'];
         if (hot_keys)
-          hot_keys.setKeyHandler(this.hotKey, combats_plugins_manager.get_binded_method(
-            this,
-            this.doReload
-          ));
+          hot_keys.setKeyHandler(this.hotKey,
+            combats_plugins_manager.get_binded_method(this,this.doReload),
+            this.toString());
         else
           throw new Error('Ќе загружен требующийс€ дл€ работы плагин: <b>hot_keys</b>');
       }
