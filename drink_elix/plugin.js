@@ -26,7 +26,8 @@
         { name: "Пить элики восстановления", value: this.autoDrinkRegen },
         { name: "Пить элики регенерации маны", value: this.autoDrinkRegenMana },
         { name: "Минимальный допустимый % HP", value: this.autoDrinkLevel },
-        { name: "Перечень обязательно используемых эффектов", value: spellsRequired.join('\n'), type: 'textarea' }
+        { name: "Перечень обязательно используемых эффектов", value: spellsRequired.join('\n'), type: 'textarea' },
+        { name: "Задать горячую клавишу для эликсиров жизни", value: this.setHotKey}
       ];
     },
     isStat: {
@@ -167,9 +168,30 @@
         this.configurator.saveIni('dungeonOnly',this.dungeonOnly.toString());
         this.configurator.saveIni('autoDrinkLevel',this.autoDrinkLevel.toString());
         this.configurator.saveIni('spellsRequired',spellsRequired.join(';'));
+        this.configurator.saveIni('hotKey',this.hotKey);
       }
 
       this.checkActive();
+    },
+    setHotKey: function() {
+      var hot_keys = combats_plugins_manager.plugins_list['hot_keys'];
+      if (!hot_keys)
+        return alert('К сожалению, не найден плагин hot_keys.\nНевозможно задать горячую клавишу.');
+      hot_keys.showAssignDialog(
+        this.hotKey,
+        combats_plugins_manager.get_binded_method(
+          this,
+          function(result) {
+            if (result) {
+              if (this.hotKey)
+                hot_keys.removeKeyHandler(this.hotKey);
+              this.hotKey = result;
+              hot_keys.setKeyHandler(this.hotKey,
+                combats_plugins_manager.get_binded_method(this,this.checkHPviaAJAX),
+                this.toString());
+            }
+          })
+      );
     },
     checkActive: function() {
       if (this.active) {
@@ -471,8 +493,6 @@
         combats_plugins_manager.get_binded_method(this,this.drinkHPElixTimeoutHandler));
     },
     drinkElix: function(disableElix) {
-      if (!this.autoDrinkHP)
-        return;
       disableElix = disableElix || {};
       if (this.isDrinkingElix) {
         setTimeout(combats_plugins_manager.get_binded_method(this,this.drinkElix,disableElix), 500);
@@ -495,6 +515,8 @@
         this.drinkElix();
     },
     mainframeLoad: function() {
+      if (!this.autoDrinkHP)
+        return;
       var inBattle = (top.frames[3].location.pathname.match(/^\/battle\d*\.pl/)!=null);
       
       try {
@@ -516,6 +538,16 @@
       this.drinkTime = new Date();
       this.AJAX = combats_plugins_manager.getHTTPRequest();
       this.configurator = combats_plugins_manager.createConfigurationElement('drink_elix');
+      this.hotKey = this.configurator.loadIni('hotKey', '');
+      if (this.hotKey) {
+        var hot_keys = combats_plugins_manager.plugins_list['hot_keys'];
+        if (hot_keys)
+          hot_keys.setKeyHandler(this.hotKey,
+            combats_plugins_manager.get_binded_method(this,this.checkHPviaAJAX),
+            this.toString());
+//        else
+//          throw new Error('Не загружен требующийся для работы плагин: <b>hot_keys</b>');
+      }
       this.setProperties([
         { value: false },
         { value: this.configurator.loadIni('dungeonOnly','true')!='false' },

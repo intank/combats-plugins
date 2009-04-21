@@ -1,10 +1,5 @@
 (function() {
-  function plugin_notify_handler() {
-    this.load_notifications();
-    this.timerHandler();
-  }
-
-  plugin_notify_handler.prototype = {
+  return {
     notify_timer: null,
     notify_list: {},
     toString: function() {
@@ -102,8 +97,11 @@
       this.save_notifications();
       if (!this.notify_timer)
         this.timerHandler();
+    },
+    Init: function() {
+      this.load_notifications();
+      this.timerHandler();
+      return this;
     }
-  };
-
-  return new plugin_notify_handler();
+  }.Init();
 })()

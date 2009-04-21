@@ -111,17 +111,14 @@
     getProperties: function() {
       var handlers = [];
       for(var i in this.hotKeys) {
-        handlers.push(
-          'keyCode:'+this.hotKeys[i].keyCode+
-          ',shiftKey:'+this.hotKeys[i].shiftKey+
-          ',ctrlKey:'+this.hotKeys[i].ctrlKey+
-          ',altKey:'+this.hotKeys[i].altKey);
+        handlers.push(this.realKeyName(this.hotKeys[i])+(this.hotKeys[i].description?': '+this.hotKeys[i].description:''));
       }
       return [
         { name:'Зарегистрированные коды:', value:handlers.join('\n'), type:'textarea' }
       ];
     },
-    setProperties: function(a) {
+    realKeyName: function(parsed) {
+      return (parsed.ctrlKey?'Ctrl+':'')+(parsed.shiftKey?'Shift+':'')+(parsed.altKey?'Alt+':'')+(parsed.keyCode in this.keyCodes?this.keyCodes[parsed.keyCode]:('?'+parsed.keyCode+'?'));
     },
     assignDialogHandler: function(result, callback) {
       this.assignDialogActive = false;
@@ -129,13 +126,12 @@
       if (!result) {
         return callback(null);
       }
+      result = result.replace(/;.*$/,'');
       callback(result);
     },
     showAssignDialog: function(value, callback) {
       top.Window.Prompt(
         function(result) {
-          if (result)
-            result = result.replace(/;.*$/,'');
           this.assignDialogHandler(result, callback);
         },
         this,
@@ -144,8 +140,8 @@
         'Назначаем горячую клавишу'
       );
       var parsed = this.parseKeyId(value);
-      if (parsed && (parsed.keyCode in this.keyCodes)) {
-        value += '; '+(parsed.ctrlKey?'Ctrl+':'')+(parsed.shiftKey?'Shift+':'')+(parsed.altKey?'Alt+':'')+this.keyCodes[parsed.keyCode];
+      if (parsed) {
+        value += '; '+this.realKeyName(parsed);
       }
       top.Window.oPrompt.oValue.value = value;
       top.Window.oPrompt.oValue.readOnly = true;
@@ -209,7 +205,7 @@
         var s = (e.ctrlKey?'C':'c')+(e.shiftKey?'S':'s')+(e.altKey?'A':'a')+'_'+e.keyCode.toString();
         if (this.assignDialogActive && top.Window.oPrompt.oValue==e.srcElement) {
           if (e.keyCode in this.keyCodes) {
-            s += '; '+(e.ctrlKey?'Ctrl+':'')+(e.shiftKey?'Shift+':'')+(e.altKey?'Alt+':'')+this.keyCodes[e.keyCode];
+            s += '; '+this.realKeyName(e);
           }
           top.Window.oPrompt.oValue.value = s;
           setTimeout(function(){top.Window.oPrompt.oValue.focus();},10);
