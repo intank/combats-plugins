@@ -7,6 +7,7 @@
  * [chat_hilight]
  * [chat_private_tab]
  * [dress]
+ * [drink_elix]
  * [fighter_notebook]
  * [flooder]
  * [inventory_backup]
