@@ -14,6 +14,7 @@
  * [mainframe_handler]
  * [notify_handler]
  * [recipes]
+ * [red_hitpoints]
  * [run_to_location]
  * [top_tray] 
  * [simple_doc]
