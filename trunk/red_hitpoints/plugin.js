@@ -165,7 +165,7 @@
       this.complect = this.configurator.loadIni('complect', '');
       this.reserve = parseFloat(this.configurator.loadIni('reserve', '10')) || 0;
       this.cancelExchange = this.configurator.loadIni('cancelExchange', 'true') != 'false';
-      this.forceDress = this.configurator.loadIni('forceDress', 'true') == 'false';
+      this.forceDress = this.configurator.loadIni('forceDress', 'true') == 'true';
       this.forceDressPeriod = parseFloat(this.configurator.loadIni('forceDressPeriod', '10')) || 0;
 
       return this;
