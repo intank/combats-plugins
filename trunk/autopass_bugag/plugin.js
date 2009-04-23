@@ -1,14 +1,8 @@
 (function() {
-  var plugin_autopass_bugag = function() {
-    this.glassComplect = this.load('glassComplect','');
-    top.combats_plugins_manager.attachEvent(
-      "mainframe.load",
-      combats_plugins_manager.get_binded_method(this,this.onloadHandler)
-    );
-    this.onloadHandler();
-  };
+//  if (!(/^(?:emeraldscity|dungeon)\.combats\.(?:com|ru)$/.test(top.location.host)))
+//    return null;
 
-  plugin_autopass_bugag.prototype = {
+  return {
     state: 0,
     glassComplect: '',
 
@@ -34,7 +28,19 @@
         this.glassComplect = '';
       this.save('glassComplect',this.glassComplect);
     },
-    bugagClick: function() {
+    bugagClick: function(e) {
+      e = e || top.frames[3].event;
+      var d = top.frames[3].document;
+      var div = d.body.insertBefore(
+        d.createElement(
+          '<div style="position:absolute; left:'+Math.max(0,e.clientX-100)+'px; top:'+Math.max(0,e.clientY-10)+'px; text-align:center; color:#003388; background:#e2e0e0; font-weight:bold;">'));
+      div.innerHTML = '<div style="margin:0.5em;"><span style="cursor:pointer">Пройти в город</span></div><div style="margin:0.5em;"><span style="cursor:pointer">Поговорить</span></div>';
+      div.firstChild.onclick = combats_plugins_manager.get_binded_method(this,this.startBugagPass);
+      div.lastChild.onclick = function() {
+        top.frames[3].location = '/portal.pl?path=o0&rnd='+Math.random();
+      };
+    },
+    startBugagPass: function() {
       if (this.glassComplect!='') {
         this.state = 2;
         top.frames[3].location = 'http://'+top.location.host+'/main.pl?skmp='+this.glassComplect+'&tmp='+Math.random();
@@ -106,11 +112,15 @@
         top.frames[3].location = '/main.pl?move_dialog=0&'+Math.random();
         break;
       }
+    },
+    Init: function() {
+      this.glassComplect = this.load('glassComplect','');
+      top.combats_plugins_manager.attachEvent(
+        "mainframe.load",
+        combats_plugins_manager.get_binded_method(this,this.onloadHandler)
+      );
+      this.onloadHandler();
+      return this;
     }
-  };
-  
-  if (/^(?:emeraldscity|dungeon)\.combats\.(?:com|ru)$/.test(top.location.host))
-    return new plugin_autopass_bugag();
-  else
-    return null;
+  }.Init();
 })()
