@@ -45,6 +45,7 @@ function enablePlugin(plugin_index) {
 }
 
 function getProps() {
+  try {
   for(var i=0; i<props.length; i++) {
     var element = document.getElementById('prop_'+i);
     prop_type = typeof(props[i].value);
@@ -65,16 +66,27 @@ function getProps() {
       props[i].value = element.value;
     }
   }
+  } catch(e) {
+    top.combats_plugins_manager.logError('getProps',e);
+  }
 }
 
 function setPluginGfg() {
   getProps();
+  try {
   plugin.setProperties(props);
+  } catch(e) {
+    top.combats_plugins_manager.logError('setPluginGfg',e);
+  }
 }
 
 function invoke(i) {
   getProps();
+  try {
   props[i].value.apply(plugin, [props]);
+  } catch(e) {
+    top.combats_plugins_manager.logError('invoke',e);
+  }
 }
 
 function is_function(value) {
@@ -82,6 +94,7 @@ function is_function(value) {
 }
 
 function getPluginGfg() {
+  try {
   var plugin_index = document.all["index"].value;
   parent.combats_plugins_manager.lastConfiguredPlugin = plugin_index;
   plugin = parent.combats_plugins_manager.plugins_list[plugin_index];
@@ -111,46 +124,47 @@ function getPluginGfg() {
       for(var i=0; i<props.length; i++) {
         if (!props[i])
           continue;
-        if (is_function(props[i].value)) {
-          s += "<tr><td colspan=2><input type=button value=\""+props[i].name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\" id=\"prop_"+i+"\">";
+        property = props[i];
+        if (is_function(property.value)) {
+          s += "<tr><td colspan=2><input type=button value=\""+property.name.replace('"','\\"')+"\" onclick=\"invoke("+i+")\" id=\"prop_"+i+"\">";
         } else {
           var style = '';
-          if ('style' in props[i])
-            style = props[i].style.replace(/"/g,'&quot;');
-          if (typeof(props[i].value)=="boolean") {
-            s += '<tr><td colspan="2"><input type=checkbox style="'+style+'"'+(props[i].value?' CHECKED':'')+' id="prop_'+i+'"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
-          } else if (typeof(props[i].value)=="object") {
-            if ('length' in props[i].value) {
-              s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
+          if ('style' in property)
+            style = property.style.replace(/"/g,'&quot;');
+          if (typeof(property.value)=="boolean") {
+            s += '<tr><td colspan="2"><input type=checkbox style="'+style+'"'+(property.value?' CHECKED':'')+' id="prop_'+i+'"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL>';
+          } else if (typeof(property.value)=="object") {
+            if ('length' in property.value) {
+              s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL>';
               s += '<td><select id="prop_'+i+'">\n';
-              for (var j=0; j<props[i].value.length; j++) {
-                if (j in props[i].value)
-                  s += '<option value="'+j+'"'+(j==props[i].value.selected?' SELECTED':'')+'>'+props[i].value[j]+'</option>\n';
+              for (var j=0; j<property.value.length; j++) {
+                if (j in property.value)
+                  s += '<option value="'+j+'"'+(j==property.value.selected?' SELECTED':'')+'>'+property.value[j]+'</option>\n';
               }
               s += '</select>';
             } else {
               s += '<tr><td colspan="2"><DIV style="border: 1px solid black;">';
-              for (var j in props[i].value) {
-                s += '<DIV><input type="checkbox" id="prop_'+i+'.'+j+'"'+(props[i].value[j]?' CHECKED':'')+'> <LABEL FOR="prop_'+i+'.'+j+'" style="cursor:pointer">'+j+'</LABEL></DIV>';
+              for (var j in property.value) {
+                s += '<DIV><input type="checkbox" id="prop_'+i+'.'+j+'"'+(property.value[j]?' CHECKED':'')+'> <LABEL FOR="prop_'+i+'.'+j+'" style="cursor:pointer">'+j+'</LABEL></DIV>';
               }
               s += '</DIV>';
             }
           } else {
             try {
-              if ("type" in props[i]) {
-                if (props[i].type=="textarea") {
+              if ("type" in property) {
+                if (property.type=="textarea") {
                   style = 'width:100%; height:7em; '+style;
-                  s += '<tr><td colspan="2"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL><br/>';
-                  s += '<textarea style="'+style+'" id="prop_'+i+'">'+props[i].value+"</textarea>";
+                  s += '<tr><td colspan="2"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL><br/>';
+                  s += '<textarea style="'+style+'" id="prop_'+i+'">'+property.value+"</textarea>";
                 } else
                   throw new Error();
               } else
                 throw new Error();
             } catch(e) {
-              if (typeof(props[i].value)=="string")
+              if (typeof(property.value)=="string")
                 style = "width:100%; "+style;
-              s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+props[i].name+'</LABEL>';
-              s += '<td><input type=text style="'+style+'" value="'+props[i].value.toString().replace(/"/g,'&quot;')+'" id="prop_'+i+'">';
+              s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL>';
+              s += '<td><input type=text style="'+style+'" value="'+property.value.toString().replace(/"/g,'&quot;')+'" id="prop_'+i+'">';
             }
           }
         }
@@ -170,6 +184,11 @@ function getPluginGfg() {
   }
   if (("enable" in plugin) && parent.combats_plugins_manager.plugins_disabled[plugin_index]) {
     document.all["props"].innerHTML = "<br><input type=\"button\" value=\"¬ключить\" onclick=\"enablePlugin("+plugin_index+")\"><br>"+document.all["props"].innerHTML;
+  }
+  } catch(e) {
+    e.property = property;
+    e.i = i;
+    top.combats_plugins_manager.logError('getPluginGfg',e);
   }
 }
 
