@@ -15,8 +15,9 @@
 
 	  getProperties: function() {
 	  	var Methods = [];
+	  	var section = top.getCookie('battle')+(this.usedTactics?'.'+this.usedTactics:'');
 		for(i=1;i<=20;i++){ // считывание приемов
-			var t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"Method"+i,"");
+			var t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"Method"+i,"");
 			if (t) {
 				Methods.push(t);
 			}
@@ -30,7 +31,8 @@
 			{ name: 'Использовать оружие', value: this.useWeapon },
 			{ name: 'Название тактики', value: this.usedTactics },
 			{ name:"Правила", value:Methods.join('\n'), type: 'textarea' },
-			{ name: 'Диагностика', value: this.diagnostics }
+			{ name: 'Диагностика', value: this.diagnostics },
+			{ name: 'Показать боевые приёмы', value:this.showMethods }
 		];
 	  },
 	
@@ -46,20 +48,41 @@
 		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"totalRefreshTime",""+this.totalRefreshTime);
 		external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",top.getCookie('battle'),"useWeapon",""+this.useWeapon);
 
-		this.usedTactics = a[5].value;
-	  	var section = top.getCookie('battle')+(this.usedTactics?'.'+this.usedTactics:'');
-		var Methods = a[6].value.split(/[\n\r]+/);
-		for(var i=0;i<20;i++) {
-			if (!Methods[i])
-				Methods[i] = '';
-			external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"Method"+(i+1),Methods[i]);
+		var save = true;
+		if (this.usedTactics != a[5].value) {
+			this.usedTactics = a[5].value;
+			external.m2_writeIni(
+				top.combats_plugins_manager.security_id,
+				"Combats.RU",
+				"antitimeout\\antitimeout.ini",
+				top.getCookie('battle'),
+				"usedTactics",
+				this.usedTactics);
+			save = top.confirm('Внимание!!!\n\nСохранить указанную тактику под именем "'+a[5].value+'"?\nНажатие кнопки "Отмена" приведёт к перезагрузке тактики с именем "'+a[5].value+'"');
 		}
-		this.diagnostics=a[6].value;
+		if (save) {
+		  	var section = top.getCookie('battle')+(this.usedTactics?'.'+this.usedTactics:'');
+			var Methods = a[6].value.split(/[\n\r]+/);
+			for(var i=0;i<20;i++) {
+				if (!Methods[i])
+					Methods[i] = '';
+				external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"Method"+(i+1),Methods[i]);
+			}
+		}
+		this.diagnostics=a[7].value;
 
 		this.LoadMethods();
 		this.checkActive();
 	  },
-	  
+
+	  showMethods: function() {
+	  	if (!top.Battle.oBattle || !top.Battle.oBattle.arrMethods)
+	  		return;
+	  	for(var i in top.Battle.oBattle.arrMethods) {
+	  		this.addChat(top.Battle.oBattle.arrMethods[i].oMethod.sText+':'+top.Battle.oBattle.arrMethods[i].oMethod.sID, true);
+	  	}
+	  },
+
 	  checkActive: function() {
 		if (this.active) {
 			this.onloadHandler();
@@ -110,14 +133,17 @@
 		this.groups = {};
 		this.myGroup = '';
 		var oBattle = top.Battle.oBattle;
-		var warriors = oBattle.oGroupsLayer.innerHTML.match(/<SPAN\s+(?:style="TEXT-DECORATION\:\s*underline"\s+|)class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/g);
+		var warriors = oBattle.oGroupsLayer.childNodes;
 		for(var k=0; k<warriors.length; k++) {
-			warriors[k] = warriors[k].match(/<SPAN\s+(?:style="TEXT-DECORATION\:\s*(underline)"\s+|)class=['"]?UserBattleGroup(\d+)['"]?[^>]*?>(.*?)<\/SPAN>/);
-			if (warriors[k]) {
-				if (!this.groups[warriors[k][2]]) this.groups[warriors[k][2]] = []
-				this.groups[warriors[k][2]].push({name:warriors[k][3],group:warriors[k][2],ready:(warriors[k][1]!='')});
-				if (warriors[k][3]==oBattle.sMyLogin) {
-					this.myGroup = warriors[k][2];
+			if (warriors[k].nodeName=='SPAN' && (match=warriors[k].className.match(/^UserBattleGroup(\d+)$/))) {
+				if (!this.groups[match[1]]) this.groups[match[1]] = [];
+				this.groups[match[1]].push({
+					name:warriors[k].innerText,
+					group:match[1],
+					ready:(warriors[k].style.textDecoration=='underline')
+				});
+				if (warriors[k].innerText==oBattle.sMyLogin) {
+					this.myGroup = match[1];
 				}
 			}
 		}
@@ -138,20 +164,24 @@
 
        		var arrMethodEff=eff.split(/\s*\|\s*/);
        		for(var k in arrMethodEff) {
-       			var match = arrMethodEff[k].match(/^([^\:]*?)(?:\:(.*?)\:(.*)|)$/);
+       			var match = arrMethodEff[k].match(/^([^\:]*?)(?:\:(.*?)\:(.*)|\:(\d+)|)$/);
        			if (!match)
        				continue;
        			oMethodEff[match[1]] = {};
-       			if (match[2]) {
-       				var s = this.readIni(match[2]);
-       				if (s)
-       					oMethodEff[match[1]].regExp = new RegExp(s);
-       			}
-       			if (match[3]) {
-       				var s = this.readIni(match[3]);
-       				if (s) {
-       					var func;
-       					oMethodEff[match[1]].func = eval('func='+s);
+       			if (match[4]) {
+       				oMethodEff[match[1]].count = parseInt(match[4]);
+       			} else {
+	       			if (match[2]) {
+       					var s = this.readIni(match[2]);
+       					if (s)
+       						oMethodEff[match[1]].regExp = new RegExp(s);
+	       			}
+       				if (match[3]) {
+       					var s = this.readIni(match[3]);
+       					if (s) {
+       						var func;
+       						oMethodEff[match[1]].func = eval('func='+s);
+	       				}
        				}
        			}
        		}
@@ -175,6 +205,9 @@
        					if (match) {
        						effPositive = oMethodEff[effect.sID].func(match);
        					}
+       				} else if (oMethodEff[effect.sID].count) {
+       					var match = effect.sStack ? effect.sStack.match(/x(\d+)/): ['x1','1'];
+       					effPositive = match && parseInt(match[1])>=oMethodEff[effect.sID].count;
        				} else
        					effPositive = true;
        			} else if (oMethodEff['-'+effect.sID]) { // найден ненужный эффект
@@ -254,7 +287,7 @@
 					continue;
 				}
 
-				var oMethod = oBattle.arrMethods[id].oMethod;
+				var oMethod = (id == '*') ? null : oBattle.arrMethods[id].oMethod;
 				var Res=this.MethodPriority[i].Res;
 				var sName = this.enemy.sName;
 				//this.addChat(i+'-'+id);
@@ -335,6 +368,7 @@
 							for(var l in this.groups[k]) {
 								if (this.groups[k][l].name==sName) {
 									CheckRes = CheckRes && this.groups[k][l].ready;
+									this.addChat(this.groups[k][l].name+': '+(this.groups[k][l].ready?'готов':'не готов',true));
 									break;
 								}
 							}
@@ -346,7 +380,15 @@
 							if (k==this.myGroup) continue;
 							for(var l in this.groups[k]) {
 								CheckRes = CheckRes && this.groups[k][l].ready;
+								this.addChat(this.groups[k][l].name+': '+(this.groups[k][l].ready?'готов':'не готов',true));
 							}
+						}
+					}else if(j=='enemy_max_hp' && this.enemy){
+						var Less=(value.indexOf('<')>=0);
+						var More=(value.indexOf('>')>=0);
+						var lvl = parseFloat(value.replace(/^.*?(\d+).*?$/,'$1'));
+						if (!isNaN(lvl)) {
+							CheckRes = CheckRes && (Less && this.enemy.nMaxHP<=lvl || More && this.enemy.nMaxHP>=lvl);
 						}
 					}else if(j=='enemy_hp' && this.enemy){
 					//-----------------------обработка уровня HP противника
@@ -414,7 +456,7 @@
 						attack = true;
 						break;
 					}
-					this.addChat('<b>'+oMethod.sText+'</b> '+(this.diagnostics?diag_str:''));
+					this.addChat('<b>'+oMethod.sText+'</b> '+(this.diagnostics?diag_str:''),this.diagnostics);
 					var oButton = top.Battle.oBattle.arrMethods[id];
 					oButton.click();
 					if (oButton.oMethod.bSelectTarget) {
@@ -438,11 +480,15 @@
 			//this.addChat("T="+this.timeAttack);
 			if(this.timeAttack>=this.autotime && (attack || this.useWeapon || oBattle.sEnemyLogin==oBattle.sMyLogin)){
 			//------------ Наносим удар если пора
-				this.addChat('<b>Attack</b>'+(this.diagnostics?diag_str:''));
-				oBattle.Attack();
+				this.addChat('<b>Attack</b>'+(this.diagnostics?diag_str:''),this.diagnostics);
+				var battle_attack = combats_plugins_manager.plugins_list['battle_attack'];
+				if (battle_attack)
+					battle_attack.doAttack();
+				else
+					oBattle.Attack();
 				this.timeAttack=0;
 			} else {
-				this.addChat('too early to kick'+(this.diagnostics?diag_str:''));
+				this.addChat('too early to kick'+(this.diagnostics?diag_str:''),this.diagnostics);
 			}
 //			if(this.autotime)
 			this.setKickTimer(this.minTime*1000);
@@ -479,8 +525,15 @@
 	  },
 
 	  setTactics: function(tactics) {
-	  	this.usedTactics = tactics;
+	  	this.usedTactics = tactics || '';
 	  	this.LoadMethods();
+		external.m2_writeIni(
+			top.combats_plugins_manager.security_id,
+			"Combats.RU",
+			"antitimeout\\antitimeout.ini",
+			top.getCookie('battle'),
+			"usedTactics",
+			this.usedTactics);
 	  },
 
 	  LoadMethods: function() {
@@ -490,7 +543,7 @@
 	  	var section = top.getCookie('battle')+(this.usedTactics?'.'+this.usedTactics:'');
 		for(i=1;i<=20;i++){ // считывание приемов
 			t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"Method"+i,"");
-			if(a=t.match(/(\S+)\s*([^;]*).*/)){ // ----- отделяем прием от параметров
+			if(a=t.match(/^(\S+)(?:\s+(.*?)|)\s*(?:;.*?|)$/)){ // ----- отделяем прием от параметров
 				var Method=new Object();
 				Method['id']= a[1];
 				if(a[2]){
@@ -517,8 +570,7 @@
 		var t = this.readIni("totalRefreshTime","45");
 		this.totalRefreshTime = parseFloat(t) || 0; // --------- время в секундах для полного обновления окна при зависании
 		this.useWeapon = this.readIni("useWeapon","true")!='false';
-
-		this.LoadMethods();
+		this.setTactics(this.readIni("usedTactics",""),true);
 
 		top.combats_plugins_manager.attachEvent('mainframe.load',
 			top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
