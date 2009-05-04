@@ -247,7 +247,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           onTimeout: null,
 
           timeoutHandler: function() {
-            if (this.timeoutTimer)
+            if (!this.timeoutTimer)
               return;
             this.timeoutTimer = null;
             this.AJAX.abort();
@@ -278,11 +278,16 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
             this.AJAX = combats_plugins_manager.getHTTPRequest();
             this.AJAX.onreadystatechange = 
               combats_plugins_manager.get_binded_method(this,this.readyStateChangeHandler);
-            this.AJAX.open(method, URL, true);
-            this.AJAX.send(data);
             this.timeoutTimer = setTimeout(
               combats_plugins_manager.get_binded_method(this,this.timeoutHandler),
               this.timeoutValue);
+            try {
+              this.AJAX.open(method, URL, true);
+              this.AJAX.send(data);
+            } catch(e) {
+              e.URL = URL;
+              combats_plugins_manager.logError('HTTPRequestProcessor',e);
+            }
           },
           GET: function(URL) {
             this.startRequest('GET', URL, '');

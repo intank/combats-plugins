@@ -35,12 +35,7 @@
       if (wasActive && !this.active)
         this.deactivate();
       if (!wasActive && this.active) {
-        if (!this.complect) {
-          this.active = false;
-          combats_plugins_manager.add_chat('<b>Ошибка:</b> Невозможно активировать плагин, не задавая ')
-        } else {
-          this.activate();
-        }
+        this.activate();
       }
     },
 
@@ -152,12 +147,21 @@
       this.AJAX.GET('/zayavka.pl?level=fiz&'+Math.random());
     },
 
-    activate: function() {
+    activate: function(setActive) {
+      if (setActive)
+        this.active = true;
+      if (!this.complect) {
+        this.active = false;
+        combats_plugins_manager.add_chat('<b>Ошибка:</b> Невозможно активировать плагин, не задавая комплект')
+        return;
+      }
       if (this.timer)
         clearTimeout(this.timer);
       this.restartCheckTimer();
     },
-    deactivate: function() {
+    deactivate: function(resetActive) {
+      if (resetActive)
+        this.active = false;
     },
 
     Init: function() {

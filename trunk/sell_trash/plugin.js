@@ -104,8 +104,10 @@
     },
     analizeChest: function(innerHTML, auto) {
       var match = innerHTML.match(/<B>Отдел "Скупка"<\/B>/);
-      if (!match)
+      if (!match) {
+        if (auto) this.autoSellComplete = true;
         return;
+      }
       var params = {
         used: parseInt(match[1]),
         max: parseInt(match[2]),
@@ -154,6 +156,7 @@
             this.analizeChest(AJAX.responseText, true);
           } catch(e) {
             combats_plugins_manager.logError(this, e);
+            this.autoSellComplete = true;
           }
         });
       requestProcessor.onBadResult = 
@@ -168,6 +171,7 @@
               this.autoSellComplete = true;
           } catch(e) {
             combats_plugins_manager.logError(this, e);
+            this.autoSellComplete = true;
           }
         });
       requestProcessor.GET('/shop.pl?sd4='+this.sd4+'&sale='+Math.random());
