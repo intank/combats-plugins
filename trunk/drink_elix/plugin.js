@@ -99,6 +99,7 @@
     addicts: {
       'ele_addict_magicresist_10' : 'def',
       'ele_addict_magicresist' : 'defmag',
+      'ele_addict_speedMana' : 'regmana',
       'ele_addict_speedHP' : 'reg',
       'ele_addict_str' : 'srt',
       'ele_addict_dex' : 'dex',
