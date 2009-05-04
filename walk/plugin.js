@@ -206,6 +206,7 @@
 		{ name: "Кликать по объектам по умолчанию", value: this.auto_en_click },
 		{ name: "Собирать ингридиенты по умолчанию", value: this.auto_mat_click },
 		{ name: "Всегда отказываться от спорных предметов", value: this.mat_abandon_contest },
+		{ name: "Останавливать при перегрузе", value: this.enableNoPlaceAlert },
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -235,6 +236,7 @@
 	this.auto_en_click = a[15].value;
 	this.auto_mat_click = a[16].value;
 	this.mat_abandon_contest = a[17].value;
+	this.enableNoPlaceAlert = a[18].value;
 
 	this.save('forced',this.forced?"yes":"no");
 	this.save('ignoreWall',this.ignoreWall?"yes":"no");
@@ -254,6 +256,7 @@
 	this.save('auto_en_click',this.auto_en_click.toString());
 	this.save('auto_mat_click',this.auto_mat_click.toString());
 	this.save('mat_abandon_contest',this.mat_abandon_contest.toString());
+	this.save('enableNoPlaceAlert',this.enableNoPlaceAlert.toString());
     },
 
     "clearLog": function() {
@@ -412,19 +415,18 @@
             function(){
 	      this.skip_mat_click = false;
             }),0);
-        } else
-        if (redText.search('Не хватает места')>=0) {
+        } else if (redText.search('Не хватает места')>=0) {
           this.skip_quest = true;
 	  this.skip_mat_click = true;
-          setTimeout(top.combats_plugins_manager.get_binded_method(
-            this,
-            function(){
-              alert('Наведите порядок в рюкзаке');
-	      this.skip_mat_click = false;
-              this.skip_quest = false;
-            }),0);
-        } else
-        if (redText.search('если за 5 минут его не подберут, он может стать вашим...')>=0) {
+	  if (this.enableNoPlaceAlert)
+            setTimeout(top.combats_plugins_manager.get_binded_method(
+              this,
+              function(){
+                alert('Наведите порядок в рюкзаке');
+	        this.skip_mat_click = false;
+                this.skip_quest = false;
+              }),0);
+        } else if (redText.search('если за 5 минут его не подберут, он может стать вашим...')>=0) {
 	  this.skip_mat_click = true;
           setTimeout(top.combats_plugins_manager.get_binded_method(
             this,
@@ -1060,6 +1062,7 @@
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path='+turn_id;
           },0.1);
         } else {
+          top.Chat.am('Нельзя шагать: это кому-то мешает');
           this.StartStepTimer(function(){
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
           }, 2);
@@ -1079,19 +1082,22 @@
     },
 
     "checkEnemy": function() {
-      if (!top.frames[3].arrLayers[1] || !top.frames[3].arrLayers[1][0])
-        return true;
-      var units = top.frames[3].arrLayers[1][0].l.arrUnits;
-      for(var i in units) {
-        // если есть хотя бы один противник, ждём 10 секунд и обновляем
-        if (!units[i].maxHP) {
-          // this.addLog('enemy');
-          combats_plugins_manager.fireEvent('dungeon_walk.enemy', {units:units});
-          this.StartStepTimer(function(){
-            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
-          }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
-          return false;
+      try {
+        if (!top.frames[3].arrLayers[1] || !top.frames[3].arrLayers[1][0])
+          return true;
+        var units = top.frames[3].arrLayers[1][0].l.arrUnits;
+        for(var i in units) {
+          // если есть хотя бы один противник, ждём 10 секунд и обновляем
+          if (!units[i].maxHP) {
+            // this.addLog('enemy');
+            combats_plugins_manager.fireEvent('dungeon_walk.enemy', {units:units});
+            this.StartStepTimer(function(){
+              top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+            }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
+            return false;
+          }
         }
+      } catch(e) {
       }
       return true;
     },
@@ -1121,6 +1127,7 @@
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
           },mtime+0.1);
         } else {
+          top.Chat.am('Нельзя шагать: это кому-то мешает');
           this.StartStepTimer(function(){
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
           }, 6);
@@ -1212,24 +1219,14 @@
           'mainframe.load',
 	  top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
 	this.clearUsedObjects();
-/*
-	this.Coordinates=new Array();
-	if(t = external.readFile(top.combats_plugins_manager.security_id,"Combats.RU","walk\\coordinates.ini")){ //загрузка индексов координат
-	  	s=t.split(/[\x0A\x0D]+/);
-	  	for(i in s){
-	  		top.Chat.am("3");
-	  		t=s[i].split(" ");
-	  		this.Coordinates[t[0]]={x:t[1],y:t[2]};
-	  	}
-	}
-*/
+
 	this.forced=(this.load('forced','no')=='yes');
 	this.ignoreWall=(this.load('ignoreWall','no')=='yes');
 	this.showUnits=(this.load('showUnits','yes')=='yes');
 	this.showObjects=(this.load('showObjects','yes')=='yes');
 	this.autoHideMap = (this.load('autoHideMap','yes')=='yes');
-	this.minHP=parseInt(this.load('minHP','95'));
-	this.minMana=parseInt(this.load('minMana','95'));
+	this.minHP=parseFloat(this.load('minHP','95'));
+	this.minMana=parseFloat(this.load('minMana','95'));
 	this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
 	this.defaultDungeonName=this.load(this.cityName+'.defaultDungeonName','');
 	var items=this.load('alwaysItems','Блеклый подземник;Черепичный подземник;Кровавый подземник').split(/;/);
@@ -1247,6 +1244,7 @@
 	this.en_click = this.auto_en_click = this.load('auto_en_click','false')=='true';
 	this.mat_click = this.auto_mat_click = this.load('auto_mat_click','false')=='true';
 	this.mat_abandon_contest = this.load('mat_abandon_contest','false')=='true';
+	this.enableNoPlaceAlert = this.load('enableNoPlaceAlert','true')!='false';
 
 	if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );
@@ -1260,7 +1258,6 @@
 		this.Direction=(t & 7);
 	}
 	
-//	alert('Свежак!');
 	return this;
     }
   }.Init();

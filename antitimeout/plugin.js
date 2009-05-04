@@ -119,7 +119,7 @@
 
 	  Fix: function(){
 	    try {
-	      var sURL = top.Battle.oQuery.sURL;
+	      var sURL = top.Battle.oBattle.oQuery.sURL;
 	      top.Battle.SetScript(sURL);
 	      top.Battle.nRequests = 0;
 	      top.Battle.oBattle.Send( null, true );
@@ -437,6 +437,29 @@
 						if (!isNaN(cnt)) {
 							var enemies = this.getEnemyCount();
 							CheckRes = CheckRes && (Less && enemies<cnt || More && enemies>cnt);
+						}
+					}else if(j=='my_effect_turn'){
+						var match = value.match(/^\s*([^\:]+)\s*\:\s*(\d+)/);
+						if (match) {
+							var searchText = match[1];
+							var turn = parseInt(match[2]);
+							var log = top.User.Framework.GetTab('alllog').Frame();
+							var CheckEffTurn = false
+							for(var k=0; k<log.childNodes.length; k++) {
+								var logLine = log.childNodes[k].innerText || log.childNodes[k].nodeValue || '';
+								if (logLine=='') {
+									if (--turn <= 0) {
+										break;
+									}
+								} else if (logLine.indexOf('"'+searchText+'"')>=0) {
+									if (logLine.indexOf('Закончилось действие эффекта')<0) {
+										if (turn == 1)
+											CheckEffTurn = true;
+										break;
+									}
+								}
+							}
+							CheckRes = CheckRes && CheckEffTurn;
 						}
 					}else{
 					//-----------------------обработка тактик для приема
