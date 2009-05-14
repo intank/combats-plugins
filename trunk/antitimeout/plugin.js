@@ -31,6 +31,7 @@
 			{ name: 'Использовать оружие', value: this.useWeapon },
 			{ name: 'Название тактики', value: this.usedTactics },
 			{ name:"Правила", value:Methods.join('\n'), type: 'textarea' },
+			{ name: 'Приоритет противников', value:this.enemy_priority.join(',') },
 			{ name: 'Диагностика', value: this.diagnostics },
 			{ name: 'Показать боевые приёмы', value:this.showMethods }
 		];
@@ -68,8 +69,9 @@
 					Methods[i] = '';
 				external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"Method"+(i+1),Methods[i]);
 			}
+			external.m2_writeIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"enemy_priority",a[7].value);
 		}
-		this.diagnostics=a[7].value;
+		this.diagnostics=a[8].value;
 
 		this.LoadMethods();
 		this.checkActive();
@@ -438,27 +440,39 @@
 							var enemies = this.getEnemyCount();
 							CheckRes = CheckRes && (Less && enemies<cnt || More && enemies>cnt);
 						}
+					}else if(j=='available'){
+						if (typeof(top.Battle.oBattle.arrMethods[value])!='object' || !top.Battle.oBattle.arrMethods[value].oMethod.bEnable){
+							CheckRes = false;
+						}
 					}else if(j=='my_effect_turn'){
-						var match = value.match(/^\s*([^\:]+)\s*\:\s*(\d+)/);
+						var match = value.match(/^\s*([^\:]+)\s*\:\s*(\d+|\+|-)/);
 						if (match) {
 							var searchText = match[1];
-							var turn = parseInt(match[2]);
+							var searchUsed = '';
+							var turn;
+							if (match[2]=='+') searchUsed = '+';
+							else if (match[2]=='-') searchUsed = '-';
+							else turn = parseInt(match[2]);
 							var log = top.User.Framework.GetTab('alllog').Frame();
 							var CheckEffTurn = false
 							for(var k=0; k<log.childNodes.length; k++) {
 								var logLine = log.childNodes[k].innerText || log.childNodes[k].nodeValue || '';
 								if (logLine=='') {
-									if (--turn <= 0) {
+									if (!searchUsed && --turn<0) {
 										break;
 									}
 								} else if (logLine.indexOf('"'+searchText+'"')>=0) {
 									if (logLine.indexOf('Закончилось действие эффекта')<0) {
-										if (turn == 1)
+										if (searchUsed || turn==0)
 											CheckEffTurn = true;
 										break;
 									}
 								}
 							}
+							if (searchUsed=='-') { // проверка, что приём вообще не использовался
+								CheckEffTurn = !CheckEffTurn;
+							}
+
 							CheckRes = CheckRes && CheckEffTurn;
 						}
 					}else{
@@ -485,8 +499,10 @@
 					if (oButton.oMethod.bSelectTarget) {
 						if (oButton.oMethod.sTarget=='friend')
 							top.Window.oPrompt.oValue.value = top.Battle.oBattle.sMyLogin;
-						else
-							top.Window.oPrompt.oValue.value = top.Battle.oBattle.sEnemyLogin;
+						else {
+							// стреляем по противнику, нужно выбрать сильнейшую цель
+							top.Window.oPrompt.oValue.value = this.getStrongName();
+						}
 						top.Window.oPrompt.oOk.Apply();
 					} else if (!oButton.oMethod.bFreeCast) {
 						top.Window.oConfirm.oOk.Apply();
@@ -522,6 +538,27 @@
 			e.diag = diag_str;
         		combats_plugins_manager.logError(this,e);
 		}
+	  },
+
+	  getStrongName: function() {
+		this.scanGroups();
+		var strongest_index = 1000;
+		var strongest = '';
+		for(var k in this.groups) {
+			if (k==this.myGroup) continue;
+			for(var l in this.groups[k]) {
+				var name = this.groups[k][l].name.toUpperCase();
+				for(var m in this.enemy_priority) {
+					if (name.indexOf(this.enemy_priority[m])>=0) {
+						if (strongest_index>m) {
+							strongest_index = m;
+							strongest = this.groups[k][l].name;
+						}
+					}
+				}
+			}
+		}
+		return strongest || top.Battle.oBattle.sEnemyLogin;
 	  },
 	
 	  onloadHandler: function() {
@@ -564,7 +601,7 @@
 	  	this.oMethodEnemyEff = null;
 	  	this.MethodPriority = [];
 	  	var section = top.getCookie('battle')+(this.usedTactics?'.'+this.usedTactics:'');
-		for(i=1;i<=20;i++){ // считывание приемов
+		for(var i=1;i<=20;i++){ // считывание приемов
 			t=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"Method"+i,"");
 			if(a=t.match(/^(\S+)(?:\s+(.*?)|)\s*(?:;.*?|)$/)){ // ----- отделяем прием от параметров
 				var Method=new Object();
@@ -579,6 +616,13 @@
 				}
 				if(Method['id'])
 					this.MethodPriority.push(Method);
+			}
+		}
+		var enemy_priority=external.m2_readIni(top.combats_plugins_manager.security_id,"Combats.RU","antitimeout\\antitimeout.ini",section,"enemy_priority","");
+		this.enemy_priority = enemy_priority.toUpperCase().split(/\s*,\s*/);
+		for(var i=this.enemy_priority.length-1; i>=0; i--) {
+			if (!this.enemy_priority[i]) {
+				this.enemy_priority.splice(i,1);
 			}
 		}
 	  },

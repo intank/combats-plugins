@@ -159,7 +159,7 @@
             this.autoSellComplete = true;
           }
         });
-      requestProcessor.onBadResult = 
+      requestProcessor.onBadStatus = 
       requestProcessor.onTimeout = combats_plugins_manager.get_binded_method(
         this,
         function() {

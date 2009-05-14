@@ -207,6 +207,7 @@
 		{ name: "Собирать ингридиенты по умолчанию", value: this.auto_mat_click },
 		{ name: "Всегда отказываться от спорных предметов", value: this.mat_abandon_contest },
 		{ name: "Останавливать при перегрузе", value: this.enableNoPlaceAlert },
+		{ name: "Минимум здоровья для шага", value: this.minSafeHP },
 		{ name: "Журнал", value: this.log.join("\n"), type:"textarea"}
       ];
     },
@@ -237,6 +238,7 @@
 	this.auto_mat_click = a[16].value;
 	this.mat_abandon_contest = a[17].value;
 	this.enableNoPlaceAlert = a[18].value;
+	this.minSafeHP = parseFloat(a[19].value);
 
 	this.save('forced',this.forced?"yes":"no");
 	this.save('ignoreWall',this.ignoreWall?"yes":"no");
@@ -257,6 +259,7 @@
 	this.save('auto_mat_click',this.auto_mat_click.toString());
 	this.save('mat_abandon_contest',this.mat_abandon_contest.toString());
 	this.save('enableNoPlaceAlert',this.enableNoPlaceAlert.toString());
+	this.save('minSafeHP',this.minSafeHP.toString());
     },
 
     "clearLog": function() {
@@ -1115,22 +1118,29 @@
       if (this.forcedStepTime && mtime>this.forcedStepTime)
         mtime = this.forcedStepTime;
       if (this.checkEnemy()) {
-        var stepObj = { enable: true };
-        combats_plugins_manager.fireEvent('dungeon_walk.before_step', stepObj);
-        if (stepObj.enable) {
-          this.StartStepTimer(function(){
-            try {
-              this.checkEnemy();
-            } catch(e) {
-            }
-            // this.addLog('step forward');
-            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
-          },mtime+0.1);
-        } else {
-          top.Chat.am('Нельзя шагать: это кому-то мешает');
+        if (top.tkHP<this.minSafeHP) {
+          top.Chat.am('Нельзя шагать: низкий уровень HP');
           this.StartStepTimer(function(){
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
-          }, 6);
+          }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
+        } else {
+          var stepObj = { enable: true };
+          combats_plugins_manager.fireEvent('dungeon_walk.before_step', stepObj);
+          if (stepObj.enable) {
+            this.StartStepTimer(function(){
+              try {
+                this.checkEnemy();
+              } catch(e) {
+              }
+              // this.addLog('step forward');
+              top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
+            },mtime+0.1);
+          } else {
+            top.Chat.am('Нельзя шагать: это кому-то мешает');
+            this.StartStepTimer(function(){
+              top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+            }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
+          }
         }
       }
     },
@@ -1245,6 +1255,7 @@
 	this.mat_click = this.auto_mat_click = this.load('auto_mat_click','false')=='true';
 	this.mat_abandon_contest = this.load('mat_abandon_contest','false')=='true';
 	this.enableNoPlaceAlert = this.load('enableNoPlaceAlert','true')!='false';
+	this.minSafeHP = parseFloat(this.load('minSafeHP','0')) || 0;
 
 	if( /walkSettings=(\d+)/.test( document.cookie ) ){
 		t = parseFloat( document.cookie.match( /walkSettings=(\d+)/ )[ 1 ] );

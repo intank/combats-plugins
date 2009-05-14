@@ -99,6 +99,13 @@
     search_step_node: function(location) {
       var doc = combats_plugins_manager.getMainFrame().document;
       var moveto = doc.getElementById('moveto');
+      if (moveto && moveto.disabled) {
+        setTimeout(
+          combats_plugins_manager.get_binded_method(this, this.try_run_to_new_location),
+          500);
+        return;
+      }
+
       this.step_node = null;
       if (moveto && moveto.firstChild.tagName=='TABLE' && moveto.firstChild.rows.length>0) {
         for(var i=0; i<moveto.firstChild.rows.length; i++) {
