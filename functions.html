@@ -278,6 +278,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
             this.AJAX = combats_plugins_manager.getHTTPRequest();
             this.AJAX.onreadystatechange = 
               combats_plugins_manager.get_binded_method(this,this.readyStateChangeHandler);
+            this.AJAX.ontimeout = combats_plugins_manager.get_binded_method(this,this.timeoutHandler);
             this.timeoutTimer = setTimeout(
               combats_plugins_manager.get_binded_method(this,this.timeoutHandler),
               this.timeoutValue);

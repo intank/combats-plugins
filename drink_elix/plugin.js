@@ -268,13 +268,13 @@
           }
           this.startRequest();
         });
-      if (requestInfo.onBadResult) {
-        requestInfo.AJAX.onBadResult = combats_plugins_manager.get_binded_method(
+      if (requestInfo.onBadStatus) {
+        requestInfo.AJAX.onBadStatus = combats_plugins_manager.get_binded_method(
           this,
           function() {
             try {
-              this.addChat('BadResult');
-              if (!requestInfo.onBadResult())
+              this.addChat('BadStatus');
+              if (!requestInfo.onBadStatus())
                 this.dequeueRequest();
             } catch(e) {
               combats_plugins_manager.logError(this, e);
@@ -282,21 +282,21 @@
             this.startRequest();
           });
       } else
-        requestInfo.AJAX.onBadResult = requestInfo.AJAX.onTimeout;
+        requestInfo.AJAX.onBadStatus = requestInfo.AJAX.onTimeout;
       requestInfo.time = new Date();
       requestInfo.AJAX.startRequest(
         requestInfo.method,
         requestInfo.URL,
         requestInfo.data);
     },
-    queueRequest: function(method, URL, data, onComplete, onTimeout, onBadResult) {
+    queueRequest: function(method, URL, data, onComplete, onTimeout, onBadStatus) {
       this.requestsQueue.push({
         method : method, 
         URL : URL, 
         data : data, 
         onComplete : onComplete, 
         onTimeout : onTimeout,
-        onBadResult : onBadResult
+        onBadStatus : onBadStatus
       });
       if (this.requestsQueue.length==1) {
         this.isDrinkingElix = true;
@@ -385,7 +385,7 @@
           this.waitList[spell] = 1;
       } else if (match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
         this.waitList[spell] = (spell in this.waitList)?this.waitList[spell]+1:1;
-        if (this.waitList[spell]>5) {
+        if (this.waitList[spell]>1) {
           combats_plugins_manager.fireEvent('drink.no_spell', {spell:spell});
         }
       } else {
@@ -414,6 +414,7 @@
         var s = AJAX.responseText;
         var images = s.match(/<IMG[^>]*?\/misc\/icons\/.*?\.gif[^>]*onmouseover=(["']).*?\1[^>]*>/gmi);
         
+        this.effectsCheckRequired = false;
         if (images && images.length) {
           var spellsFound = {};
           this.addChat('Всего: '+images.length+' эффектов');
@@ -466,10 +467,12 @@
         }
         isError = false;
       } catch(e) {
+        this.effectsCheckRequired = true;
         this.addChat('Сбой при анализе эффектов.');
       }
     },
     getEffectsTimeoutHandler: function() {
+      this.effectsCheckRequired = true;
       this.addChat('Сбой загрузки страницы с эффектами. Перезапуск...');
       this.getEffects();
       return false;
@@ -492,17 +495,15 @@
       var nextIteration = 0;
       var isError = true;
       try {
-        if (top.Battle.bInBattle) {
+        if (top.Battle.bInBattle || this.requestsQueue.length)
           return;
-        }
-        if (this.requestsQueue.length) {
-          return;
-        }
         if (this.getEffects())
           nextIteration = 120;
       } finally {
-        if (!nextIteration)
-          nextIteration = 10
+        if (!nextIteration) {
+          this.effectsCheckRequired = true;
+          nextIteration = 10;
+        }
         this.checkEffectsTimer = setTimeout(this.checkEffectsHandler, nextIteration*1000);
       }
 /**/

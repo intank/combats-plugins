@@ -1,9 +1,5 @@
 (function() {
-  function plugin_chat_log() {
-    this.Init();
-  }
-
-  plugin_chat_log.prototype = {
+  return {
     writeLogTimer: null,
     toString: function() {
       return "Ћог чата";
@@ -48,20 +44,6 @@
         date = new Date();
       return 'chat_log/history/'+top.getCookie('battle')+' '+date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+' log.html';
     },
-    Init: function() {
-      this.lastCreatedFile = new Date(this.load('lastCreatedFile',(new Date()).toString()));
-      this.joinFiles();
-      this.save('lastCreatedFile',this.lastCreatedFile.toString());
-
-      this.filename = this.createFilename();
-      this.mess = this.getFile(this.filename);
-      if (typeof(this.mess)=='undefined' || this.mess=='')
-        this.mess = this.getHeadFile();
-
-      combats_plugins_manager.attachEvent(
-        'onmessage',
-        combats_plugins_manager.get_binded_method(this,this.store));
-    },
     writeLog: function() {
       clearTimeout(this.writeLogTimer);
       this.writeLogTimer = null;
@@ -84,8 +66,23 @@
       if (this.writeLogTimer)
         clearTimeout(this.writeLogTimer);
       this.writeLogTimer = setTimeout(combats_plugins_manager.get_binded_method(this,this.writeLog), 3000);
-    }
-  };
+    },
+    Init: function() {
+      this.lastCreatedFile = new Date(this.load('lastCreatedFile',(new Date()).toString()));
+      this.joinFiles();
+      this.save('lastCreatedFile',this.lastCreatedFile.toString());
 
-  return new plugin_chat_log();
+      this.filename = this.createFilename();
+      this.mess = this.getFile(this.filename);
+      if (typeof(this.mess)=='undefined' || this.mess=='')
+        this.mess = this.getHeadFile();
+
+      combats_plugins_manager.attachEvent(
+        'onmessage',
+        combats_plugins_manager.get_binded_method(this,this.store));
+
+      top.onunload = combats_plugins_manager.get_binded_method(this,this.writeLog);
+      return this;
+    }
+  }.Init();
 })()
