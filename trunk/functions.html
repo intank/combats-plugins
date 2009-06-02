@@ -65,6 +65,10 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           return '"'+obj.toString().replace(/(["\\])/g,'\\$1')+'" /*'+typeof(obj)+'*/';
         }
       },
+      format: function() {
+        var params = arguments;
+        return arguments[0].replace(/%(\d+)/g,function(a,b){return params[parseInt(b)+1]});
+      },
       "attachEvent": function(event, method) {
         if (!(event in this.events))
           this.events[event] = [];
@@ -293,8 +297,8 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           GET: function(URL) {
             this.startRequest('GET', URL, '');
           },
-          PUT: function(URL,data) {
-            this.startRequest('PUT', URL, data);
+          POST: function(URL,data) {
+            this.startRequest('POST', URL, data);
           }
         };
       },
