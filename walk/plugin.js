@@ -556,7 +556,7 @@
 		    } else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)) {//-- Нападать если нет стены
 		      if(Obj.action && Obj.action.search(/attack/)>=0) {
 			if( (100*top.tkHP/top.maxHP)>this.minHP) {
-			  top.frames[3].location=loc+"?attack="+Obj.id;
+			  top.frames[3].location=loc+"?attack=1&use="+Obj.id;
 			  return;
 			} else {
 			  var timeout_HP = 180000*(top.maxHP*this.minHP/100-top.tkHP)/(top.speed*top.maxHP)*1000;
