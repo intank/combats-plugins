@@ -17,6 +17,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       "events": {},
       "plugins_list": {},
       "plugins_disabled": {},
+      'hideLogsTab': false,
       "silent": true,
       "cityName": top.location.hostname.replace(/^(.+?)\..+$/,'$1'),
       "toString": function() {
@@ -33,24 +34,34 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 
         return [
           { name: "\"Тихие\" ошибки плагинов", value: this.silent },
+          { name: 'Скрыть вкладку журналов', value: this.hideLogsTab },
           { name: "Загрузить новый плагин", value: this.loadCustomPlugin },
           { name: "Перечень загружаемых плагинов", value: cfg_object }
         ];
       },
       "setProperties": function(a) {
         this.silent=a[0].value;
+        this.hideLogsTab=a[1].value;
         var plugins=[];
         for(var i=0;i<this.combats_plugins.length;i++) {
           var match = this.combats_plugins[i].match(/^\s*(.*?)\s*=\s*(true|false|yes|no)\s*([#;].*|)$/)
           if (match && match[1]) {
-            this.combats_plugins[i] = match[1]+'='+(match[1] in a[2].value?a[2].value[match[1]].toString():false)+match[3];
+            this.combats_plugins[i] = match[1]+'='+(match[1] in a[3].value?a[3].value[match[1]].toString():false)+match[3];
           }
         }
         var s = this.combats_plugins.join('\r\n');
         external.writeFile( this.security_id, "Combats.RU", "combats_plugins.ini", s);
+        if (this.hideLogsTab)
+          this.logsTab.Hide();
+        else
+          this.logsTab.Show();
       },
       getVersion: function() {
         return '1.7';
+      },
+      createChatTab: function(name, title) {
+        var oTab = top.Chat.Self.oTab.arrTabs[name] = top.Chat.Self.oTab.AddTab(name, title);
+        return oTab;
       },
       serialize: function(obj) {
         if (obj===null) {
@@ -303,7 +314,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         };
       },
       add_sys: function(s) {
-        top.Chat.am(s);
+	this.logsTab.Frame( ).createNode( "DIV", { innerHTML: s, className: "Chat", Self: top.Chat.Self } );
       },
       add_chat: function(s) {
         top.Chat.am(s);
@@ -332,6 +343,11 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         if (this.loadingWindow)
           this.loadingWindow.oWindow.Hide();
 
+        this.logsTab = this.createChatTab('Журналы','Журналы');
+        if (this.hideLogsTab)
+          this.logsTab.Hide();
+        else
+          this.logsTab.Show();
         this.lastConfiguredPlugin = -1;
         this.security_id = %max_security_id;
         this.base_folder = external.m2_plugin_folder( this.security_id, "Combats.RU" );
