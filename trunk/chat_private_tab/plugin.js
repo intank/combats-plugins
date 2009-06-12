@@ -43,7 +43,7 @@
       if (login in this.filters)
         return;
       top.Chat.Self.CtxMenuHide();
-      var oTab = top.Chat.Self.oTab.arrTabs['private '+login] = top.Chat.Self.oTab.AddTab( "private "+login, login+'&nbsp;<img src="http://img.combats.com/i/clear.gif" style="cursor:pointer">' );
+      var oTab = top.combats_plugins_manager.createChatTab('private '+login, login+'&nbsp;<img src="http://img.combats.com/i/clear.gif" style="cursor:pointer">' );
       oTab.firstChild.lastChild.onclick = oTab.ondblclick = top.combats_plugins_manager.get_binded_method(
         this, this.removePrivateTab, oTab, login);
       var filter = this.filters[login] = new RegExp('\\[<SPAN class=p_from>'+login+'<\\/SPAN>\]|<SPAN class=p title=.*?>'+login+'<\\/SPAN>');
