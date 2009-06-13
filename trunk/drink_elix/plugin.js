@@ -24,6 +24,9 @@
         { name: "Только в подземельях", value: this.dungeonOnly },
         { name: "Пить элики жизни", value: this.autoDrinkHP },
         { name: "Использовать склянки из Грибницы", value: this.useSpawnElix },
+
+        { name: "Использовать Глотки лёгкой жизни", value: this.use600Elix },
+
         { name: "Пить статовые элики", value: this.autoDrinkStat },
         { name: "Пить элики от урона", value: this.autoDrinkDamage },
         { name: "Пить элики от стихий", value: this.autoDrinkMagic },
@@ -31,6 +34,7 @@
         { name: "Пить элики регенерации маны", value: this.autoDrinkRegenMana },
         { name: "Минимальный допустимый % HP", value: this.autoDrinkLevel },
         { name: "Перечень обязательно используемых эффектов", value: spellsRequired.join('\n'), type: 'textarea' },
+        { name: 'Контролировать травмы', value: this.checkInjury },
         { name: "Задать горячую клавишу для эликсиров жизни", value: this.setHotKey},
         { name: "Отладка", value:this.debugging }
       ];
@@ -93,7 +97,8 @@
       ],
       'regmana': [
         'pot_base_50_mana_regen',
-        'pot_base_50_ggmanaregen'
+        'pot_base_50_ggmanaregen',
+        'pot_curemana200_30'
       ]
     },
     addicts: {
@@ -151,25 +156,28 @@
       this.autoDrinkHP = a[2].value;
 
       this.useSpawnElix = a[3].value;
-      
-      this.autoDrinkStat = a[4].value;
-      this.autoDrinkDamage = a[5].value;
-      this.autoDrinkMagic = a[6].value;
-      this.autoDrinkRegen = a[7].value;
-      this.autoDrinkRegenMana = a[8].value;
-      this.autoDrinkLevel = parseFloat(a[9].value) || 95;
-      var spellsRequired = a[10].value.split(/\s*[\n\r]+\s*/);
+      this.use600Elix = a[4].value;
+
+      this.autoDrinkStat = a[5].value;
+      this.autoDrinkDamage = a[6].value;
+      this.autoDrinkMagic = a[7].value;
+      this.autoDrinkRegen = a[8].value;
+      this.autoDrinkRegenMana = a[9].value;
+      this.autoDrinkLevel = parseFloat(a[10].value) || 95;
+      var spellsRequired = a[11].value.split(/\s*[\n\r]+\s*/);
       this.spellsRequired = {};
       for(var i in spellsRequired) {
         var match = spellsRequired[i].match(/^(.*?)=(.*)$/);
         if (match)
           this.spellsRequired[match[1]]=match[2];
       }
-      this.debugging = a[12].value;
+      this.checkInjury = a[12].value;
+      this.debugging = a[14].value;
 
       if (!noSave) {
         this.configurator.saveIni('autoDrinkHP',  this.autoDrinkHP.toString());
         this.configurator.saveIni('useSpawnElix',  this.useSpawnElix.toString());
+        this.configurator.saveIni('use600Elix',  this.use600Elix.toString());
         this.configurator.saveIni('autoDrinkStat',  this.autoDrinkStat.toString());
         this.configurator.saveIni('autoDrinkDamage', this.autoDrinkDamage.toString());
         this.configurator.saveIni('autoDrinkMagic', this.autoDrinkMagic.toString());
@@ -180,6 +188,7 @@
         this.configurator.saveIni('autoDrinkLevel',this.autoDrinkLevel.toString());
         this.configurator.saveIni('spellsRequired',spellsRequired.join(';'));
         this.configurator.saveIni('hotKey',this.hotKey);
+        this.configurator.saveIni('checkInjury',this.checkInjury.toString());
         this.configurator.saveIni('debugging',this.debugging.toString());
       }
 
@@ -207,6 +216,7 @@
     },
     checkActive: function() {
       if (this.active) {
+        this.notFoundElix = {};
         if (!this.loadHandler) {
           this.loadHandler = combats_plugins_manager.get_binded_method(this, this.mainframeLoad);
           this.checkEffectsHandler = combats_plugins_manager.get_binded_method(this, this.timerFunction);
@@ -236,7 +246,7 @@
       var drinkObj = { enable: true };
       combats_plugins_manager.fireEvent('drink_elix.before_drink', drinkObj);
       if (!drinkObj.enable) {
-        top.Chat.am('Нельзя пить: это кому-то мешает');
+        this.addChat('Нельзя пить: это кому-то мешает');
         this.startRequestTimer = setTimeout(
           combats_plugins_manager.get_binded_method(this,this.startRequest),
           200);
@@ -345,12 +355,15 @@
     drinkElixHandler: function(potions, attempt, AJAX) {
       var s = AJAX.responseText;
       match = s.match(/<FONT COLOR=red>(.*?)<\/FONT>/i);
-      if (match && match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
-        this.addChat(match[1]);
-        this.startDrinkElix(potions, attempt+1);
-        return;
-      } else if (match) {
-        this.addChat(match[1]);
+      if (match) {
+        delete this.waitList[potions[attempt]];
+        if (match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
+          this.addChat(match[1]);
+          this.startDrinkElix(potions, attempt+1);
+          return;
+        } else {
+          this.addChat(match[1]);
+        }
         return;
       }
       this.addChat('пили '+potions[attempt]+'. результат неизвестен');
@@ -360,9 +373,11 @@
     },
     startDrinkElix: function(potions, attempt) {
       if (!potions[attempt]) {
+        combats_plugins_manager.fireEvent('drink.no_elix', {elix:potions[attempt]});
         return this.NO_ELIX;
       }
 
+      this.waitList[potions[attempt]] = true;
       this.queueRequest(
         'GET',
         '/main.pl?use='+potions[attempt]+'&n=-1&'+Math.random(),
@@ -450,6 +465,9 @@
 		  }
 		}
               }
+            } else if (this.checkInjury && (match = images[i].match(/\/misc\/icons\/(eff_travma\d+)\.gif[^>]*onmouseover='fastshow\("[^"]*<B>([^"<]*)<.*?Осталось\:\s*(?:\d+\s*нед\.\s*)?(?:\d+\s*дн\.\s*)?(?:(\d+)\s*ч\.\s*)?(?:(\d+)\s*мин\.\s*)?(?:(\d+)\s*сек\.)?.*?"[^>]*>/))) {
+              var time = (parseFloat(match[4]) || 0)*3600 + (parseFloat(match[5]) || 0)*60 + (parseFloat(match[6]) || 0);
+              combats_plugins_manager.fireEvent('effect.injury', { type:match[1], message:match[2], timeLeft:time });
             }
           }
 	  for(var spell in this.spellsRequired) {
@@ -474,7 +492,11 @@
     getEffectsTimeoutHandler: function() {
       this.effectsCheckRequired = true;
       this.addChat('Сбой загрузки страницы с эффектами. Перезапуск...');
-      this.getEffects();
+
+      if (this.checkEffectsTimer) {
+        clearTimeout(this.checkEffectsTimer);
+      }
+      this.checkEffectsTimer = setTimeout(this.checkEffectsHandler, 30*1000);
       return false;
     },
     getEffects: function() {
@@ -521,13 +543,14 @@
     },
 
 // == Проверка выпивания эликов жизни ==
-    drinkHPElixHandler: function(disableElix, AJAX) {
+    drinkHPElixHandler: function(disableElix, objName, AJAX) {
       this.isDrinkingHP = false;
       var s = AJAX.responseText;
       if (!s)
         return;
       match = s.match(/<FONT COLOR=red>(.*?)<\/FONT>/i);
       if (match && match[1] == '<B>Свиток не найден в вашем рюкзаке</B>') {
+        this.notFoundElix[objName] = true;
         this.drinkElix(disableElix);
       } else {
         this.drinkTime = new Date();
@@ -544,9 +567,11 @@
       disableElix = disableElix || {};
 
       var objName;
-      if (this.useSpawnElix && this.maxHP-this.currentHP>500 && !disableElix['pot_cureHP250_20_gg'])
+      if (this.use600Elix && this.maxHP-this.currentHP>900 && !disableElix['pot_cureHP600_50'] && !this.notFoundElix['pot_cureHP600_50'])
+        objName = 'pot_cureHP600_50';
+      else if (this.useSpawnElix && this.maxHP-this.currentHP>500 && !disableElix['pot_cureHP250_20_gg'] && !this.notFoundElix['pot_cureHP250_20_gg'])
         objName = 'pot_cureHP250_20_gg';
-      else if (this.maxHP-this.currentHP>500 && !disableElix['pot_cureHP250_20'])
+      else if (this.maxHP-this.currentHP>500 && !disableElix['pot_cureHP250_20'] && !this.notFoundElix['pot_cureHP250_20'])
         objName = 'pot_cureHP250_20';
       else if (!disableElix['pot_cureHP100_20'])
         objName = 'pot_cureHP100_20';
@@ -562,7 +587,7 @@
         'GET',
         '/main.pl?use='+objName+'&n=-1&'+Math.random(),
         '',
-        combats_plugins_manager.get_binded_method(this,this.drinkHPElixHandler, disableElix),
+        combats_plugins_manager.get_binded_method(this,this.drinkHPElixHandler, disableElix, objName),
         combats_plugins_manager.get_binded_method(this,this.drinkHPElixTimeoutHandler));
     },
     drinkElix: function(disableElix) {
@@ -644,6 +669,7 @@
 
         { value: this.configurator.loadIni('autoDrinkHP','true')!='false' },
         { value: this.configurator.loadIni('useSpawnElix', 'false')=='true' },
+        { value: this.configurator.loadIni('use600Elix', 'false')=='true' },
         { value: this.configurator.loadIni('autoDrinkStat','true')!='false' },
         { value: this.configurator.loadIni('autoDrinkDamage','true')!='false' },
         { value: this.configurator.loadIni('autoDrinkMagic','true')!='false' },
@@ -652,6 +678,7 @@
 
         { value: this.configurator.loadIni('autoDrinkLevel','95') },
         { value: this.configurator.loadIni('spellsRequired','').split(';').join('\n') },
+        { value: this.configurator.loadIni('checkInjury','false')=='true' },
         { value: null },
         { value: this.configurator.loadIni('debugging','false')=='true' }
       ], true);
@@ -663,7 +690,7 @@
             'width': "28px",
             'height': "20px",
             'background': "#505050",
-            'border': "2px outset",
+            'border': "1px outset",
             'overflow': "hidden"
             },
           'onclick': combats_plugins_manager.get_binded_method(this, this.checkHPviaAJAX)

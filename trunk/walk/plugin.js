@@ -262,6 +262,10 @@
 	this.save('minSafeHP',this.minSafeHP.toString());
     },
 
+    addSys: function(s) {
+      combats_plugins_manager.add_sys(s);
+    },
+
     "clearLog": function() {
       this.log = [];
     },
@@ -398,7 +402,7 @@
 		top.bottom.sw_sys(); //--------------- Включаем системки
 		
 	if( (Red_str=doc_inner.match(/red>(.*?)<BR>/)) && this.sys_msg ){ // ------- вывод системки (на что кликнули и каков результат) ------- Added by Solt
-		top.Chat.am(this.sys_msg + '<i>'+Red_str[1]+'<i>');
+		this.addSys(this.sys_msg + '<i>'+Red_str[1]+'<i>');
 		this.sys_msg='';
 	}
 
@@ -589,7 +593,7 @@
 		
 	//alert(dT+' '+T);
 	d.getElementsByTagName('table')[2].rows[0].cells[0].innerHTML+="(100HP/"+T+"сек.)"
-	//top.Chat.am(t);
+	//this.addSys(t);
 /*
 //---------Вычисление своих координат
 	if(arrMap=top.frames[3].arrMap){
@@ -600,7 +604,7 @@
 				map_i+=(arrMap[y][x] ? 1:0);
 			}
 		}
-		//top.Chat.am(map_i.toString(10));
+		//this.addSys(map_i.toString(10));
 		if(this.Coordinates[map_i])
 			d.getElementsByTagName('table')[4].rows[0].cells[0].innerHTML+="<br>"+"x:"+this.Coordinates[map_i].x+" y:"+this.Coordinates[map_i].y;
 	}
@@ -1065,7 +1069,7 @@
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path='+turn_id;
           },0.1);
         } else {
-          top.Chat.am('Нельзя шагать: это кому-то мешает');
+          this.addSys('Нельзя шагать: это кому-то мешает');
           this.StartStepTimer(function(){
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
           }, 2);
@@ -1119,7 +1123,7 @@
         mtime = this.forcedStepTime;
       if (this.checkEnemy()) {
         if (top.tkHP<this.minSafeHP) {
-          top.Chat.am('Нельзя шагать: низкий уровень HP');
+          this.addSys('Нельзя шагать: низкий уровень HP');
           this.StartStepTimer(function(){
             top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
           }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
@@ -1136,7 +1140,7 @@
               top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
             },mtime+0.1);
           } else {
-            top.Chat.am('Нельзя шагать: это кому-то мешает');
+            this.addSys('Нельзя шагать: это кому-то мешает');
             this.StartStepTimer(function(){
               top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
             }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);

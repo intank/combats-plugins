@@ -317,8 +317,8 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         };
       },
       add_sys: function(s) {
-	this.logsTab.Frame( ).createNode( "DIV", { innerHTML: s, className: "Chat", Self: top.Chat.Self } );
-	this.fireEvent('log.message', { mess: s } );
+	this.logsTab.Frame( ).createNode( "DIV", { innerHTML: '<font class=sysdate>'+(new Date().toLocaleTimeString())+'</font> '+s, className: "Chat", Self: top.Chat.Self } );
+	this.fireEvent('log.message', { mess: (new Date().toLocaleTimeString())+' '+s } );
       },
       add_chat: function(s) {
         top.Chat.am(s);
