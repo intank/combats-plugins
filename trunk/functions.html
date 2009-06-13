@@ -299,6 +299,9 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
               this.timeoutValue);
             try {
               this.AJAX.open(method, URL, true);
+              if (data) {
+                this.AJAX.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+              }
               this.AJAX.send(data);
             } catch(e) {
               e.URL = URL;
@@ -315,6 +318,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       },
       add_sys: function(s) {
 	this.logsTab.Frame( ).createNode( "DIV", { innerHTML: s, className: "Chat", Self: top.Chat.Self } );
+	this.fireEvent('log.message', { mess: s } );
       },
       add_chat: function(s) {
         top.Chat.am(s);

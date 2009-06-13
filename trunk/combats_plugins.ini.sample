@@ -6,6 +6,8 @@
 ; Файл combats_plugins.ini.sample - это список "по умолчанию",
 ; необходим для первого запуска и в дальнейшем не используется.
 
+logging=true
+sys_log=true
 top_tray=true
 chat_handler=true
 exchange_handler=true
