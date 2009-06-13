@@ -1,87 +1,22 @@
 (function() {
   return {
-    writeLogTimer: null,
     toString: function() {
       return "Лог чата";
-    },
-    load: function(key,def_val){
-      return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","chat_log\\chat_log.ini",top.getCookie('battle'),key,def_val);
-    },
-    save: function(key,val){
-      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","chat_log\\chat_log.ini",top.getCookie('battle'),key,val);
-    },
-    getHeadFile: function(){
-      return this.getFile('chat_log/default.html');
-    },
-    getFile: function(filename) {
-      var s = external.readFile(combats_plugins_manager.security_id,'Combats.RU',filename);
-      while (s && !s.slice(-1).charCodeAt(0)) {
-        s = s.slice(0,-1);
-      }
-      return s?s:'';
-    },
-    joinFiles: function() {
-      var date = this.lastCreatedFile;
-      var all_mess = '';
-      for(var i=0; i<24; i++) {
-        date.setHours(i);
-        var filename = this.createFilename(date);
-        var mess = this.getFile(filename);
-        if (mess) {
-          var pos = mess.indexOf('<body>');
-          if (pos>=0)
-            pos += 6;
-          all_mess += mess.substr(pos);
-        }
-      }
-      if (all_mess!='') {
-        all_mess = this.getHeadFile()+all_mess;
-        external.writeFile(combats_plugins_manager.security_id,'Combats.RU','chat_log/history/'+top.getCookie('battle')+' '+date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' log.html',all_mess);
-      }
-    },
-    createFilename: function(date) {
-      if (!date)
-        date = new Date();
-      return 'chat_log/history/'+top.getCookie('battle')+' '+date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+' log.html';
-    },
-    writeLog: function() {
-      clearTimeout(this.writeLogTimer);
-      this.writeLogTimer = null;
-      external.writeFile(combats_plugins_manager.security_id,'Combats.RU',this.filename,this.mess);
     },
     store: function(eventObj) {
       if (eventObj.mess=='')
         return;
-      var now = new Date();
-      if (this.filename != this.createFilename()) {
-        if (this.lastCreatedFile.getDate()!=now.getDate()) {
-          this.joinFiles();
-        }
-        this.lastCreatedFile = now;
-        this.save('lastCreatedFile',this.lastCreatedFile.toString());
-        this.filename = this.createFilename(this.lastCreatedFile);
-        this.mess = this.getHeadFile();
-      }
-      this.mess += eventObj.mess+"<br/>\n";
-      if (this.writeLogTimer)
-        clearTimeout(this.writeLogTimer);
-      this.writeLogTimer = setTimeout(combats_plugins_manager.get_binded_method(this,this.writeLog), 3000);
+      this.logger.log(eventObj.mess);
     },
     Init: function() {
-      this.lastCreatedFile = new Date(this.load('lastCreatedFile',(new Date()).toString()));
-      this.joinFiles();
-      this.save('lastCreatedFile',this.lastCreatedFile.toString());
+      if (!combats_plugins_manager.plugins_list['logging'])
+        throw new Error('Плагин "logging" должен быть загружен ранее.');
 
-      this.filename = this.createFilename();
-      this.mess = this.getFile(this.filename);
-      if (typeof(this.mess)=='undefined' || this.mess=='')
-        this.mess = this.getHeadFile();
-
+      this.logger = combats_plugins_manager.plugins_list['logging'].createLogger('chat_log','chat_log\\history');
       combats_plugins_manager.attachEvent(
         'onmessage',
         combats_plugins_manager.get_binded_method(this,this.store));
 
-      top.onunload = combats_plugins_manager.get_binded_method(this,this.writeLog);
       return this;
     }
   }.Init();
