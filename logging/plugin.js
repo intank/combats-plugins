@@ -55,7 +55,7 @@
             }
             lastCreatedFile = now;
             plugin.save(loggerName,'lastCreatedFile',lastCreatedFile.toString());
-            filename = this.createFilename(this.lastCreatedFile);
+            filename = createFilename(lastCreatedFile);
             mess = plugin.getHeadFile();
           }
           mess += str+"<br/>\n";
