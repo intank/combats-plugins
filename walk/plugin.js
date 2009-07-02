@@ -218,8 +218,8 @@
 	this.showUnits=a[2].value;
 	this.showObjects=a[3].value;
 	this.autoHideMap=a[4].value;
-	this.minHP=Math.max(0, Math.min(parseFloat(a[5].value) || 95, 100));
-	this.minMana=Math.max(0, Math.min(parseFloat(a[6].value) || 95, 100));
+	this.minHP=Math.max(0, Math.min(parseFloat(a[5].value) || 0, 100));
+	this.minMana=Math.max(0, Math.min(parseFloat(a[6].value) || 0, 100));
 	this.forcedStepTime = parseFloat(a[7].value) || 0;
 	this.excludedObjects=a[8].value;
         this.alwaysItems = {};
@@ -1239,8 +1239,8 @@
 	this.showUnits=(this.load('showUnits','yes')=='yes');
 	this.showObjects=(this.load('showObjects','yes')=='yes');
 	this.autoHideMap = (this.load('autoHideMap','yes')=='yes');
-	this.minHP=parseFloat(this.load('minHP','95'));
-	this.minMana=parseFloat(this.load('minMana','95'));
+	this.minHP=parseFloat(this.load('minHP','95')) || 0;
+	this.minMana=parseFloat(this.load('minMana','95')) || 0;
 	this.excludedObjects=this.load('exclude','').replace(/;/g, "\n");
 	this.defaultDungeonName=this.load(this.cityName+'.defaultDungeonName','');
 	var items=this.load('alwaysItems','Блеклый подземник;Черепичный подземник;Кровавый подземник').split(/;/);
