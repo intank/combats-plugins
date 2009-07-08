@@ -234,11 +234,15 @@
        				} else
        					effPositive = true;
        			} else if (oMethodEff['-'+effect.sID]) { // найден ненужный эффект
-       				effNegative = false;
-       			}
-       			//this.addChat(k+'-'+effect.sID+'-'+CheckEffect);
-       		}
-       		return effNegative || effPositive;
+				if (oMethodEff['-'+effect.sID].count) {
+					var match = effect.sStack ? effect.sStack.match(/x(\d+)/): ['x1','1'];
+					effNegative = !match || parseInt(match[1])<oMethodEff['-'+effect.sID].count;
+				} else
+					effNegative = false;
+			}
+			//this.addChat(k+'-'+effect.sID+'-'+CheckEffect);
+		}
+		return effNegative || effPositive;
 	  },
 
 	  checkRes: function(Res, Mode) {
