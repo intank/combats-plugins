@@ -2,6 +2,7 @@
 
  * [auto_answerer]
  * [autopass_bugag]
+ * [battle_attack]
  * [chat_context_menu]
  * [chat_handler]
  * [chat_hilight]
