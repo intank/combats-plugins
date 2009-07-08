@@ -14,7 +14,8 @@
         {name:"Отменять передачу", value:this.cancelExchange},
         {name:"Использовать принудительное надевание для поддержания уровня", value:this.forceDress},
         {name:"Период принудительного надевания (с)", value:this.forceDressPeriod},
-        {name:"Идентификатор комплекта с максимумом HP", value:this.complect}
+        {name:"Идентификатор комплекта с максимумом HP", value:this.complect},
+        {name:'Блокировать перемещение со снятым комплектом', value:this.disableRunNude}
       ];
     },
     setProperties: function(a) {
@@ -25,18 +26,24 @@
       this.forceDress = a[3].value;
       this.forceDressPeriod = Math.max(2,parseFloat(a[4].value) || 0);
       this.complect = a[5].value.replace(/^.*?skmp=(\d+).*?$/,'$1');
+      this.disableRunNude = a[6].value;
 
       this.configurator.saveIni('reserve', this.reserve.toString());
       this.configurator.saveIni('cancelExchange', this.cancelExchange.toString());
       this.configurator.saveIni('forceDress', this.forceDress.toString());
       this.configurator.saveIni('forceDressPeriod', this.forceDressPeriod.toString());
       this.configurator.saveIni('complect', this.complect);
+      this.configurator.saveIni('disableRunNude', this.disableRunNude.toString());
 
       if (wasActive && !this.active)
         this.deactivate();
       if (!wasActive && this.active) {
         this.activate();
       }
+    },
+
+    locationStep: function(eventObj) {
+      eventObj.enable &= (!this.disableRunNude || !this.disableRun);
     },
 
     restartCheckTimer: function() {
@@ -48,6 +55,7 @@
         this.timer = null;
     },
     dress_complete: function(force,AJAX) {
+      this.disableRun = false;
       if (this.forceDress && this.active) {
         this.forceDressTimer = setTimeout(
           combats_plugins_manager.get_binded_method(this,this.startDress,true),
@@ -104,6 +112,7 @@
       this.restartCheckTimer();
     },
     startStriptease: function() {
+      this.disableRun = true;
       if (this.forceDressTimer)
         clearTimeout(this.forceDressTimer);
       this.AJAX = combats_plugins_manager.getHTTPRequestProcessor();
@@ -171,6 +180,10 @@
       this.cancelExchange = this.configurator.loadIni('cancelExchange', 'true') != 'false';
       this.forceDress = this.configurator.loadIni('forceDress', 'true') == 'true';
       this.forceDressPeriod = parseFloat(this.configurator.loadIni('forceDressPeriod', '10')) || 0;
+      this.disableRunNude = this.configurator.loadIni('disableRunNude', 'false') == 'true';
+
+      combats_plugins_manager.attachEvent('location_step',
+        combats_plugins_manager.get_binded_method(this, this.locationStep));
 
       return this;
     }

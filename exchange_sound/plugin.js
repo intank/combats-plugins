@@ -1,19 +1,5 @@
 (function() {
-  plugin_exchange_sound = function() {
-    this.autoAccept = (this.load('autoAccept','false')=='true');
-    this.autoCommit = (this.load('autoCommit','false')=='true');
-    this.loadBlackList();
-    top.combats_plugins_manager.attachEvent('exchange.confirm',
-      top.combats_plugins_manager.get_binded_method(this,this.exchangeConfirm));
-    top.combats_plugins_manager.attachEvent('exchange.confirmDlg',
-      top.combats_plugins_manager.get_binded_method(this,this.exchangeConfirmDlg));
-    top.combats_plugins_manager.attachEvent('exchange.completed',
-      top.combats_plugins_manager.get_binded_method(this,this.exchangeCompleted));
-    top.combats_plugins_manager.attachEvent('fighterContextMenu', 
-      top.combats_plugins_manager.get_binded_method(this, this.handlerCtxMenu));
-  }
-
-  plugin_exchange_sound.prototype = {
+  return {
     autoAccept: false,
     autoCommit: false,
     blackListIndicator: null,
@@ -24,6 +10,7 @@
       return [
         { name:"Автоматически подтверждать приглашение", value: this.autoAccept },
         { name:"Автоматически выходить из передач", value: this.autoCommit },
+        { name:"Трёхминутный запрет на передачи с указанного времени [ЧЧ:ММ]", value:this.suspendTime },
         { name:"Добавить в чёрный список", value:'' },
         { name:"Добавить", value:this.addBlackList }
       ];
@@ -31,8 +18,11 @@
     setProperties: function(a) {
       this.autoAccept=a[0].value;
       this.autoCommit=a[1].value;
+      this.applySuspendTime(a[2].value)
+
       this.save('autoAccept',this.autoAccept.toString());
       this.save('autoCommit',this.autoCommit.toString());
+      this.save('suspendTime',this.suspendTime);
     },
     load: function(key,def_val){
       return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","exchange_sound\\settings.ini",top.getCookie('battle'),key,def_val);
@@ -41,7 +31,7 @@
       external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","exchange_sound\\settings.ini",top.getCookie('battle'),key,val);
     },
     addBlackList: function(a) {
-      this.addPersToBlackList(a[2].value);
+      this.addPersToBlackList(a[3].value);
     },
     loadBlackList: function() {
       var blacklist = this.load('BlackList','');
@@ -128,12 +118,23 @@
         try {
           var match = eventObj.oRoot.text.match(/"(.+)" хочет совершить с вами сделку/);
           var name = match?match[1]:'';
+
           if (name in this.blacklist) {
             setTimeout(combats_plugins_manager.get_binded_method(this, this.confirmClick, false),0);
             this.sendAutoResponse('private ['+name+'] Ну нет у меня сейчас желания меняться! Заходите в понедельник');
-          } else {
-            setTimeout(combats_plugins_manager.get_binded_method(this, this.confirmClick, true),0);
+            return;
           }
+
+          var time = new Date();
+          var timeValue = time.getHours()*3600+time.getMinutes()*60+time.getSeconds();
+          if ((timeValue-this.suspendTimeValue+24*3600) % (24*3600) < 3*60) 
+          {
+            this.sendAutoResponse('private ['+name+'] Извините, технический перерыв. Это ненадолго: заходите через несколько минут.');
+            setTimeout(combats_plugins_manager.get_binded_method(this, this.confirmClick, false),0);
+            return;
+          }
+          
+          setTimeout(combats_plugins_manager.get_binded_method(this, this.confirmClick, true),0);
         } catch(e) {
           combats_plugins_manager.logError(this,e);
         }
@@ -143,8 +144,32 @@
       var volume=top.frames['bottom'].soundvol;
       top.frames['bottom'].window.document.Sound.SetVariable("Volume", (volume*50));
       top.frames['bottom'].window.document.Sound.SetVariable("Sndplay",sid);
-    }
-  };
+    },
+    applySuspendTime: function(newTime) {
+      var match = newTime.match(/^(\d\d?)\:(\d\d)(?:\:(\d\d)|)$/);
+      if (match) {
+        this.suspendTime = newTime;
+        this.suspendTimeValue = parseFloat(match[1])*3600+parseFloat(match[2])*60;//+parseFloat(match[3] || '0');
+      } else {
+        this.suspendTime = '23:58';
+        this.suspendTimeValue = 23*3600+58*60;
+      }
+    },
+    Init: function() {
+      this.applySuspendTime(this.load('suspendTime','23:58'));
 
-  return new plugin_exchange_sound();
+      this.autoAccept = (this.load('autoAccept','false')=='true');
+      this.autoCommit = (this.load('autoCommit','false')=='true');
+      this.loadBlackList();
+      top.combats_plugins_manager.attachEvent('exchange.confirm',
+        top.combats_plugins_manager.get_binded_method(this,this.exchangeConfirm));
+      top.combats_plugins_manager.attachEvent('exchange.confirmDlg',
+        top.combats_plugins_manager.get_binded_method(this,this.exchangeConfirmDlg));
+      top.combats_plugins_manager.attachEvent('exchange.completed',
+        top.combats_plugins_manager.get_binded_method(this,this.exchangeCompleted));
+      top.combats_plugins_manager.attachEvent('fighterContextMenu', 
+        top.combats_plugins_manager.get_binded_method(this, this.handlerCtxMenu));
+      return this;
+    }
+  }.Init();
 })()

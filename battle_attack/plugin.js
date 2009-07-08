@@ -74,7 +74,7 @@
       	return top.Battle.End(oBattle.sLocation);
       }
 
-      var block = (this.block==0)?Math.floor(Math.random()*5):this.block;
+      var block = (this.block==0)?Math.floor(Math.random()*5):this.block-1;
       oBattle.SetDefend(block, 0);
       var defCount = oBattle.oAttack.rows[ 1 ].cells[ 2 ].lastChild.innerText.split(/(,| è )/).length;
       var usedBlock = {};

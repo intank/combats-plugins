@@ -559,7 +559,7 @@
 		      return;
 		    } else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)) {//-- Нападать если нет стены
 		      if(Obj.action && Obj.action.search(/attack/)>=0) {
-			if( (100*top.tkHP/top.maxHP)>this.minHP && top.maxMana && (100*top.tkMana/top.maxMana)>this.minMana ) {
+			if( (100*top.tkHP/top.maxHP)>this.minHP && (!top.maxMana || (100*top.tkMana/top.maxMana)>this.minMana) ) {
 			  top.frames[3].location=loc+"?attack=1&use="+Obj.id;
 			  return;
 			} else {

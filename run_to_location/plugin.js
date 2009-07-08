@@ -144,6 +144,16 @@
           this.click_attempt = 0;
           this.prev_location = this.current_location;
         }
+        var eventObj = { enable:true };
+        combats_plugins_manager.fireEvent('location_step', eventObj);
+        if (!eventObj.enable) {
+          if (this.timer)
+            clearTimeout(this.timer);
+          this.timer = setTimeout(
+            combats_plugins_manager.get_binded_method(this, this.search_step_node, location),
+            500);
+          return;
+        }
         this.step_attempt = 0;
         this.step_node.click();
         if ('chat_sender' in combats_plugins_manager.plugins_list) {

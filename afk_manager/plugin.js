@@ -1,11 +1,5 @@
 (function(){
-  plugin_afk_manager = function () {
-    this.refreshPeriod = parseInt(this.load('refreshPeriod','15'));
-    top.combats_plugins_manager.attachEvent('mainframe.load',
-      top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
-  }
-
-  plugin_afk_manager.prototype = {
+  return {
     refreshTimer: null,
     refreshPeriod: 15,
     toString: function() {
@@ -57,8 +51,12 @@
       } catch (e) {
         combats_plugins_manager.logError(this,e);
       }
+    },
+    Init: function () {
+      this.refreshPeriod = parseInt(this.load('refreshPeriod','15'));
+      top.combats_plugins_manager.attachEvent('mainframe.load',
+        top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
+      return this;
     }
-  };
-
-  return new plugin_afk_manager();
+  }.Init();
 })()
