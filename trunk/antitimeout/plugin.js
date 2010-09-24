@@ -647,7 +647,7 @@
 		if (!this.active)
 			return;
 		try {
-			if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/battle\d*\.pl/)!=0)
+			if (top.combats_plugins_manager.getMainFrame().location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/battle\d*\.pl/)!=0)
 				return;
 			if(typeof(top.Battle.oBattle.Class)=='object'){
 				if(!(top.Battle.oBattle.Class.Settings() & 1)) top.Battle.oBattle.Class.Settings(1); // ----------”прощенный бой
@@ -659,7 +659,7 @@
 			else
 				this.kickTimer = null;
 			
-			top.frames[3].attachEvent( "onbeforeunload", top.combats_plugins_manager.get_binded_method(this,this.clearKickTimer));
+			top.combats_plugins_manager.getMainFrame().attachEvent( "onbeforeunload", top.combats_plugins_manager.get_binded_method(this,this.clearKickTimer));
 		}catch(e){
 			e.Function = 'onLoadHandler';
         	combats_plugins_manager.logError(this,e);

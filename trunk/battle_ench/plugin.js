@@ -46,13 +46,13 @@ plugin_battle_ench.prototype = {
     this.DisplayWeaponsAndLevels(oLayer);
   },
   onloadHandler: function() {
-    if (top.frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/battle\d?\.pl/)!=0) {
+    if (top.combats_plugins_manager.getMainFrame().location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/battle\d?\.pl/)!=0) {
       if (this.newData && this.autosave)
         this.saveData();
       return;
     }
 
-    d = top.frames[3].document;
+    d = top.combats_plugins_manager.getMainFrame().document;
     elements = d.forms["f1"].elements;
     if (this.enable_change_batton && ("f1" in d.forms) && ("let_attack" in elements)) {
       cell = elements["let_attack"].parentNode.nextSibling;
@@ -158,7 +158,7 @@ plugin_battle_ench.prototype = {
     }
   },
   disable: function() {
-    top.frames[3].frameElement.detachEvent("onload",this.bindedOnloadHandler);
+    top.combats_plugins_manager.getMainFrame().frameElement.detachEvent("onload",this.bindedOnloadHandler);
   },
   OnLoadHandler: function( bXML, oXML ) {
     this.originalOnLoad.apply(top.Battle.oBattle.oQuery,[ bXML, oXML ]);

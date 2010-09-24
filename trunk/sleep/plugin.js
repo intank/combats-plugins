@@ -23,7 +23,7 @@
     },
     goToRoom: function(onclick) {
       this.goingToRoom = true;
-      return onclick?onclick.apply(frames[3],[]):true;
+      return onclick?onclick.apply(top.combats_plugins_manager.getMainFrame(),[]):true;
     },
     sleep: function() {
       var d = top.combats_plugins_manager.getMainFrame().document;

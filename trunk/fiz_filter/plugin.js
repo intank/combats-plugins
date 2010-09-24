@@ -16,10 +16,10 @@ plugin_fiz_filter.prototype.setProperties = function(a) {
 }
 
 plugin_fiz_filter.prototype.onloadHandler = function() {
-  if (frames[3].location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/zayavka\.pl\?level=fiz/)!=0)
+  if (top.combats_plugins_manager.getMainFrame().location.href.search(/^http\:\/\/\w+\.combats\.(?:com|ru)\/zayavka\.pl\?level=fiz/)!=0)
     return;
   try {
-    var d=top.frames[3].document;
+    var d=top.combats_plugins_manager.getMainFrame().document;
     if (!('F1' in d.forms))
       return;
     enemy = d.forms['F1'].getElementsByTagName('TABLE')[0].cells[0].innerHTML.match(/<SCRIPT>drwfl\(".+?",\d+,"(\d+?)",.+?,".*?"\)<\/SCRIPT>/);
@@ -31,5 +31,5 @@ plugin_fiz_filter.prototype.onloadHandler = function() {
 }
 
 fiz_filter = new plugin_fiz_filter();
-frames[3].frameElement.attachEvent("onload",function(){fiz_filter.onloadHandler();});
+top.combats_plugins_manager.getMainFrame().frameElement.attachEvent("onload",function(){fiz_filter.onloadHandler();});
 fiz_filter

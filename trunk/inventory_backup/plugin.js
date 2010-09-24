@@ -104,7 +104,7 @@
       this.save('addChestToInventory',this.addChestToInventory.toString());
     },
     onloadHandler: function(eventObj) {
-      if (this.addChestToInventory && top.frames[3].location.pathname=='/main.pl' && top.frames[3].location.search.search(/(?:\?|&)(?:edit|skmp|set|setdown)=/)>=0) {
+      if (this.addChestToInventory && top.combats_plugins_manager.getMainFrame().location.pathname=='/main.pl' && top.combats_plugins_manager.getMainFrame().location.search.search(/(?:\?|&)(?:edit|skmp|set|setdown)=/)>=0) {
         var tabsTable;
         try {
           tabsTable = top.combats_plugins_manager.getMainFrame().document.
@@ -119,7 +119,7 @@
         ChestTabCell.innerHTML = '<a href=#>Сундук</a>';
         ChestTabCell.firstChild.onclick = 
           top.combats_plugins_manager.get_binded_method(this,this.onChestTabClick);
-      } else if (top.frames[3].location.pathname=='/house.pl' && top.frames[3].location.search.search(/(?:\?|&)room=2/)>=0) {
+      } else if (top.combats_plugins_manager.getMainFrame().location.pathname=='/house.pl' && top.combats_plugins_manager.getMainFrame().location.search.search(/(?:\?|&)room=2/)>=0) {
         if (this.autoSaveChest) {
           this.saveChest();
         } else {

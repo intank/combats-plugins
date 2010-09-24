@@ -3,7 +3,8 @@
   var timer;
   top.setHPlocal = function() {
     clearTimeout(timer);
-    if (top.frames[3].document.getElementById("HP1")==null || top.frames[3].document.getElementById("HP2")==null) {
+    var frame = top.combats_plugins_manager.getMainFrame();
+    if (frame.document.getElementById("HP1")==null || frame.document.getElementById("HP2")==null) {
       timer = setTimeout(function(){top.setHPlocal();}, 100);
     } else
       old_setHPlocal();

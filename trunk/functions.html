@@ -250,7 +250,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         throw new Error('Неверный идентификатор плагина "'+plugin+'"');
       },
       getMainFrame: function() {
-        return top.frames[3]; // пока что так
+        return top.User.Framework.GetTab('main').Frame().firstChild.contentWindow;
       },
       getHTTPRequest: function() {
         if (top.XMLHttpRequest) {
@@ -334,6 +334,12 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
       add_chat: function(s) {
         top.Chat.am(s);
       },
+      InitJQuery: function() {
+	var script = document.createElement('script');
+	script.type = 'text/javascript';
+	script.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js';
+	document.getElementsByTagName("head")[0].appendChild(script);
+      },
       Init: function() {
         var sleep = 0;
         try {
@@ -413,6 +419,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
       },
       startInitialization: function() {
+	this.InitJQuery();
         this.config = this.createConfigurationElement('.');
         this.silent = this.config.loadIni('silent','true')!='false';
         this.hideLogsTab = this.config.loadIni('hideLogsTab','false')=='true';
