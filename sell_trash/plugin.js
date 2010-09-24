@@ -50,7 +50,7 @@
       return result;
     },
     refreshShop: function() {
-      top.frames[3].location='/shop.pl?sale=&sd4='+this.sd4+'&'+Math.random();
+      top.combats_plugins_manager.getMainFrame().location='/shop.pl?sale=&sd4='+this.sd4+'&'+Math.random();
     },
     checkItemMoved: function() {
       if (this.AJAX.readyState != 4)

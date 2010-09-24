@@ -45,7 +45,7 @@
       return result;
     },
     refreshChest: function() {
-      top.frames[3].location='/house.pl?room=2&'+Math.random();
+      top.combats_plugins_manager.getMainFrame().location='/house.pl?room=2&'+Math.random();
     },
     checkItemMoved: function() {
       if (this.AJAX.readyState != 4)

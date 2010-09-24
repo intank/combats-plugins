@@ -32,7 +32,7 @@
       );
     },
     doReload: function() {
-      top.frames[3].location = top.frames[3].location.pathname;
+      top.combats_plugins_manager.getMainFrame().location = top.combats_plugins_manager.getMainFrame().location.pathname;
     },
     Init: function(){
       this.configurator = combats_plugins_manager.createConfigurationElement('mainframe_reload');

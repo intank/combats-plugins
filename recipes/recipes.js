@@ -324,7 +324,7 @@ var show_type = '0';
 
 components_count=0;
 for(i=0;i<cells.length;i++) {
-  var src = cells(i).href;
+  var src = cells[i].href;
 
   var matches = /http\:\/\/.+?\/(mater\d+)\./.exec(src);
   var is_material = matches && (matches.length>1);
@@ -335,13 +335,18 @@ for(i=0;i<cells.length;i++) {
   var id = matches[1];
   var is_rune = (id.match(/^rune_/)!=null);
 
-  var name = cells(i).innerText;
+  var name = cells[i].innerText;
   matches = /^(.*?)\s*\(x(\d+)\)/.exec(name);
   if(!matches)
     cnt=1;
   else {
     cnt=parseInt(matches[2]);
     name=matches[1];
+  }
+  var description = '';
+  if (is_rune) {
+    var match = cells[i].parentNode.innerText.match(/Действует на\:[\s\n\r]+\u2022\s*(.*?)[\n\r]/);
+    if (match) description = id+':"'+match[1]+'"';
   }
 
   for(j=0;j<components.length;j++) {
@@ -357,7 +362,8 @@ for(i=0;i<cells.length;i++) {
       src:'http://img.combats.com/i/items/'+id+'.gif', 
       count:cnt, 
       used:0, 
-      name:name, 
+      name:name,
+      description:description,
       is_material:is_material,
       is_rune:is_rune
     });
@@ -400,7 +406,7 @@ function ShowComponents() {
     var s = '<html><body style="margin: 0; padding: 0;"><div id=\'hint\' style=\'position: absolute; z-index: 1; width: 80%; background: yellow; visibility: hidden;\'></div><table width=100%>';
     for(var i in components) {
       if(components[i].count && (show_type=='0' || show_type=='1' && components[i].is_material || show_type=='2' && components[i].is_rune))
-        s += '<tr id="'+components[i].id+'"><td><img src="'+components[i].src+'" onmouseover="top.HintRecipes(\''+components[i].id+'\',window.event)" onmouseout="top.HintHide()"><td><b>'+components[i].name+'</b><td id="'+components[i].id+'_cnt">'+components[i].count;
+        s += '<tr id="'+components[i].id+'"><td><img src="'+components[i].src+'" onmouseover="top.HintRecipes(\''+components[i].id+'\',window.event)" onmouseout="top.HintHide()"><td><b>'+components[i].name+'</b>'+(components[i].description?'<br/>'+components[i].description:'')+'<td id="'+components[i].id+'_cnt">'+components[i].count;
     }
     s += '</table></body></html>';
   } else

@@ -17,7 +17,7 @@
       if (!eventObj.window.location.pathname.match(/\/dungeon\d*\.pl/) 
           || !eventObj.window.document.getElementById('DungMap'))
         return;
-      var location = top.frames[3].document.getElementsByTagName('table')[0].cells[1].innerHTML;
+      var location = top.combats_plugins_manager.getMainFrame().document.getElementsByTagName('table')[0].cells[1].innerHTML;
       location = location.replace(/<.*/,'');
       this.locations[location] = true;
     },

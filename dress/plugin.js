@@ -266,7 +266,7 @@
       top.dress.oReq.onreadystatechange = this.oReqReady;
     },
     activate: function() {
-      d = top.frames[3].document;
+      d = top.combats_plugins_manager.getMainFrame().document;
       if (d.readyState!="complete" && d.readyState!="loading") {
         d.parentWindow.detachEvent("onload", dress.activate);
         d.parentWindow.attachEvent("onload", dress.activate);
@@ -341,9 +341,9 @@
       }
     },
     onloadHandler: function() {
-      if (top.frames[3].location.pathname.search(/^\/main\.pl/)!=0)
+      if (top.combats_plugins_manager.getMainFrame().location.pathname.search(/^\/main\.pl/)!=0)
         return;
-      d = top.frames[3].document;
+      d = top.combats_plugins_manager.getMainFrame().document;
       var tables = d.getElementsByTagName('table');
       if (tables.length<2 || tables[1].cells.length<6)
         return;

@@ -10,11 +10,11 @@
       return "Уведомление о заканчивающихся эликсирах";
     },
     onloadHandler: function() {
-      if (top.frames[3].location.pathname.search(/^\/(main|battle\d*)\.pl/)!=0)
+      if (top.combats_plugins_manager.getMainFrame().location.pathname.search(/^\/(main|battle\d*)\.pl/)!=0)
         return;
       var notify_handler = top.combats_plugins_manager.plugins_list['notify_handler'];
       try {
-        tables=top.frames[3].document.getElementsByTagName('TABLE');
+        tables=top.combats_plugins_manager.getMainFrame().document.getElementsByTagName('TABLE');
         var images=null;
         if(tables.length>=7 && tables[6].cells.length==3)
           images=tables[6].cells[1].getElementsByTagName('img');

@@ -276,15 +276,15 @@
 
     "setDirection": function(a) {
         if(this.Direction) {
-          img=window.frames[3].document.all("i"+this.Direction);
+          img=top.combats_plugins_manager.getMainFrame().document.all("i"+this.Direction);
           img.src=img.src.replace(/b\.gif$/,".gif");
         }
         this.Direction=a;
-        img=top.frames[3].document.all("i"+this.Direction);
+        img=top.combats_plugins_manager.getMainFrame().document.all("i"+this.Direction);
         img.src=img.src.replace(/b?\.gif$/,"b.gif");
-        top.frames[3].document.all("td_stop").style.backgroundColor="black";
-        if (this.ignoreWall || top.frames[3].document.getElementById("m"+this.Direction) && this.steptimer==null) {
-          var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
+        top.combats_plugins_manager.getMainFrame().document.all("td_stop").style.backgroundColor="black";
+        if (this.ignoreWall || top.combats_plugins_manager.getMainFrame().document.getElementById("m"+this.Direction) && this.steptimer==null) {
+          var mtime = top.combats_plugins_manager.getMainFrame().mtime*(1-(top.combats_plugins_manager.getMainFrame().progressAt/top.combats_plugins_manager.getMainFrame().progressEnd));
           if (mtime<0)
             mtime = 0;
           this.StartStepTimer(this.do_step, mtime);
@@ -305,11 +305,11 @@
       
     "stop_it": function() {
         if(this.Direction) {
-          var img=window.frames[3].document.getElementById("i"+this.Direction);
+          var img=top.combats_plugins_manager.getMainFrame().document.getElementById("i"+this.Direction);
           if (img) img.src=img.src.replace(/b\.gif$/,".gif");
         }
         this.Direction=0;
-        var td=window.frames[3].document.all("td_stop")
+        var td=top.combats_plugins_manager.getMainFrame().document.all("td_stop")
         if (td) td.style.backgroundColor="red";
         if(this.steptimer!=null){
           clearTimeout(this.steptimer);
@@ -328,7 +328,7 @@
         if (this.Direction==1) {
           var oLayer;
           var oObjects;
-          if ((oLayer = top.frames[3].document.getElementById('1_0l')))
+          if ((oLayer = top.combats_plugins_manager.getMainFrame().document.getElementById('1_0l')))
             oObjects = oLayer.getElementsByTagName('button');
             for (var i=0; i<oObjects.length; i++)
                if (oObjects[i].currentStyle.filter.search(/src=.?http\:\/\/img\.combats\.(?:com|ru)\/i\/chars\/d\//)>=0
@@ -339,7 +339,7 @@
         }
 
         if(this.Direction>0 && canStep) {
-          top.frames[3].location=top.frames[3].location.pathname+"?rnd="+Math.random()+"&path=m"+this.Direction;
+          top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+"?rnd="+Math.random()+"&path=m"+this.Direction;
           if(this.forced)
             this.StartStepTimer(this.do_step, 15);
         }
@@ -369,11 +369,11 @@
 
     "setCurrentSettings": function() {
       try {
-        this.en_click=top.frames[3].document.all['en_click'].checked;
-	this.mat_click=top.frames[3].document.all['mat_click'].checked;
-        this.autoPilot=top.frames[3].document.all['autoPilot'].checked;
-        this.autoAttack=top.frames[3].document.all['autoAttack'].checked;
-        this.showMap=top.frames[3].document.all['showMap'].checked;
+        this.en_click=top.combats_plugins_manager.getMainFrame().document.all['en_click'].checked;
+	this.mat_click=top.combats_plugins_manager.getMainFrame().document.all['mat_click'].checked;
+        this.autoPilot=top.combats_plugins_manager.getMainFrame().document.all['autoPilot'].checked;
+        this.autoAttack=top.combats_plugins_manager.getMainFrame().document.all['autoAttack'].checked;
+        this.showMap=top.combats_plugins_manager.getMainFrame().document.all['showMap'].checked;
       } catch(e) {
       }
       var t=this.Direction;
@@ -388,7 +388,7 @@
 
     "onloadHandler": function() {
       try {
-        var d=top.frames[3].document;
+        var d=top.combats_plugins_manager.getMainFrame().document;
         if(d.location.pathname.search(/^\/dungeon\d*\.pl/)!=0) {
           if (this.autoHideMap)
             this.doHideMap();
@@ -457,7 +457,7 @@
                 || (!this.skip_mat_click && (match = img.alt.match(/'(.*?)'/)) && (match[1] in this.alwaysItems)))
             {
               if (!(img.alt.replace(/^.*?'(.*)'.*?$/,'$1') in this.excludedItems) && !link.href.match(/#$/)) {
-                top.frames[3].location = link.href+'&rnd='+Math.random();
+                top.combats_plugins_manager.getMainFrame().location = link.href+'&rnd='+Math.random();
                 return;
               }
             }
@@ -491,19 +491,19 @@
 	R_div.style.top=8;
 		
 //---------- Обработка объектов (автокликанье, автонападение, прорисовка радара)
-	arrLayers=top.frames[3].arrLayers; //----- Зарываемся в массив объектов+юнитов
+	arrLayers=top.combats_plugins_manager.getMainFrame().arrLayers; //----- Зарываемся в массив объектов+юнитов
 	for(var y in arrLayers)
 	  for(var x in arrLayers[y])
 	    for(var rl in arrLayers[y][x]) {
 	      var Obj_X=parseInt(rl=='r'? x:-x);
 	      var Obj_Y=parseFloat(y);
 	      var tmp;
-	      if(top.frames[3].nMyDirection & 2){ //если направление 3 или 7, поворачиваем координаты направо
+	      if(top.combats_plugins_manager.getMainFrame().nMyDirection & 2){ //если направление 3 или 7, поворачиваем координаты направо
 		tmp=Obj_X;
 		Obj_X=Obj_Y;
 		Obj_Y=-tmp;
 	      }
-	      if(top.frames[3].nMyDirection & 4){ //если 5 или 7, координаты разворачиваем на 180гр
+	      if(top.combats_plugins_manager.getMainFrame().nMyDirection & 4){ //если 5 или 7, координаты разворачиваем на 180гр
 		Obj_X=-Obj_X;
 		Obj_Y=-Obj_Y;
 	      }
@@ -555,19 +555,19 @@
 		      this.usedObjects[Obj.id]=true;
 		      if(top.ChatSys) //------------ Добавить к логу на что кликали (если включены системки)
 			this.sys_msg='<font class=date2>'+cur_time+'</font> Кликнули объект <b>'+Obj.name+'</b>, ';
-		      top.frames[3].location=loc+"?useobj="+Obj.id;
+		      top.combats_plugins_manager.getMainFrame().location=loc+"?useobj="+Obj.id;
 		      return;
 		    } else if(this.autoAttack && (doc_inner.search(/DIV(.{2,18})LeftFront0_0/i)<0)) {//-- Нападать если нет стены
 		      if(Obj.action && Obj.action.search(/attack/)>=0) {
 			if( (100*top.tkHP/top.maxHP)>this.minHP && (!top.maxMana || (100*top.tkMana/top.maxMana)>this.minMana) ) {
-			  top.frames[3].location=loc+"?attack=1&use="+Obj.id;
+			  top.combats_plugins_manager.getMainFrame().location=loc+"?attack=1&use="+Obj.id;
 			  return;
 			} else {
 			  var timeout_HP = 180000*(top.maxHP*this.minHP/100-top.tkHP)/(top.speed*top.maxHP)*1000;
 			  var timeout_Mana = ((top.maxMana||0)>100)?180000*(top.maxMana*this.minMana/100-top.tkMana)/(top.mspeed*top.maxMana)*1000:0;
 			  var timeout = Math.max(timeout_HP, timeout_Mana);
-			  //setTimeout("top.frames[3].location.reload()",180000*(top.maxHP-top.tkHP)/(top.speed*top.maxHP)*1000);//обновить когда будет 100% HP
-			  setTimeout("top.frames[3].location=top.frames[3].location.href",180000*(top.maxHP*this.minHP/100-top.tkHP)/(top.speed*top.maxHP)*1000+10000);//обновить когда будет minHP HP
+			  //setTimeout("top.combats_plugins_manager.getMainFrame().location.reload()",180000*(top.maxHP-top.tkHP)/(top.speed*top.maxHP)*1000);//обновить когда будет 100% HP
+			  setTimeout("top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.href",180000*(top.maxHP*this.minHP/100-top.tkHP)/(top.speed*top.maxHP)*1000+10000);//обновить когда будет minHP HP
 			}
 		      }
 		    }
@@ -596,7 +596,7 @@
 	//this.addSys(t);
 /*
 //---------Вычисление своих координат
-	if(arrMap=top.frames[3].arrMap){
+	if(arrMap=top.combats_plugins_manager.getMainFrame().arrMap){
 		map_i=parseInt(0); 
 		for(y=0;y<8;y++){
 			for(x=0;x<8;x++){
@@ -639,13 +639,13 @@
               el = d.getElementById("m"+((this.Direction+6)%8));
               er = d.getElementById("m"+((this.Direction+2)%8));
               if (er && !el)
-                setTimeout("top.frames[3].location=top.frames[3].location.pathname+'?rnd="+Math.random()+"&path=rr';",100);
+                setTimeout("top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd="+Math.random()+"&path=rr';",100);
               else if (el && !er)
-                setTimeout("top.frames[3].location=top.frames[3].location.pathname+'?rnd="+Math.random()+"&path=rl';",100);
+                setTimeout("top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd="+Math.random()+"&path=rl';",100);
               return;
             }
           }
-          var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
+          var mtime = top.combats_plugins_manager.getMainFrame().mtime*(1-(top.combats_plugins_manager.getMainFrame().progressAt/top.combats_plugins_manager.getMainFrame().progressEnd));
           if (mtime<0)
             mtime = 0;
           if (this.forcedStepTime && mtime>this.forcedStepTime)
@@ -723,7 +723,7 @@
     "getCurrentFloor": function() {
       // this.addLog('getCurrentFloor');
       try {
-        var match = top.frames[3].document.getElementsByTagName('table')[0].cells[1].innerHTML.match(/^(.*?)(?:(Этаж\s+\d+)(?:\S*)|)(?=\s*-[^-]+?&nbsp;|&nbsp;)/);
+        var match = top.combats_plugins_manager.getMainFrame().document.getElementsByTagName('table')[0].cells[1].innerHTML.match(/^(.*?)(?:(Этаж\s+\d+)(?:\S*)|)(?=\s*-[^-]+?&nbsp;|&nbsp;)/);
         return match ? (match[2] ? match[2] : match[1]) : '';
       } catch(e) {
       }
@@ -789,7 +789,7 @@
       this.addLog('doShowMap');
       if (this.mapTargetMenu)
         this.mapTargetMenu.style.display = 'none';
-      var b = top.frames[3].document.getElementById('showMap');
+      var b = top.combats_plugins_manager.getMainFrame().document.getElementById('showMap');
       if (!b || b.checked) {
         this.setCurrentSettings();
         if (!this.mapPanel) {
@@ -842,10 +842,10 @@
                 }
               }
             }
-          var arrMap = top.frames[3].arrMap;
+          var arrMap = top.combats_plugins_manager.getMainFrame().arrMap;
           for (var i in arrMap)
             for (var j in arrMap[i])
-              if (arrMap[i][j].constructor == top.frames[3].Array)
+              if (arrMap[i][j].constructor == top.combats_plugins_manager.getMainFrame().Array)
                 arrMap[i][j] = arrMap[i][j][0];
           this.position = this.getMapPosition(Map, arrMap);
           if (this.position) {
@@ -871,7 +871,7 @@
       if (this.mapPanel)
         this.mapPanel.oWindow.Hide();
       if (permanent) {
-        var input = top.frames[3].document.all['showMap'];
+        var input = top.combats_plugins_manager.getMainFrame().document.all['showMap'];
         if (input) {
           input.checked = false;
           this.setCurrentSettings();
@@ -1048,7 +1048,7 @@
     
     "checkDirection": function(d) {
       // this.addLog('check direction');
-      var match = top.frames[3].document.body.innerHTML.match(/>смотрим на (север|юг|запад|восток)<\//i);
+      var match = top.combats_plugins_manager.getMainFrame().document.body.innerHTML.match(/>смотрим на (север|юг|запад|восток)<\//i);
       if (match) {
         // this.addLog('direction found');
         var direction = {'север':1,'восток':3,'юг':5,'запад':7}[match[1]];
@@ -1066,12 +1066,12 @@
 
           this.StartStepTimer(function(){
             // this.addLog('rotate');
-            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path='+turn_id;
+            top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd='+Math.random()+'&path='+turn_id;
           },0.1);
         } else {
           this.addSys('Нельзя шагать: это кому-то мешает');
           this.StartStepTimer(function(){
-            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+            top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd='+Math.random();
           }, 2);
         }
         return false;
@@ -1079,7 +1079,7 @@
     },
 
     "stopAll": function(position) {
-      position = position || (top.frames[3].arrMap ? this.getMapPosition(this.Map, top.frames[3].arrMap) : null);
+      position = position || (top.combats_plugins_manager.getMainFrame().arrMap ? this.getMapPosition(this.Map, top.combats_plugins_manager.getMainFrame().arrMap) : null);
       this.stop_it();
       this.oneStepMode = false;
       this.nextPosition = null;
@@ -1090,16 +1090,16 @@
 
     "checkEnemy": function() {
       try {
-        if (!top.frames[3].arrLayers[1] || !top.frames[3].arrLayers[1][0])
+        if (!top.combats_plugins_manager.getMainFrame().arrLayers[1] || !top.combats_plugins_manager.getMainFrame().arrLayers[1][0])
           return true;
-        var units = top.frames[3].arrLayers[1][0].l.arrUnits;
+        var units = top.combats_plugins_manager.getMainFrame().arrLayers[1][0].l.arrUnits;
         for(var i in units) {
           // если есть хотя бы один противник, ждём 10 секунд и обновляем
           if (!units[i].maxHP) {
             // this.addLog('enemy');
             combats_plugins_manager.fireEvent('dungeon_walk.enemy', {units:units});
             this.StartStepTimer(function(){
-              top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+              top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd='+Math.random();
             }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
             return false;
           }
@@ -1118,14 +1118,14 @@
 
     "doStep": function() {
       // this.addLog('doStep');
-      var mtime = top.frames[3].mtime*(1-(top.frames[3].progressAt/top.frames[3].progressEnd));
+      var mtime = top.combats_plugins_manager.getMainFrame().mtime*(1-(top.combats_plugins_manager.getMainFrame().progressAt/top.combats_plugins_manager.getMainFrame().progressEnd));
       if (this.forcedStepTime && mtime>this.forcedStepTime)
         mtime = this.forcedStepTime;
       if (this.checkEnemy()) {
         if (top.tkHP<this.minSafeHP) {
           this.addSys('Нельзя шагать: низкий уровень HP');
           this.StartStepTimer(function(){
-            top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+            top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd='+Math.random();
           }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
         } else {
           var stepObj = { enable: true };
@@ -1137,12 +1137,12 @@
               } catch(e) {
               }
               // this.addLog('step forward');
-              top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random()+'&path=m1';
+              top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd='+Math.random()+'&path=m1';
             },mtime+0.1);
           } else {
             this.addSys('Нельзя шагать: это кому-то мешает');
             this.StartStepTimer(function(){
-              top.frames[3].location=top.frames[3].location.pathname+'?rnd='+Math.random();
+              top.combats_plugins_manager.getMainFrame().location=top.combats_plugins_manager.getMainFrame().location.pathname+'?rnd='+Math.random();
             }, this.randomWaitTimeMin+Math.random()*this.randomWaitTimeMax);
           }
         }
@@ -1154,10 +1154,10 @@
       var floor = this.getCurrentFloor();
       var Map = this.Map ? this.Map[floor] : null;
       if (Map) {
-        var arrMap = top.frames[3].arrMap;
+        var arrMap = top.combats_plugins_manager.getMainFrame().arrMap;
         for (var i in arrMap)
           for (var j in arrMap[i])
-            if (arrMap[i][j].constructor == top.frames[3].Array)
+            if (arrMap[i][j].constructor == top.combats_plugins_manager.getMainFrame().Array)
               arrMap[i][j] = arrMap[i][j][0];
         this.position = this.getMapPosition(Map, arrMap);
         if (this.position) 

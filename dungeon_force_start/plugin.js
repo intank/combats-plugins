@@ -20,8 +20,8 @@
       if (loc.pathname!='/dungeon.pl')
         return false;
       return (loc.search.match(/[\?&]start=/))
-        && ('REQUEST' in top.frames[3].document.forms) 
-        && ('start' in top.frames[3].document.forms['REQUEST']);
+        && ('REQUEST' in top.combats_plugins_manager.getMainFrame().document.forms) 
+        && ('start' in top.combats_plugins_manager.getMainFrame().document.forms['REQUEST']);
     },
     onloadHandler: function() {
       try {

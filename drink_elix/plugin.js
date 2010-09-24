@@ -557,7 +557,7 @@
         if (match) {
           this.addChat(match[1]);
         }
-        top.frames[3].location = '/main.pl?'+Math.random();
+        top.combats_plugins_manager.getMainFrame().location = '/main.pl?'+Math.random();
       }
     },
     drinkHPElixTimeoutHandler: function() {
@@ -613,13 +613,13 @@
         this.drinkElix();
     },
     checkBlockDrink: function(eventObj) {
-      if (!(top.frames[3].document.readyState=="complete" ||
-            top.frames[3].document.readyState=="interactive" ||
-            top.frames[3].document.readyState=="loaded")
+      if (!(top.combats_plugins_manager.getMainFrame().document.readyState=="complete" ||
+            top.combats_plugins_manager.getMainFrame().document.readyState=="interactive" ||
+            top.combats_plugins_manager.getMainFrame().document.readyState=="loaded")
           || this.blockingTimer)
       {
         if (this.debugging)
-          this.addChat(top.frames[3].document.readyState+','+this.lastLoadTime)
+          this.addChat(top.combats_plugins_manager.getMainFrame().document.readyState+','+this.lastLoadTime)
         eventObj.enable = false;
       }
     },
@@ -632,14 +632,14 @@
         100);
       if (!this.autoDrinkHP)
         return;
-      var inBattle = (top.frames[3].location.pathname.match(/^\/battle\d*\.pl/)!=null);
+      var inBattle = (top.combats_plugins_manager.getMainFrame().location.pathname.match(/^\/battle\d*\.pl/)!=null);
       
       try {
-        if ((!this.dungeonOnly || top.frames[3].location.pathname.match(/^\/dungeon\d*\.pl/)) 
-            && this.checkHP(top.frames[3].document.documentElement.innerHTML))
+        if ((!this.dungeonOnly || top.combats_plugins_manager.getMainFrame().location.pathname.match(/^\/dungeon\d*\.pl/)) 
+            && this.checkHP(top.combats_plugins_manager.getMainFrame().document.documentElement.innerHTML))
         {
           if (this.wasInBattle) {
-            setTimeout(function(){top.frames[3].location = '/main.pl?'+Math.random();},10);
+            setTimeout(function(){top.combats_plugins_manager.getMainFrame().location = '/main.pl?'+Math.random();},10);
 //            this.drinkTime = new Date(new Date().valueOf()-3000);
           } else {
             this.drinkElix();
