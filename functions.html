@@ -1,4 +1,7 @@
 <script language="JavaScript">
+// Внимание! Пользователь использует "Менеджер плагинов" на свой страх и риск.
+// Разработчик(и) "Менеджера плагинов" не несут никакой ответственности за
+// санкции, которые могут быть применены к персонажу администрацией проекта "Бойцовский Клуб".
 try {
 if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.com\/buttons\.pl\?battle=/)==0){
   if ("combats_plugins_manager" in this) {
@@ -64,7 +67,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           this.logsTab.Show();
       },
       getVersion: function() {
-        return '1.7';
+        return '1.8';
       },
       createChatTab: function(name, title) {
         var oTab = top.Chat.Self.oTab.arrTabs[name] = top.Chat.Self.oTab.AddTab(name, title);
@@ -339,6 +342,15 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 	script.type = 'text/javascript';
 	script.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js';
 	document.getElementsByTagName("head")[0].appendChild(script);
+
+	(function(){
+	  if(('$' in top) && ('jQuery' in top) && (top.$==top.jQuery)) {
+            setTimeout(combats_plugins_manager.get_binded_method(
+              combats_plugins_manager,combats_plugins_manager.Init),1500);
+	    return;
+	  }
+	  setTimeout(arguments.callee, 100);
+	})();
       },
       Init: function() {
         var sleep = 0;
@@ -425,7 +437,6 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         this.hideLogsTab = this.config.loadIni('hideLogsTab','false')=='true';
         this.fullWidth = this.config.loadIni('fullWidth','false')=='true';
 
-        setTimeout(this.get_binded_method(this,this.Init),1500);
         return this;
       }
     }.startInitialization();

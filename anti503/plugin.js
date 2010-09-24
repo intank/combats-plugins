@@ -14,7 +14,8 @@
     toString: function() {
       return "Автоматическое обновление 503";
     },
-    
+
+/*
     getProperties: function() {
       return [
         { name:"Время задержки до обновления", value: this.timeOut }
@@ -24,7 +25,7 @@
     setProperties: function(a) {
       this.timeOut=parseInt(a[0].value);
     },
-
+*/
     onUnload: function() {
       top.clearTimeout(this.timer);
       this.timer = null;
@@ -45,7 +46,15 @@
             top.combats_plugins_manager.addLog((new Date()).toLocaleTimeString()+'Отказ сервера.');
             this.stateError = true;
           }
-          this.timer = top.setTimeout(this.refresh,1000*this.timeOut);
+          $('body', d).prepend(
+            $('<button>Обновить</button>', d)
+              .css('width','100%')
+              .click(function(){
+                var l = top.combats_plugins_manager.getMainFrame().location;
+                top.combats_plugins_manager.getMainFrame().location = l.protocol+"//"+l.host+l.pathname;
+              })
+          );
+//          this.timer = top.setTimeout(this.refresh,1000*this.timeOut);
           d.parentWindow.attachEvent(
             "onbeforeunload", 
             combats_plugins_manager.get_binded_method(this,this.onUnload)
