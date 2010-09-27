@@ -345,12 +345,11 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 
 	(function(){
 	  if(('$' in top) && ('jQuery' in top) && (top.$==top.jQuery)) {
-            setTimeout(combats_plugins_manager.get_binded_method(
-              combats_plugins_manager,combats_plugins_manager.Init),1500);
+            setTimeout(this.get_binded_method(this, this.Init),0);
 	    return;
 	  }
-	  setTimeout(arguments.callee, 100);
-	})();
+          setTimeout(this.get_binded_method(this, arguments.callee),100);
+	}).apply(this);
       },
       Init: function() {
         var sleep = 0;
@@ -383,7 +382,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           this.logsTab.Show();
         this.lastConfiguredPlugin = -1;
         this.security_id = %max_security_id;
-        this.base_folder = external.m2_plugin_folder( this.security_id, "Combats.RU" );
+        this.base_folder = external.m2_plugin_folder( this.security_id, 'Combats.RU' );
 
         var d = (new Date()).toLocaleTimeString();
         var s;
@@ -431,12 +430,11 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         }
       },
       startInitialization: function() {
-	this.InitJQuery();
         this.config = this.createConfigurationElement('.');
         this.silent = this.config.loadIni('silent','true')!='false';
         this.hideLogsTab = this.config.loadIni('hideLogsTab','false')=='true';
         this.fullWidth = this.config.loadIni('fullWidth','false')=='true';
-
+	this.InitJQuery();
         return this;
       }
     }.startInitialization();
