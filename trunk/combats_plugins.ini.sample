@@ -75,3 +75,5 @@ firework=true
 battle_bloodring=false
 red_hitpoints=false
 view_current=true
+exchange_filter=true
+highlight_best_rune=true
