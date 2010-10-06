@@ -2,6 +2,8 @@
 // Внимание! Пользователь использует "Менеджер плагинов" на свой страх и риск.
 // Разработчик(и) "Менеджера плагинов" не несут никакой ответственности за
 // санкции, которые могут быть применены к персонажу администрацией проекта "Бойцовский Клуб".
+(function() {
+try {location.href;} catch(e) {return;}
 try {
 if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.com\/buttons\.pl\?battle=/)==0){
   if ("combats_plugins_manager" in this) {
@@ -344,7 +346,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
 	document.getElementsByTagName("head")[0].appendChild(script);
 
 	(function(){
-	  if(('$' in top) && ('jQuery' in top) && (top.$==top.jQuery)) {
+	  if(('$' in top) && ('jQuery' in top) && (top.$==top.jQuery) && top.Window && top.Chat) {
             setTimeout(this.get_binded_method(this, this.Init),0);
 	    return;
 	  }
@@ -441,6 +443,11 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
   }
 }
 } catch (e) {
-  alert(e.message);
+  var s = 'Exception:';
+  for(var i in e) {
+    s+='\n'+i+': '+e[i];
+  }
+  alert(s);
 }
+})();
 </script>
