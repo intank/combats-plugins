@@ -25,14 +25,14 @@
           var now = parseInt((new Date()).getTime()/60000);
           cnt=0;
           for(var i=0;i<images.length;i++) {
-            if(images[i].src.search(/http\:\/\/img\.combats\.(?:com|ru)\/i\/misc\/icons\/(icon_pot_base_|spell_|wis_)/)!=0)
+            if(images[i].src.search(/http\:\/\/img\.combats\.(?:com|ru)\/i\/misc\/icons\/(icon_pot_base_|spell_|wis_|standart_curse|ny_|plain_1s_)/)!=0)
               continue;
             var onmouseover = images[i].onmouseover;
             if (onmouseover==null)
               onmouseover = images[i].parentNode.onmouseover;
             if (onmouseover==null)
               continue;
-            hint=onmouseover.toString().match(/fastshow\(\".*?<B>(.*?)<.*?Осталось\:\s*([^<]*).*\",\d+\)/);
+            hint=onmouseover.toString().match(/fastshow\(\".*?<B>(?:<U>|)(.*?)(?:<\/U>|)<.*?Осталось\:\s*([^<]*).*\",\d+\)/);
             if (hint==null)
               continue;
             cnt=1;
