@@ -1,4 +1,4 @@
-#summary Как установить Менеджер плагинов в Maxthon 1.xx
+#summary Как установить Менеджер плагинов в Maxthon 2.xx
 #labels Featured,Phase-Deploy
 #sidebar MainNavigation
 
