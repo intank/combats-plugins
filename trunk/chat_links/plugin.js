@@ -14,7 +14,7 @@
         if (match) {
           result += match[1];
           mess = mess.slice(match.lastIndex);
-          if (match[1].length<30 && match[2]!='.') {
+          if (match[1].replace(/&(nbsp|amp|lt|gt|quot|bull|mdash|ndash|#x[\da-fA-F]{1,4}|#\d{1,5});/g,' ').length<30 && match[2]!='.') {
             mess = match[3]+mess;
             break;
           }
@@ -23,7 +23,7 @@
         }
       }
       if (/http\:\/\/[^\/]*combats.(com|ru)($|\/)/i.test(result)) {
-        eventObj.mess = first+'<a href="'+result+'" target=_blank>'+result+'</a>'+mess;
+        eventObj.mess = first+'<a href="'+result+'" target="_blank">'+result+'</a>'+mess;
       } else {
         eventObj.mess = first+'<span oncontextmenu="window.event.cancelBubble=true" onclick="window.event.cancelBubble=true">'+result+'</span> (:dont: ссылка вне зоны БК)'+mess;
       }
