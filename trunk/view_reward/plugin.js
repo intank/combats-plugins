@@ -11,7 +11,7 @@
     },
     getProperties: function() {
       return [
-        { name:"Что мы имеем?", value: decodeURIComponent(this.load('state', '')), type: 'textarea' }
+        { name:"Что мы имеем?", value: decodeURIComponent(this.load('state', '')), type: 'textarea', readonly:true }
       ];
     },
     onloadHandler: function(eventObj) {
