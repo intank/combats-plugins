@@ -27,7 +27,7 @@
         }
       }
       return [
-        { name:''/*"Уведомления"*/, value: notifications, type: 'textarea' }
+        { name:''/*"Уведомления"*/, value: notifications, type: 'textarea', readonly:true }
       ];
     },
     load_notifications: function() {

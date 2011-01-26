@@ -3,7 +3,7 @@
 <title>Настройки плагинов Combats.RU</title>
 </head>
 <body>
-<input type="checkbox" onclick="switchUnconfigurable()" CHECKED>&nbsp;Скрыть ненастраиваемые плагины<br/>
+<div><input type="checkbox" onclick="switchUnconfigurable()" id="chkHideNonconfigurable" CHECKED><label for="chkHideNonconfigurable" style="cursor:pointer">Скрыть ненастраиваемые плагины</label></div>
 <div style="border:2px solid red; padding:3px"><strong>Внимание!</strong> Пользователь использует "Менеджер плагинов" на свой страх и риск. Разработчик(и) "Менеджера плагинов" не несут никакой ответственности за санкции, которые могут быть применены к персонажу администрацией проекта "Бойцовский Клуб".<br/><button onclick="this.parentNode.style.display='none';">Скрыть</button></div>
 <select id="index" onchange="getPluginGfg()"></select>
 <div id="props"></div>
@@ -133,11 +133,11 @@ function getPluginGfg() {
           if ('style' in property)
             style = property.style.replace(/"/g,'&quot;');
           if (typeof(property.value)=="boolean") {
-            s += '<tr><td colspan="2"><input type=checkbox style="'+style+'"'+(property.value?' CHECKED':'')+' id="prop_'+i+'"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL>';
+            s += '<tr><td colspan="2"><input type=checkbox style="'+style+'"'+(property.value?' CHECKED':'')+' id="prop_'+i+'"'+(property.readonly?' READONLY':'')+'><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL>';
           } else if (typeof(property.value)=="object") {
             if ('length' in property.value) {
               s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL>';
-              s += '<td><select id="prop_'+i+'">\n';
+              s += '<td><select id="prop_'+i+'"'+(property.readonly?' READONLY':'')+'>\n';
               for (var j=0; j<property.value.length; j++) {
                 if (j in property.value)
                   s += '<option value="'+j+'"'+(j==property.value.selected?' SELECTED':'')+'>'+property.value[j]+'</option>\n';
@@ -146,7 +146,7 @@ function getPluginGfg() {
             } else {
               s += '<tr><td colspan="2"><DIV style="border: 1px solid black;">';
               for (var j in property.value) {
-                s += '<DIV><input type="checkbox" id="prop_'+i+'.'+j+'"'+(property.value[j]?' CHECKED':'')+'> <LABEL FOR="prop_'+i+'.'+j+'" style="cursor:pointer">'+j+'</LABEL></DIV>';
+                s += '<DIV><input type="checkbox" id="prop_'+i+'.'+j+'"'+(property.value[j]?' CHECKED':'')+(property.readonly?' READONLY':'')+'/> <LABEL FOR="prop_'+i+'.'+j+'" style="cursor:pointer">'+j+'</LABEL></DIV>';
               }
               s += '</DIV>';
             }
@@ -156,7 +156,7 @@ function getPluginGfg() {
                 if (property.type=="textarea") {
                   style = 'width:100%; height:7em; '+style;
                   s += '<tr><td colspan="2"><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL><br/>';
-                  s += '<textarea style="'+style+'" id="prop_'+i+'">'+property.value+"</textarea>";
+                  s += '<textarea style="'+style+'" id="prop_'+i+'"'+(property.readonly?' READONLY':'')+'>'+property.value+"</textarea>";
                 } else
                   throw new Error();
               } else
@@ -165,7 +165,7 @@ function getPluginGfg() {
               if (typeof(property.value)=="string")
                 style = "width:100%; "+style;
               s += '<tr><td><LABEL FOR="prop_'+i+'" style="cursor:pointer">'+property.name+'</LABEL>';
-              s += '<td><input type=text style="'+style+'" value="'+property.value.toString().replace(/"/g,'&quot;')+'" id="prop_'+i+'">';
+              s += '<td><input type=text style="'+style+'" value="'+property.value.toString().replace(/"/g,'&quot;')+'" id="prop_'+i+'"'+(property.readonly?' READONLY':'')+'/>';
             }
           }
         }

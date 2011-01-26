@@ -114,7 +114,7 @@
         handlers.push(this.realKeyName(this.hotKeys[i])+(this.hotKeys[i].description?': '+this.hotKeys[i].description:''));
       }
       return [
-        { name:'Зарегистрированные коды:', value:handlers.join('\n'), type:'textarea' }
+        { name:'Зарегистрированные коды:', value:handlers.join('\n'), type:'textarea', readonly:true }
       ];
     },
     realKeyName: function(parsed) {
