@@ -7,6 +7,11 @@ try {location.href;} catch(e) {return;}
 try {
 if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.com\/buttons\.pl\?battle=/)==0){
   if ("combats_plugins_manager" in this) {
+    if (combats_plugins_manager.time) {
+      if (new Date().valueOf()-combats_plugins_manager.time < 500)
+        return;
+      delete combats_plugins_manager.time;
+    }
     if ('lastConfiguredPlugin' in combats_plugins_manager)
       combats_plugins_manager.Configure();
   } else {
@@ -158,6 +163,9 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         oPanel.oWindow.SetStyle('Neitral');
         oPanel.oWindow.Align( "1/2", "1/2" );
         return oPanel;
+      },
+      clickHandler: function() {
+        this.time = new Date().valueOf();
       },
       "Configure": function() {
         var oConfig;
@@ -385,6 +393,8 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
         this.lastConfiguredPlugin = -1;
         this.security_id = %max_security_id;
         this.base_folder = external.m2_plugin_folder( this.security_id, 'Combats.RU' );
+
+        top.document.onclick = this.get_binded_method(this,this.clickHandler);
 
         var d = (new Date()).toLocaleTimeString();
         var s;
