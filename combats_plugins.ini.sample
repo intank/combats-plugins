@@ -78,3 +78,4 @@ view_current=true
 exchange_filter=true
 highlight_best_rune=true
 countdown=true
+battle_layout_fix=true
