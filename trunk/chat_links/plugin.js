@@ -10,10 +10,11 @@
       var result = '';
       mess = mess.slice(i);
       while (mess) {
-        var match = mess.match(/^([^<]+?(\.?))([\s<])/);
+        var match = mess.match(/^([^<]*?(\.?))([\s<])/);
         if (match) {
           result += match[1];
           mess = mess.slice(match.lastIndex);
+debugger;
           if (match[1].length<30 && match[2]!='.') {
             mess = match[3]+mess;
             break;
