@@ -19,19 +19,27 @@
         { name:'Использовать недоступные приёмы', value:this.ignoreDisabledMethod }
       ];
     },
-    setProperties: function(a) {
+    parseTricksSettings: function(text) {
+      var lines = text.split(/[\n\r]+/);
       var shortcuts = {};
-      var lines = a[0].value.split(/[\n\r]+/);
       for(var i=0;i<lines.length;i++) {
         var match=lines[i].match(/^\s*(\d+)\s*\:\s*(.+?)\s*$/);
         if (match) {
           shortcuts[match[1].charCodeAt(0)] = match[2];
         }
       }
-      this.shortcuts = shortcuts;
+      return shortcuts;
+    },
+    setProperties: function(a) {
+      this.shortcuts = this.parseTricksSettings(a[0].value);
       this.ignoreDisabledMethod = a[1].value;
+      this.configurator.saveIni('tricks', encodeURIComponent(a[0].value));
+      this.configurator.saveIni('ignoreDisabledMethod', this.ignoreDisabledMethod.toString());
     },
     init: function() {
+      this.configurator = combats_plugins_manager.createConfigurationElement('battle_fast_tricks');
+      this.shortcuts = this.parseTricksSettings(decodeURIComponent(this.configurator.loadIni('tricks', '')));
+      this.ignoreDisabledMethod = this.configurator.loadIni('ignoreDisabledMethod', '')=='true';
       top.document.onkeydown = top.combats_plugins_manager.get_binded_method(this,this.keydown);
       return this;
     },
@@ -44,6 +52,8 @@
       if (this['debug'])
         alert(e.keyCode in this.shortcuts);
       if (e.keyCode in this.shortcuts) {
+        e.cancelBubble = true;
+        e.returnValue = false;
         if (this['debug'])
           alert(this.shortcuts[e.keyCode]);
         this.method = top.Battle.oBattle.arrMethods[this.shortcuts[e.keyCode]];
