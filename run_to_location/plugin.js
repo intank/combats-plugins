@@ -132,34 +132,59 @@
       }
 
       if (this.step_node) {
-        if (this.prev_location == this.current_location) {
-          if (++this.click_attempt>this.attempts_limit) {
-            combats_plugins_manager.detachEvent('mainframe.load',
-              this.mainframeHandler);
-            combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>');
-            this.new_location = '';
+        if (this.runAutomatically) {
+          if (this.prev_location == this.current_location) {
+            if (++this.click_attempt>this.attempts_limit) {
+              combats_plugins_manager.detachEvent('mainframe.load',
+                this.mainframeHandler);
+              combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>');
+              this.new_location = '';
+              return;
+            }
+          } else {
+            this.click_attempt = 0;
+            this.prev_location = this.current_location;
+          }
+          var eventObj = { enable:true };
+          combats_plugins_manager.fireEvent('location_step', eventObj);
+          if (!eventObj.enable) {
+            if (this.timer)
+              clearTimeout(this.timer);
+            this.timer = setTimeout(
+              combats_plugins_manager.get_binded_method(this, this.search_step_node, location),
+              500);
             return;
           }
+          this.step_attempt = 0;
+          this.step_node.click();
+          if ('chat_sender' in combats_plugins_manager.plugins_list) {
+            setTimeout(
+              function() { combats_plugins_manager.plugins_list.chat_sender.refreshChat(); },
+              1500);
+          }
         } else {
+          this.step_attempt = 0;
           this.click_attempt = 0;
-          this.prev_location = this.current_location;
-        }
-        var eventObj = { enable:true };
-        combats_plugins_manager.fireEvent('location_step', eventObj);
-        if (!eventObj.enable) {
-          if (this.timer)
-            clearTimeout(this.timer);
-          this.timer = setTimeout(
-            combats_plugins_manager.get_binded_method(this, this.search_step_node, location),
-            500);
-          return;
-        }
-        this.step_attempt = 0;
-        this.step_node.click();
-        if ('chat_sender' in combats_plugins_manager.plugins_list) {
-          setTimeout(
-            function() { combats_plugins_manager.plugins_list.chat_sender.refreshChat(); },
-            1500);
+          if (this.step_node.filters['Glow']) {
+            var glow = this.step_node.filters['Glow'];
+            glow.enabled=1;
+            glow.color='#FF4040';
+            glow.strength=5
+          } else {
+            this.step_node.style.color = '#FF4040';
+          }
+
+          if (location==this.new_location) {
+            combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Вроде, дошли</i>');
+            this.step_node.attachEvent('onclick',
+              combats_plugins_manager.get_binded_method(this, function() {
+                combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Точно, дошли</i>');
+                combats_plugins_manager.detachEvent('mainframe.load',
+                  this.mainframeHandler);
+                this.new_location = '';
+              })
+            );
+          }
         }
       } else {
         if (++this.step_attempt>this.attempts_limit) {
@@ -192,7 +217,7 @@
       this.can_step = false;
       try {
         this.step = 0;
-        this.analyze_step(this.step+1, this.current_location);
+//        this.analyze_step(this.step+1, this.current_location);
         if (!this.can_step) {
           this.analyze_step(this.step+1, this.current_location, this.getAvailableSteps());
         }
