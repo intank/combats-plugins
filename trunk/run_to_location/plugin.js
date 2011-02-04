@@ -168,7 +168,10 @@
           if (this.step_node.filters['Glow']) {
             var glow = this.step_node.filters['Glow'];
             glow.enabled=1;
-            glow.color='#FF4040';
+            glow.color = glow.color ? glow.color.replace(/#(..)(....)/,function(c,a,b){
+              var newColor='#'+(Math.max(0x10,(parseInt('0x'+a) ^ 0x80)).toString(16))+b;
+              return newColor;
+            }) : '#FF4040';
             glow.strength=5
           } else {
             this.step_node.style.color = '#FF4040';
@@ -302,10 +305,17 @@
         this.saveFavorites();
         return;
       }
-      if (element.nodeName!='TD') return;
+      if (element.nodeName!='TD')element=element.parentNode;
+      if (element.nodeName!='TD')return;
 
       if (element.attributes['run_to_location_all']) {
         this.showAllLocationsWindow();
+      } else if (element.attributes['stop_run_to_location']) {
+        if (this.new_location) {
+          combats_plugins_manager.detachEvent('mainframe.load',
+            this.mainframeHandler);
+          this.new_location = '';
+        }
       } else {
         if (this.locationsWindow)
           this.locationsWindow.oWindow.Hide();
@@ -323,6 +333,9 @@
       }
       this.menu = top.document.createElement('div');
       var s = '';
+      if (this.new_location) {
+        s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; vertical-align: middle" stop_run_to_location="1">Бежим в: <span style="font-weight: bold; ">'+this.new_location+'</span></td></tr>';
+      }
       for(var i=0; i<this.favorites.length; i++) {
         s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.favorites[i]+'</td></tr>';
       }
@@ -407,7 +420,7 @@
 
     Init: function() {
       this.city = top.location.host.replace(/\..*$/,'');
-      top.combats_plugins_manager.plugins_list['top_tray'].addButton({
+      this.button = top.combats_plugins_manager.plugins_list['top_tray'].addButton({
         'button': {
           'style': {
             'width': "32px",
