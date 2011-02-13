@@ -37,7 +37,10 @@
         var selectorText = styleSheet.rules[i].selectorText;
         if (selectorText.match(/^(SPAN|\.date2?|DIV\.Chat|DIV\.Chat .+)$/)) {
           styleSheet.rules[i].style.fontSize=this.fontSize+"pt";
-        }
+        } else if (selectorText.match(/.UserBattleError/)) {
+          styleSheet.rules[i].style.height="auto";
+          styleSheet.rules[i].style.minHeight=this.fontSize+"pt";
+	}
       }
       for(var i=0; i<styleSheet.imports.length; i++) {
         this.processStyleSheet(styleSheet.imports[i]);
