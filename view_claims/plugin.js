@@ -14,7 +14,7 @@
           if (match) {
             level = match[1];
           }
-          var iframe = doc.createElement('<iframe src="http://www.darklaw.ru/claims.php?mini_view=1#city='+doc.location.host.replace(/(?:city)?\..*$/,'')+',level='+level+'" style="width:100%; height:500px; border:0;">')
+          var iframe = doc.createElement('<iframe src="http://www.darklaw.ru/claims.php?mini_view=1#city='+doc.location.host.replace(/(?:city)?\..*$/,'')+',level='+level+'" style="width:100%; height:500px; border:0;" border="0">')
           doc.forms['F1'].insertBefore(iframe, null);
         }
       }
