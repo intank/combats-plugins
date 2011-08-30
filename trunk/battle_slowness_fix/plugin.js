@@ -12,6 +12,26 @@
 		0 && combats_plugins_manager.add_sys(s);
 	},
 
+	toString: function() {
+		return 'Устранение подтормаживания боя';
+	},
+
+    getProperties: function() {
+      return [
+        { name: "Максимальный размер блока строк", value: this.blockSize },
+        { name: "Интервал добавления блоков строк (мс)", value: this.blockInterval }
+      ];
+    },
+    setProperties: function(a) {
+		this.blockSize = Math.max(1,parseFloat(a[0].value)||0);
+		this.blockInterval = Math.max(0,parseFloat(a[1].value)||0);
+		this.saveConfig();
+    },
+	saveConfig: function() {
+        this.config.saveIni('blockSize', this.blockSize.toString());
+        this.config.saveIni('blockInterval', this.blockInterval.toString());
+	},
+    
 	WaitForBattleQueryInit: function(initialize) {
 		this.log('WaitForBattleQueryInit');
 		if (typeof(top.Battle.oBattle)!='object') {
@@ -63,6 +83,10 @@
 	},
 
 	Init: function() {
+		this.config = combats_plugins_manager.createConfigurationElement('battle_slowness_fix');
+		this.blockSize = Math.max(1,parseFloat(this.config.loadIni('blockSize', '20'))||20);
+		this.blockInterval = Math.max(0,parseFloat(this.config.loadIni('blockInterval', '20'))||20);
+
 		this.WaitForBattleQueryInit(function(){
 			this.log('replace the top.Battle.Init');
 			this.originalBattleInit = top.Battle.Init;
