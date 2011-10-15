@@ -13,6 +13,7 @@
 	defaultDungeonName: '',
     excludedItems: {},
     alwaysItems: {},
+    locationCache: {},
 
     "bots": {
       '0/1209_qplghuk': {
@@ -163,6 +164,48 @@
         style: { backgroundColor: '#EF00EF' }
       },
       '0/1043_ro9557495117': {
+      },
+      '0/1332_xdjeqeq': {
+	style: { backgroundColor: '#EFEF00', border: '1px solid green' }
+      },
+      '0/1331_onesixl': {
+	style: { backgroundColor: '#EFEF00', border: '1px solid green' }
+      },
+      '1/1031_vilgeua': {
+	style: { backgroundColor: '#EFEF00', border: '1px solid green' }
+      },
+      '1/1037_hlgfmet': {
+	style: { backgroundColor: '#EFEF00', border: '1px solid green' }
+      },
+      '0/1392_arimesy': {
+	style: { backgroundColor: '#EFEF00', border: '1px solid green' }
+      },
+      '0/1391_iosywjw': {
+	style: { backgroundColor: '#EFEF00', border: '1px solid green' }
+      },
+      '0/1318_eghlgaj': {// муравир
+        priority: 3, 
+	style: { backgroundColor: '#EFEF00', border: '2px solid green' }
+      },
+      '1/1030_jjzopmm': {// эшшли
+        priority: 3, 
+	style: { backgroundColor: '#EFEF00', border: '2px solid green' }
+      },
+      '0/1316_mcfusag': {// ярувагр
+        priority: 3, 
+	style: { backgroundColor: '#EFEF00', border: '2px solid green' }
+      },
+      '0/1319_scdezcp': {// хтоновар
+        priority: 3, 
+	style: { backgroundColor: '#EFEF00', border: '2px solid green' }
+      },
+      '0/1317_fosdylr': {// лавизар
+        priority: 3, 
+	style: { backgroundColor: '#EFEF00', border: '2px solid green' }
+      },
+      '0/1308_nquvkme': {// гыгыбря
+        priority: 3, 
+	style: { backgroundColor: '#EFEF00', border: '2px solid green' }
       }
     },
     "load": function(key,def_val){
@@ -576,6 +619,7 @@
 	    }
 	
 
+if (0) {
 	tables[0].rows(1).cells(0).innerHTML += '<table><tr><td><table>\
 <tr><td><td><img id="i1" src="http://img.combats.com/i/move/navigatin_52.gif" style="cursor:pointer"><td>\
 <tr><td><img id="i7" src="http://img.combats.com/i/move/navigatin_59.gif" style="cursor:pointer" onclick="this.setDirection(7)"><td id="td_stop" style="background-color:black;"><td><img id="i3" src="http://img.combats.com/i/move/navigatin_62.gif" style="cursor:pointer" onclick="this.setDirection(3)">\
@@ -587,7 +631,7 @@
 <input type="checkbox" id="autoAttack" onclick="this.autoAttack=this.checked;"'+(this.autoAttack?' CHECKED':'')+'>&nbsp;Автонападение<br>\
 <input type="checkbox" id="showMap" onclick="this.showMap=this.checked;"'+(this.showMap?' CHECKED':'') /*+' DISABLED=1'*/ +'>&nbsp;Показать карту<br>\
 </table>';
-
+}
 	maxT=1800/top.speed*100;
 	T=Math.floor(maxT/top.maxHP*100);
 		
@@ -609,7 +653,8 @@
 			d.getElementsByTagName('table')[4].rows[0].cells[0].innerHTML+="<br>"+"x:"+this.Coordinates[map_i].x+" y:"+this.Coordinates[map_i].y;
 	}
 */			
-		
+
+if (0) {
         for (var i=1; i<8; i+=2)
           d.all['i'+i].onclick = top.combats_plugins_manager.get_binded_method(this,this.setDirection, i);
 
@@ -625,6 +670,7 @@
           img.src=img.src.replace(/\.gif$/,"b.gif");
         } else
           d.all("td_stop").style.backgroundColor="red";
+}
 
         this.doShowMap();
 
@@ -723,10 +769,21 @@
     "getCurrentFloor": function() {
       // this.addLog('getCurrentFloor');
       try {
-        var match = top.combats_plugins_manager.getMainFrame().document.getElementsByTagName('table')[0].cells[1].innerHTML.match(/^(.*?)(?:(Этаж\s+\d+)(?:\S*)|)(?=\s*-[^-]+?&nbsp;|&nbsp;)/);
-        return match ? (match[2] ? match[2] : match[1]) : '';
+	if (this.Map) {
+		var location = top.combats_plugins_manager.getMainFrame().document.getElementsByTagName('table')[0].cells[1].innerHTML.replace(/&nbsp;.*/,'');
+		if (this.locationCache[location])
+			return this.locationCache[location];
+		var match = location.split(/\s*-\s*/);
+		for(var i=0,l=match.length;i<l;i++){
+			if(this.Map[match.slice(0,l-i).join('-')]){
+				this.locationCache[location]=match.slice(0,l-i).join('-')
+				return this.locationCache[location];
+			}
+		}
+	}
       } catch(e) {
       }
+      return '';
     },
 
     "updateMap": function(enforce) {
@@ -789,8 +846,10 @@
       this.addLog('doShowMap');
       if (this.mapTargetMenu)
         this.mapTargetMenu.style.display = 'none';
+/*
       var b = top.combats_plugins_manager.getMainFrame().document.getElementById('showMap');
-      if (!b || b.checked) {
+*/
+      if (this.showMap/* || !b || b.checked*/) {
         this.setCurrentSettings();
         if (!this.mapPanel) {
           // this.addLog('creating panel');
@@ -801,15 +860,18 @@
           oPanel.oWindow.Insert( div );
         }
 
+	if (!this.Map) {
+          this.updateMap(true);
+	}
         var floor = this.getCurrentFloor();
         this.addLog('floor: '+floor);
-        if (!this.Map) this.addLog('no map');
         var Map = this.Map ? this.Map[floor] : null;
         var availableCells = this.availableCells ? this.availableCells[floor] : null;
         var objects = this.objects ? this.objects[floor] : null;
         if (!Map) {
           this.updateMap(true);
           if (!this.Map) this.addLog('no map');
+          floor = this.getCurrentFloor();
           Map = this.Map ? this.Map[floor] : null;
           availableCells = this.availableCells ? this.availableCells[floor] : null;
           objects = this.objects ? this.objects[floor] : null;
@@ -871,6 +933,7 @@
       if (this.mapPanel)
         this.mapPanel.oWindow.Hide();
       if (permanent) {
+        this.showMap = false;
         var input = top.combats_plugins_manager.getMainFrame().document.all['showMap'];
         if (input) {
           input.checked = false;
@@ -1207,6 +1270,39 @@
       }
     },
 
+    'createButton': function() {
+      this.button = top.combats_plugins_manager.plugins_list['top_tray'].addButton({
+        'button': {
+          'style': {
+            'width': "30px",
+            'height': "20px",
+            'padding': "2px",
+            'background': "#505050",
+            'overflow':'hidden'
+            },
+          'onclick': top.combats_plugins_manager.get_binded_method(this,function(){
+	    this.showMap = !this.showMap;
+	    this.doShowMap();
+	  })
+        },
+        'img': {
+          'style': {
+            'width': "20px",
+            'height': "20px",
+            'margin': '-2px 3px'
+            },
+          'onmouseout': function() {
+              this.src = "file:///"+combats_plugins_manager.base_folder+"walk/map.png";
+            },
+          'onmouseover': function() {
+              this.src = "file:///"+combats_plugins_manager.base_folder+"walk/map_hover.png";
+            },
+          'src': "file:///"+combats_plugins_manager.base_folder+"walk/map.png",
+          'alt': "Карта подземелья"
+        }
+      });
+    },
+
     "Init": function() {
 	this.Direction = 0;
 	this.en_click=false;
@@ -1233,6 +1329,7 @@
           'mainframe.load',
 	  top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
 	this.clearUsedObjects();
+        this.createButton();
 
 	this.forced=(this.load('forced','no')=='yes');
 	this.ignoreWall=(this.load('ignoreWall','no')=='yes');
