@@ -1,10 +1,10 @@
-(function(){
+п»ї(function(){
   return {
     attempts_limit: 5,
     pathes: null,
-    favorites: ['Общ. Этаж 2','Портал','Зал воинов 3','Филиал Аукциона'],
+    favorites: ['РћР±С‰. Р­С‚Р°Р¶ 2','РџРѕСЂС‚Р°Р»','Р—Р°Р» РІРѕРёРЅРѕРІ 3','Р¤РёР»РёР°Р» РђСѓРєС†РёРѕРЅР°'],
     toString: function() {
-      return 'Перемещение в заданную локацию';
+      return 'РџРµСЂРµРјРµС‰РµРЅРёРµ РІ Р·Р°РґР°РЅРЅСѓСЋ Р»РѕРєР°С†РёСЋ';
     },
     getProperties: function() {
       if (this.pathes) {
@@ -16,14 +16,14 @@
         locations_list.sort();
         locations_list.selected = 0;
         return [
-          { name:"Запомнить переходы локации", value:this.savePathes },
-          { name:"Экспорт переходов в файл", value:this.exportPathes },
-          { name:"Предпочитаемые локации", value:this.favorites.join('\n'), type:'textarea' }
+          { name:"Р—Р°РїРѕРјРЅРёС‚СЊ РїРµСЂРµС…РѕРґС‹ Р»РѕРєР°С†РёРё", value:this.savePathes },
+          { name:"Р­РєСЃРїРѕСЂС‚ РїРµСЂРµС…РѕРґРѕРІ РІ С„Р°Р№Р»", value:this.exportPathes },
+          { name:"РџСЂРµРґРїРѕС‡РёС‚Р°РµРјС‹Рµ Р»РѕРєР°С†РёРё", value:this.favorites.join('\n'), type:'textarea' }
         ];
       } else {
         return [
-          { name:"Запомнить переходы локации", value:this.savePathes },
-          { name:"Экспорт переходов в файл", value:this.exportPathes }
+          { name:"Р—Р°РїРѕРјРЅРёС‚СЊ РїРµСЂРµС…РѕРґС‹ Р»РѕРєР°С†РёРё", value:this.savePathes },
+          { name:"Р­РєСЃРїРѕСЂС‚ РїРµСЂРµС…РѕРґРѕРІ РІ С„Р°Р№Р»", value:this.exportPathes }
         ];
       }
     },
@@ -130,6 +130,11 @@
           }
         }
       }
+      if (!this.step_node) {
+	this.step_node = $('.aFilter',doc).filter(function(){
+	  return this.onclick && this.onclick.toString().indexOf("'"+location+"'")>=0;
+	})[0];
+      }
 
       if (this.step_node) {
         if (this.runAutomatically) {
@@ -137,7 +142,7 @@
             if (++this.click_attempt>this.attempts_limit) {
               combats_plugins_manager.detachEvent('mainframe.load',
                 this.mainframeHandler);
-              combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>');
+              combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>РќРµ СѓРґР°Р»РѕСЃСЊ РїРµСЂРµРјРµС‰РµРЅРёРµ РІ "'+this.new_location+'" Р·Р° '+this.attempts_limit+' РїРѕРїС‹С‚РѕРє</i>');
               this.new_location = '';
               return;
             }
@@ -178,10 +183,10 @@
           }
 
           if (location==this.new_location) {
-            combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Вроде, дошли</i>');
+            combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Р’СЂРѕРґРµ, РґРѕС€Р»Рё</i>');
             this.step_node.attachEvent('onclick',
               combats_plugins_manager.get_binded_method(this, function() {
-                combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Точно, дошли</i>');
+                combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>РўРѕС‡РЅРѕ, РґРѕС€Р»Рё</i>');
                 combats_plugins_manager.detachEvent('mainframe.load',
                   this.mainframeHandler);
                 this.new_location = '';
@@ -193,7 +198,7 @@
         if (++this.step_attempt>this.attempts_limit) {
           combats_plugins_manager.detachEvent('mainframe.load',
             this.mainframeHandler);
-          combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>Не удалось перемещение в "'+this.new_location+'" за '+this.attempts_limit+' попыток</i>');
+          combats_plugins_manager.add_chat('<font class=date2>'+(new Date().toLocaleTimeString())+'</font> <i>РќРµ СѓРґР°Р»РѕСЃСЊ РїРµСЂРµРјРµС‰РµРЅРёРµ РІ "'+this.new_location+'" Р·Р° '+this.attempts_limit+' РїРѕРїС‹С‚РѕРє</i>');
           this.new_location = '';
           return;
         }
@@ -258,7 +263,7 @@
     },
     showAllLocationsWindow: function() {
       if (!this.locationsWindow) {
-        this.locationsWindow = combats_plugins_manager.createWindow("Локации города", 320, 480);
+        this.locationsWindow = combats_plugins_manager.createWindow("Р›РѕРєР°С†РёРё РіРѕСЂРѕРґР°", 320, 480);
 
         var locations_count = 0;
         this.locations_list = [];
@@ -334,12 +339,12 @@
       this.menu = top.document.createElement('div');
       var s = '';
       if (this.new_location) {
-        s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; vertical-align: middle" stop_run_to_location="1">Бежим в: <span style="font-weight: bold; ">'+this.new_location+'</span></td></tr>';
+        s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; vertical-align: middle" stop_run_to_location="1">Р‘РµР¶РёРј РІ: <span style="font-weight: bold; ">'+this.new_location+'</span></td></tr>';
       }
       for(var i=0; i<this.favorites.length; i++) {
         s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle">'+this.favorites[i]+'</td></tr>';
       }
-      s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle" run_to_location_all="1">Все локации города...</td></tr>';
+      s += '<tr><td style="width:100%; height: 2em; padding:2px 10px; cursor: pointer; font-weight: bold; vertical-align: middle" run_to_location_all="1">Р’СЃРµ Р»РѕРєР°С†РёРё РіРѕСЂРѕРґР°...</td></tr>';
       this.menu.innerHTML = '<table style="border: 2px solid black; width: 100%">'+s+'</table>';
       this.menu.style.cssText = 'position: absolute; z-index: 5; left: '+(window.event.clientX-window.event.offsetX)+'px; top: '+(window.event.clientY-window.event.offsetY+30)+'px; width: 200px; height: auto; background: #C7C7C7';
       top.document.body.insertBefore(this.menu);
@@ -385,6 +390,14 @@
           }
         }
       }
+      $('.aFilter',doc).each(function(){
+        if (this.onclick) {
+          var match = this.onclick.toString().match(/solo\s*\(\s*'(.*?)'\s*,\s*'(.*?)'\s*,.*?\)/);
+          if (match && match[2]) {
+            result.push(match[2]);
+          }
+        }
+      });
       return result;
     },
     addPath: function(from, to) {
@@ -415,7 +428,7 @@
       var output = '{}';
       if (from_array.length>0)
         output = '{\n'+from_array.join(',\n')+'\n}';
-      external.writeFile(combats_plugins_manager.security_id,"Combats.RU",'run_to_location\\pathes_'+this.city+'.!.js',output);
+      this.config.saveFile("pathes_"+this.city+".js.new",output);
     },
 
     Init: function() {
@@ -448,15 +461,19 @@
               this.filters['DXImageTransform.Microsoft.BasicImage'].Enabled=0;
             },
           'src': "file:///"+combats_plugins_manager.base_folder+"run_to_location/run_to_location.gif",
-          'alt': "Бежать по городу"
+          'alt': "Р‘РµР¶Р°С‚СЊ РїРѕ РіРѕСЂРѕРґСѓ"
           }
         });
+      this.config = combats_plugins_manager.createConfigurationElement('run_to_location');
       try {
-        var filename = 'run_to_location\\pathes_'+this.city+'.js';
-        this.pathes = top.eval('(function(){ return '+external.readFile(combats_plugins_manager.security_id,"Combats.RU",filename)+'; })()');
-        var newPathes = top.eval('(function(){ return '+external.readFile(combats_plugins_manager.security_id,"Combats.RU", 'run_to_location\\pathes_'+this.city+'.!.js')+'; })()');
+        var filename = 'pathes_'+this.city+'.js';
+        var pathes = this.config.loadFile(filename);
+//        alert(pathes);
+        this.pathes = top.eval('('+pathes+')');
+        
+        var newPathes = top.eval('(function(){ return '+this.config.loadFile(filename+'.new')+'; })()');
         if (newPathes)
-          combats_plugins_manager.add_chat(':idea: Внимание! Найден (но не загружен) альтернативный файл переходов: '+'run_to_location\\pathes_'+this.city+'.!.js');
+          combats_plugins_manager.add_chat(':idea: Р’РЅРёРјР°РЅРёРµ! РќР°Р№РґРµРЅ (РЅРѕ РЅРµ Р·Р°РіСЂСѓР¶РµРЅ) Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅС‹Р№ С„Р°Р№Р» РїРµСЂРµС…РѕРґРѕРІ: "'+filename+'.new". Р§С‚РѕР±С‹ РёР·РјРµРЅРµРЅРёСЏ РІСЃС‚СѓРїРёР»Рё РІ СЃРёР»Сѓ, РїРµСЂРµРёРјРµРЅСѓР№С‚Рµ С„Р°Р№Р» РІ СЂР°Р±РѕС‡РµРµ РёРјСЏ: "'+filename+'".');
         var warn_location = [];
         for(var from in this.pathes) {
           for(var i in this.pathes[from]) {
@@ -467,12 +484,11 @@
           }
         }
         if (warn_location.length>0) {
-//          combats_plugins_manager.addLog(new Date().toLocaleString()+': Некоторые локации в '+this.city+' описаны не полностью: '+warn_location.join(', '));
+//          combats_plugins_manager.addLog(new Date().toLocaleString()+': РќРµРєРѕС‚РѕСЂС‹Рµ Р»РѕРєР°С†РёРё РІ '+this.city+' РѕРїРёСЃР°РЅС‹ РЅРµ РїРѕР»РЅРѕСЃС‚СЊСЋ: '+warn_location.join(', '));
         }
       } catch(e) {
-        combats_plugins_manager.logError(this,'Не удалось загрузить маршруты перемещения по '+this.city);
+        combats_plugins_manager.logError(this,'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РјР°СЂС€СЂСѓС‚С‹ РїРµСЂРµРјРµС‰РµРЅРёСЏ РїРѕ '+this.city);
       }
-      this.config = combats_plugins_manager.createConfigurationElement('run_to_location');
       this.favorites = this.config.loadIni('favorites.'+this.city,'').split(/\s*[;,\n\r]+\s*/);
       while(this.favorites.length && !this.favorites[0])
         this.favorites.shift();
