@@ -1,5 +1,5 @@
 (function(){
-  var actualVersion = '1.8';
+  var actualVersion = '1.9';
   var downloadsURL = 'http://code.google.com/p/combats-plugins/downloads/list';
 
   var version = combats_plugins_manager.getVersion();
