@@ -2,6 +2,7 @@
   return {
     notify_timer: null,
     notify_list: {},
+    remaining: ['','а','ы','ы','ы','','','','',''],
     toString: function() {
       return "Уведомление о приближающихся событиях";
     },
@@ -12,22 +13,31 @@
       external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","notify_handler\\settings.ini",top.getCookie('battle'),key,val);
     },
     getProperties: function() {
-      var notifications='';
+      var notifications=[];
       var now = parseInt((new Date()).getTime()/60000);
       for (var group in this.notify_list) {
 //        notifications += group+':\n';
         for (var notification in this.notify_list[group]) {
-          notifications += /*' '+*/ notification+': ';
+          var newNotification=notification+': ';
           var minutes = this.notify_list[group][notification].estimation-now;
           var hours = Math.floor(minutes/60);
           minutes %= 60;
-          if (hours)
-            notifications += hours+' ч. ';
-          notifications += minutes+' мин.\n';
+          if (hours) {
+            var days = Math.floor(hours/24);
+            hours %= 24;
+            newNotification += (days ? days+' дн. ' : '')+hours+' ч. '+minutes+' мин.';
+          } else
+            newNotification += minutes+' мин.';
+          notifications.push([newNotification,this.notify_list[group][notification].estimation]);
         }
       }
+      notificationsStr = '';
+      notifications.sort(function(a,b){return a[1]-b[1];});
+      for(var i=0;i<notifications.length;i++){
+        notificationsStr += notifications[i][0]+'\n';
+      }
       return [
-        { name:''/*"Уведомления"*/, value: notifications, type: 'textarea', readonly:true }
+        { name:''/*"Уведомления"*/, value: notificationsStr, type: 'textarea', readonly:true, style: 'height:100%;' }
       ];
     },
     load_notifications: function() {
@@ -67,6 +77,7 @@
         for(var i in this.notify_list[group]) {
           var timespan = this.notify_list[group][i].estimation-now;
           if (timespan<=0) {
+            top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - Время пришло!');
             delete this.notify_list[group][i]
             this.save_notifications();
           } else {
@@ -74,7 +85,7 @@
             case 1:
             case 5:
             case 15:
-              top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - '+timespan+' минут');
+              top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - '+timespan+' минут'+(this.remaining[timespan%10]));
             }
             cnt=1;
           }

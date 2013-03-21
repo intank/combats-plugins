@@ -22,7 +22,8 @@
       ];
     },
     doFilter: function() {
-      var itemsParent = top.frames['activeusers'].document.body.childNodes[2].childNodes[0].childNodes[0].childNodes[0].childNodes[2];
+		var activeUsersDoc = top.frames['activeusers'].document;
+      var itemsParent = activeUsersDoc.body.childNodes[2].childNodes[0].childNodes[0].childNodes[0].childNodes[2];
       var items=itemsParent.childNodes;
       var rowStart = null;
       var charOK;
@@ -32,6 +33,7 @@
       var base;
       var match;
       var i=0;
+	var removed=0;
       while(i<items.length) {
         obj = items[i];
         if (obj.nodeName=='A') { // ссылка
@@ -59,12 +61,17 @@
                 itemsParent.removeChild(items[i]);
                 i--;
               }
+		removed++;
             }
             rowStart = null;
           }
         }
         i++;
       }
+		if (removed) {
+			var room = top.$('#room',activeUsersDoc);
+			room.text(room.text().replace(/\((\d+)\)/,function(a,b){return '('+(b-removed)+'/'+b+')';}));
+		}
     },
     filterButtonShowHide: function() {
       var buttonElement = top.frames['activeusers'].document.getElementById('filter_button');

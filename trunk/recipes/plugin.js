@@ -9,12 +9,14 @@
         'background': "#505050"
         },
       'onclick': function() {
-        s=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\recipes.js")
+        var s=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\recipes.js")
+        var ss=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\data.js")
 
-        w=window.open('about:blank');
+        var w=window.open('about:blank');
         if (!w.opener)
           w.opener = top;
-        w.document.writeln('<script>var security_id="'+top.combats_plugins_manager.security_id+'";</script>');
+        w.document.writeln('<script type="text/javascript">var security_id="'+top.combats_plugins_manager.security_id+'";</sc'+'ript>');
+        w.document.writeln('<script type="text/javascript">' + ss + '</sc'+'ript>');
         w.document.writeln(s);
         
         }

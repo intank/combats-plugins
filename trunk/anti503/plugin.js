@@ -41,7 +41,7 @@
     onloadHandler: function() {
       try {
         var d=top.combats_plugins_manager.getMainFrame().document;
-        if (d.title=="[503] Service Unavailable" || d.title=="[504] Gateway Timeout" || d.title=="[502] Bad Gateway" || d.title.search('Server Error')>=0) {
+        if (d.title=="[503] Service Unavailable" || d.title=="504 Gateway Time-out" || d.title=="[504] Gateway Timeout" || d.title=="502 Bad Gateway" || d.title=="[502] Bad Gateway" || d.title.search('Server Error')>=0) {
           if (!this.stateError) {
             top.combats_plugins_manager.addLog((new Date()).toLocaleTimeString()+'Отказ сервера.');
             this.stateError = true;
