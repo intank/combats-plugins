@@ -74,7 +74,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           this.logsTab.Show();
       },
       getVersion: function() {
-        return '1.9';
+        return '1.9.1';
       },
       createChatTab: function(name, title) {
         var oTab = top.Chat.Self.oTab.arrTabs[name] = top.Chat.Self.oTab.AddTab(name, title);
@@ -174,7 +174,7 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
           document.body.appendChild(this.CfgDiv);
           this.CfgDiv.contentWindow.document.write(external.readFile( this.security_id, "Combats.RU", "cfg.html"));
 
-        oConfig = this.oConfig = this.createWindow("Настройки", (this.fullWidth?this.getMainFrame().document.body.offsetWidth:640),480);
+        oConfig = this.oConfig = this.createWindow("Настройки", (this.fullWidth?this.getMainFrame().document.body.offsetWidth:720),480);
         } else {
           oConfig = this.oConfig;
         }
@@ -338,6 +338,10 @@ if (location.href.search(/^http\:\/\/(?:\w+city|dungeon|kitezhgrad)\.combats\.co
             this.startRequest('POST', URL, data);
           }
         };
+      },
+      add_debug: function(s) {
+        var time = new Date().toLocaleTimeString();
+        this.logsTab.Frame( ).createNode( "DIV", { innerHTML: '<font class=sysdate>'+time+'</font> '+s, className: "Chat", Self: top.Chat.Self } );
       },
       add_sys: function(s) {
         var time = new Date().toLocaleTimeString();
