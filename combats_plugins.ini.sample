@@ -33,6 +33,7 @@ check_updates=true
 claims_filter=true
 digger_check=true
 dress=false
+dungeon_fix=true
 dungeon_trip_notify=true
 elix_notify=true
 exchange_filter=true
