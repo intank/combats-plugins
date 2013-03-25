@@ -70,6 +70,29 @@
       notifications = notifications.join(';');
       this.save('notifications',notifications);
     },
+    timerFirstHandler: function() {
+      var cnt=0;
+      var now = parseInt((new Date()).getTime()/60000);
+      var save_notifications = false;
+      for(var group in this.notify_list) {
+        for(var i in this.notify_list[group]) {
+          var timespan = this.notify_list[group][i].estimation-now;
+          if (timespan<=0) {
+            top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - Время пришло!');
+            delete this.notify_list[group][i]
+            save_notifications = true;
+          } else if (timespan<=1440) {
+            top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - '+timespan+' минут'+(this.remaining[timespan%10]));
+            cnt=1;
+          }
+        }
+      }
+      save_notifications && this.save_notifications();
+      if(cnt) {
+        this.notify_timer=setTimeout(top.combats_plugins_manager.get_binded_method(this,this.timerHandler),60*1000);
+      } else
+        this.notify_timer=null;
+    },
     timerHandler: function() {
       var cnt=0;
       var now = parseInt((new Date()).getTime()/60000);
@@ -111,7 +134,7 @@
     },
     Init: function() {
       this.load_notifications();
-      this.timerHandler();
+      this.timerFirstHandler();
       return this;
     }
   }.Init();

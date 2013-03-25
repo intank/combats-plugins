@@ -1,4 +1,5 @@
 (function() {
+    $ = top.$;
 	return {
 		"toString": function() {
 			return "Бродилка по пещере";
@@ -775,7 +776,7 @@ if (0) {
 			// this.addLog('getCurrentFloor');
 			try {
 				if (this.Map) {
-					var location = top.combats_plugins_manager.getMainFrame().document.getElementsByTagName('table')[0].cells[1].innerHTML.replace(/&nbsp;.*/,'');
+					var location = $($('td.H3',top.combats_plugins_manager.getMainFrame().document)[0].firstChild).text().replace(/(^[\s\xA0]+|[\s\xA0]+$)/g,'');
 					if (this.locationCache[location])
 						return this.locationCache[location];
 					var match = location.split(/\s*-\s*/);
@@ -787,6 +788,7 @@ if (0) {
 					}
 				}
 			} catch(e) {
+              this.addLog(e.message+':'+location);
 			}
 			return '';
 		},
@@ -869,8 +871,11 @@ if (0) {
 					this.updateMap(true);
 				}
 				var floor = this.getCurrentFloor();
-				this.addLog('floor: '+floor);
 				var Map = this.Map ? this.Map[floor] : null;
+                if (typeof(Map)=='string'){
+                  floor = Map;
+                  Map = this.Map[floor];
+                }
 				var availableCells = this.availableCells ? this.availableCells[floor] : null;
 				var objects = this.objects ? this.objects[floor] : null;
 				if (!Map) {
@@ -878,6 +883,10 @@ if (0) {
 					if (!this.Map) this.addLog('no map');
 					floor = this.getCurrentFloor();
 					Map = this.Map ? this.Map[floor] : null;
+                    if (typeof(Map)=='string'){
+                      floor = Map;
+                      Map = this.Map[floor];
+                    }
 					availableCells = this.availableCells ? this.availableCells[floor] : null;
 					objects = this.objects ? this.objects[floor] : null;
 				}
@@ -888,20 +897,22 @@ if (0) {
 					this.div.style.width = ''+((Map[0].length-8)*15)+'px';
 					this.div.style.height = ''+((Map.length-8)*15)+'px';
 					var selectMapTarget = combats_plugins_manager.get_binded_method(this,this.selectMapTarget);
+
+try{
 					for(var i=4; i<Map.length-4; i++)
 						for(var j=4; j<Map[i].length-4; j++) {
 							if (Map[i][j]) {
 								var cell = top.document.createElement('<div style="position: absolute; width:17px; height:17px; background: url(http://img.combats.com/i/sprites/map/'+Map[i][j]+'.gif) no-repeat center center; overflow: hidden; left:'+(j*15-60)+'px; top:'+(i*15-60)+'px">');
 								this.div.insertBefore(cell, null);
-								if (availableCells[i][j]) {
+								if (availableCells && availableCells[i] && availableCells[i][j]) {
 									cell.onclick = selectMapTarget;
 									cell.mapX = j;
 									cell.mapY = i;
-									if (objects[i][j]) {
+									if (objects && objects[i] && objects[i][j]) {
 										cell.innerHTML = '<img src="'+this.markUseful+'" alt="'+objects[i][j]+'" style="position:absolute; left:2px; top:2px;"/>';
 									}
 								} else {
-									if (objects[i][j]) {
+									if (objects && objects[i] && objects[i][j]) {
 										cell.innerHTML = '<img src="'+this.markUseful+'" alt="'+objects[i][j]+'" style="position:absolute; left:2px; top:2px;"/>';
 									} else {
 										cell.innerHTML = '<img src="'+this.markObstacle+'" alt="Препятствие" style="position:absolute; left:2px; top:2px;"/>';
@@ -909,6 +920,10 @@ if (0) {
 								}
 							}
 						}
+} catch(e){
+  this.addLog(e.message+' ['+i+','+j+']');
+}
+
 					var arrMap = top.combats_plugins_manager.getMainFrame().arrMap;
 					for (var i in arrMap)
 						for (var j in arrMap[i])

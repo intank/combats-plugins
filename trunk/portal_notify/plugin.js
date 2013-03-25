@@ -1,28 +1,29 @@
 (function() {
+  var cpm = top.combats_plugins_manager;
   return {
     toString: function() {
       return "Ќапоминание о доступности портала";
     },
     onloadHandler: function() {
-      if (top.combats_plugins_manager.getMainFrame().location.pathname!='/portal.pl')
+      if (cpm.getMainFrame().location.pathname!='/portal.pl')
         return;
       try {
-        var match = top.combats_plugins_manager.getMainFrame().document.documentElement.innerText.match(/¬рем€ до следующего перемещени€\:\s*(?:(\d+) ч\.)?\s*(?:(\d+) мин\.)?/);
+        var match = $(cpm.getMainFrame().document.body).text().match(/¬рем€ до следующего перемещени€\:(?:\s*|.*? еще )(?:(\d+) ч\.\s*(?:(\d+) мин\.|)|(\d+) мин\.)/);
         if (match) {
-          var notify_handler = top.combats_plugins_manager.plugins_list['notify_handler'];
+          var notify_handler = cpm.plugins_list['notify_handler'];
           var timespan = 0;
-          timespan += (match[1]==''?0:parseInt(match[1])*60);
-          timespan += (match[2]==''?0:parseInt(match[2]));
+          timespan += (match[1]=='' ? 0 : 60*match[1]);
+          timespan += (match[2]=='' ? (match[3]==''?0:1*match[3]) : 1*match[2]);
           notify_handler.add_notification('portal','¬рем€ до следующего перемещени€',parseInt((new Date()).getTime()/60000)+timespan);
         }
       } catch (e) {
-        combats_plugins_manager.logError(this,e);
+        cpm.logError(this,e);
       }
     },
     Init: function() {
-      top.combats_plugins_manager.attachEvent(
+      cpm.attachEvent(
         'mainframe.load',
-        top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
+        cpm.get_binded_method(this,this.onloadHandler));
       return this;
     }
   }.Init();
