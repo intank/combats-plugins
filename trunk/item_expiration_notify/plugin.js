@@ -1,4 +1,5 @@
 (function() {
+  var CPM = top.combats_plugins_manager;
   return {
     toString: function() {
       return "Уведомление об истечении срока годности";
@@ -14,17 +15,23 @@
       this.configurator.saveIni('items',this.items.join(';'));
     },
     onloadHandler: function() {
-      var mainframe = top.combats_plugins_manager.getMainFrame();
+      var mainframe = CPM.getMainFrame();
       if (mainframe.location.pathname.search(/^\/main\.pl/)!=0)
         return;
       if (!this.notify_handler)
-        this.notify_handler = top.combats_plugins_manager.plugins_list['notify_handler'];
+        this.notify_handler = CPM.plugins_list['notify_handler'];
       var self = this;
       setTimeout(function(){
         var $ = top.$;
         try {
 //          var result = '';
+          var href = $('td[bgcolor=#a5a5a5] a',mainframe.document.body).attr('href');
+          var section = ((href?href.match(/[\?&]edit=(\d+)(?=&|$)/):0)||[])[1];
+          if (!section)
+            return;
+          section = 'inventory_expiration_'+section;
           var now = parseInt((new Date()).getTime()/60000);
+          self.notify_handler.clear_notifications(section);
           $('table[bgcolor]:has(>tbody>tr[bgcolor]) > tbody > tr',mainframe.document).each(function(){
             var match = $('>td:eq(1)',this).text().match(/Срок годности\:.*?\(до (\d+)\.(\d+)\.(\d+)\s+(\d+)\:(\d+)\)/);
             if (match) {
@@ -39,25 +46,24 @@
                 parseInt(match[5]),
                 0,0
               );
-              var notificationID = expiration.valueOf()+itemTitle;
+//              var notificationID = expiration.valueOf()+itemTitle;
 //              result += itemTitle+expiration.toLocaleString()+'\n';
               expiration = Math.floor(expiration.valueOf()/60000);
-              self.notify_handler.clear_notifications(notificationID);
-              self.notify_handler.add_notification(notificationID,'Срок годности предмета '+itemTitle,expiration);
+              self.notify_handler.add_notification(section,'Срок годности предмета '+itemTitle,expiration);
             }
           });
 //          result && alert(result);
         } catch (e) {
-          combats_plugins_manager.logError(self,e);
+          CPM.logError(self,e);
         }
       },50);
     },
     init: function(){
-      this.configurator = combats_plugins_manager.createConfigurationElement('item_expiration_notify');
+      this.configurator = CPM.createConfigurationElement('item_expiration_notify');
       this.items = this.configurator.loadIni('items', '').split(/;/);
-      top.combats_plugins_manager.attachEvent(
+      CPM.attachEvent(
         'mainframe.load',
-        top.combats_plugins_manager.get_binded_method(this,this.onloadHandler));
+        CPM.get_binded_method(this,this.onloadHandler));
       return this;
     }
   }.init();

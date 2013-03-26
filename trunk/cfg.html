@@ -84,7 +84,11 @@ function setPluginGfg() {
 function invoke(i) {
   getProps();
   try {
-  props[i].value.apply(plugin, [props]);
+    var result = props[i].value.apply(plugin, [props]);
+    if (result&&typeof(result)=='object'){
+      var plugin_index = parent.combats_plugins_manager.lastConfiguredPlugin;
+      createPluginGfgLayout(plugin, plugin_index, result);
+    }
   } catch(e) {
     top.combats_plugins_manager.logError('invoke',e);
   }
@@ -96,18 +100,27 @@ function is_function(value) {
 
 function getPluginGfg() {
   try {
-  var plugin_index = document.all["index"].value;
-  parent.combats_plugins_manager.lastConfiguredPlugin = plugin_index;
-  plugin = parent.combats_plugins_manager.plugins_list[plugin_index];
-  if (plugin==null) {
+    var plugin_index = document.all["index"].value;
+    parent.combats_plugins_manager.lastConfiguredPlugin = plugin_index;
+    plugin = parent.combats_plugins_manager.plugins_list[plugin_index];
+    if (plugin==null) {
+      props = null;
+      document.all["props"].innerHTML = "";
+      return;
+    }
     props = null;
-    document.all["props"].innerHTML = "";
-    return;
+    if ("getProperties" in plugin) {
+      props = plugin.getProperties();
+    }
+    
+    createPluginGfgLayout(plugin, plugin_index, props);
+  } catch(e) {
+    top.combats_plugins_manager.logError('getPluginGfg',e);
   }
-  props = null;
-  if ("getProperties" in plugin) {
-    props = plugin.getProperties();
-  }
+}
+
+function createPluginGfgLayout(plugin, plugin_index, props) {
+  try {
   var helpURL;
   var s = '';
   if (plugin_index=='.') {
