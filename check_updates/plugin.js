@@ -1,7 +1,9 @@
 (function(){
+  var CPM = top.combats_plugins_manager;
   return {
     checkScriptURL: 'http://combats-plugins.googlecode.com/svn/trunk/check_updates/',
     period: 2,
+    forceCheck: false,
     toString: function() { // Название плагина
       return "Проверка обновлений";
     },
@@ -17,7 +19,7 @@
       }
       return [
         {name:"Период проверки", value:choices},
-        {name:"Проверить сейчас", value:this.checkUpdates}
+        {name:"Проверить сейчас", value:function(){this.forceCheck=true;this.checkUpdates()}}
       ];
     },
     setProperties: function(a) { // применение изменённых настроек
@@ -29,8 +31,16 @@
       this.config.saveIni('lastCheck', this.lastCheck);
       document.body.insertBefore(document.createElement('<script type="text/javascript" src="'+this.checkScriptURL+'check.js">'));
     },
+    hasUpdate: function(msg){
+      CPM.add_chat(msg);
+      this.forceCheck = false;
+    },
+    noUpdates: function(){
+      this.forceCheck && CPM.add_chat('<i>Новых версий нет.</i>');
+      this.forceCheck = false;
+    },
     Init: function() {
-      this.config = combats_plugins_manager.createConfigurationElement('check_updates');
+      this.config = CPM.createConfigurationElement('check_updates');
       this.period = parseInt(this.config.loadIni('period', '2')) || 2;
       this.lastCheck = this.config.loadIni('lastCheck', '');
       switch (this.period) {

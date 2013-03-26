@@ -37,6 +37,13 @@
         notificationsStr += notifications[i][0]+'\n';
       }
       return [
+        { name:'Удалить все события', value: function(){
+            if(confirm('Это необратимая операция. Все текущие уведомления будут удалены. Продолжить?')){
+              this.RemoveAll();
+              return this.getProperties();
+            }
+          }
+        },
         { name:''/*"Уведомления"*/, value: notificationsStr, type: 'textarea', readonly:true, style: 'height:100%;' }
       ];
     },
@@ -69,6 +76,10 @@
       }
       notifications = notifications.join(';');
       this.save('notifications',notifications);
+    },
+    RemoveAll:function(){
+      this.notify_list = {};
+      this.save_notifications();
     },
     timerFirstHandler: function() {
       var cnt=0;
