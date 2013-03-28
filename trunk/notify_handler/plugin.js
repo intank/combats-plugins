@@ -1,4 +1,5 @@
 (function() {
+  var CPM = top.combats_plugins_manager;
   return {
     notify_timer: null,
     notify_list: {},
@@ -7,10 +8,20 @@
       return "Уведомление о приближающихся событиях";
     },
     load: function(key,def_val){
-      return external.m2_readIni(combats_plugins_manager.security_id,"Combats.RU","notify_handler\\settings.ini",top.getCookie('battle'),key,def_val);
+      return external.m2_readIni(CPM.security_id,"Combats.RU","notify_handler\\settings.ini",top.getCookie('battle'),key,def_val);
     },
     save: function(key,val){
-      external.m2_writeIni(combats_plugins_manager.security_id,"Combats.RU","notify_handler\\settings.ini",top.getCookie('battle'),key,val);
+      external.m2_writeIni(CPM.security_id,"Combats.RU","notify_handler\\settings.ini",top.getCookie('battle'),key,val);
+    },
+    getRemainingStr: function(minutes){
+      var hours = Math.floor(minutes/60);
+      minutes %= 60;
+      if (hours) {
+        var days = Math.floor(hours/24);
+        hours %= 24;
+        return (days ? days+' дн. ' : '')+hours+' ч. '+minutes+' минут'+(this.remaining[minutes%10]);
+      } else
+        return minutes+' минут'+(this.remaining[minutes%10]);
     },
     getProperties: function() {
       var notifications=[];
@@ -20,14 +31,7 @@
         for (var notification in this.notify_list[group]) {
           var newNotification=notification+': ';
           var minutes = this.notify_list[group][notification].estimation-now;
-          var hours = Math.floor(minutes/60);
-          minutes %= 60;
-          if (hours) {
-            var days = Math.floor(hours/24);
-            hours %= 24;
-            newNotification += (days ? days+' дн. ' : '')+hours+' ч. '+minutes+' мин.';
-          } else
-            newNotification += minutes+' мин.';
+          newNotification += this.getRemainingStr(minutes);
           notifications.push([newNotification,this.notify_list[group][notification].estimation]);
         }
       }
@@ -89,18 +93,18 @@
         for(var i in this.notify_list[group]) {
           var timespan = this.notify_list[group][i].estimation-now;
           if (timespan<=0) {
-            top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - Время пришло!');
+            CPM.add_chat('<font class=sysdate>Внимание!</font> '+i+' - Время пришло!');
             delete this.notify_list[group][i]
             save_notifications = true;
           } else if (timespan<=1440) {
-            top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - '+timespan+' минут'+(this.remaining[timespan%10]));
+            CPM.add_chat('<font class=sysdate>Внимание!</font> '+i+' - '+this.getRemainingStr(timespan));
             cnt=1;
           }
         }
       }
       save_notifications && this.save_notifications();
       if(cnt) {
-        this.notify_timer=setTimeout(top.combats_plugins_manager.get_binded_method(this,this.timerHandler),60*1000);
+        this.notify_timer=setTimeout(CPM.get_binded_method(this,this.timerHandler),60*1000);
       } else
         this.notify_timer=null;
     },
@@ -111,7 +115,7 @@
         for(var i in this.notify_list[group]) {
           var timespan = this.notify_list[group][i].estimation-now;
           if (timespan<=0) {
-            top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - Время пришло!');
+            CPM.add_chat('<font class=sysdate>Внимание!</font> '+i+' - Время пришло!');
             delete this.notify_list[group][i]
             this.save_notifications();
           } else {
@@ -119,14 +123,14 @@
             case 1:
             case 5:
             case 15:
-              top.combats_plugins_manager.add_chat('<font class=sysdate>Внимание!</font> '+i+' - '+timespan+' минут'+(this.remaining[timespan%10]));
+              CPM.add_chat('<font class=sysdate>Внимание!</font> '+i+' - '+this.getRemainingStr(timespan));
             }
             cnt=1;
           }
         }
       }
       if(cnt) {
-        this.notify_timer=setTimeout(top.combats_plugins_manager.get_binded_method(this,this.timerHandler),60*1000);
+        this.notify_timer=setTimeout(CPM.get_binded_method(this,this.timerHandler),60*1000);
       } else
         this.notify_timer=null;
     },
