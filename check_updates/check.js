@@ -1,7 +1,7 @@
 (function(){
   var actualVersion = '1.9.2';
   var downloadsURL = 'http://code.google.com/p/combats-plugins/downloads/list';
-  var msgNewVersion = ':idea: Внимание! Доступна новая версия <b>Менеджера плагинов для БК</b>. Обновить версию можно на <a href="'+downloadsURL+'" target=_blank title="Google Code">странице загрузок</a>.';
+  var msgNewVersion = ':idea: Внимание! Доступна новая версия <b>Менеджера плагинов для БК</b>: '+actualVersion+'. Обновить версию можно на <a href="'+downloadsURL+'" target=_blank title="Google Code">странице загрузок</a>.';
 
   var CPM = combats_plugins_manager;
   var version = CPM.getVersion();
