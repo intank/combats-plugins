@@ -18,6 +18,7 @@
  * [highlight_best_rune]
  * [hot_keys]
  * [inventory_backup]
+ * [item_expiration_notify]
  * [mainframe_handler]
  * [mainframe_reload]
  * [notify_handler]
