@@ -1,5 +1,5 @@
 (function() {
-
+  var w;
   top.combats_plugins_manager.plugins_list['top_tray'].addButton({
     'button': {
       'style': {
@@ -9,16 +9,19 @@
         'background': "#505050"
         },
       'onclick': function() {
-        var s=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\recipes.js")
-        var ss=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\data.js")
+          if (!w || w.closed) {
+            var s=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\recipes.js")
+            var ss=external.readFile(combats_plugins_manager.security_id,"Combats.RU","recipes\\data.js")
 
-        var w=window.open('about:blank');
-        if (!w.opener)
-          w.opener = top;
-        w.document.writeln('<script type="text/javascript">var security_id="'+top.combats_plugins_manager.security_id+'";</sc'+'ript>');
-        w.document.writeln('<script type="text/javascript">' + ss + '</sc'+'ript>');
-        w.document.writeln(s);
-        
+            w=window.open('about:blank');
+            if (!w.opener)
+              w.opener = top;
+            w.document.writeln('<script type="text/javascript">var security_id="'+top.combats_plugins_manager.security_id+'";</sc'+'ript>');
+            w.document.writeln('<script type="text/javascript">' + ss + '</sc'+'ript>');
+            w.document.writeln(s);
+          } else {
+            w.ParseInventory();
+          }
         }
       },
     'img': {

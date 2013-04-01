@@ -16,19 +16,20 @@ for(var i in locations) {
   oOption.value = ""+i;
 }
 
-//try {
-
-//debugger;
-var cells = opener.$('tr[bgcolor]:has(img)',opener.combats_plugins_manager.getMainFrame().document).get();
-
 var show_type = '0';
-
 components_count=0;
+
 var regExMater = /^http\:\/\/.+?\/item-(mater\d+)$/;
 var regExItem = /^http\:\/\/.+?\/item-(.+)$/;
 var regExCount = /^(.*?)\s*\(x(\d+)\)(.*?)$/;
 var regExRune = /^rune[\d_]/;
 var regExImgItem = /\/i\/items\/(.*?)\.gif$/i;
+
+function ParseInventory(){
+//try {
+
+//debugger;
+var cells = opener.$('tr[bgcolor]:has(img)',opener.combats_plugins_manager.getMainFrame().document).get();
 
 for(i=0;i<cells.length;i++) {
   var src = opener.$('img:first',cells[i])[0].src;
@@ -97,6 +98,12 @@ components.sort(function(a,b){
     return 1;
   else return 0;
 });
+
+Analyze();
+ShowComponents();
+ShowRecipes();
+ShowAccepted();
+}
 
 function HintHide() {
   document.all['components'].contentWindow.document.all("hint").style.visibility = "hidden";
@@ -191,7 +198,7 @@ function Analyze() {
     if(m>=0) {
       recipes[i].possible = m;
     }
-    if (!recipes[i].comp_str) {
+    if (1 || !recipes[i].comp_str) {
       s = '';
       for(k=0; k<recipes[i].comp.length; k+=2) {
         for(j=0; j<components.length; j++) {
@@ -252,11 +259,9 @@ function ShowAccepted() {
   document.all['accepted'].contentWindow.document.body.scrollTop = t;
 }
 
-Analyze();
 load_cfg();
-ShowComponents();
-ShowRecipes();
-ShowAccepted();
+
+ParseInventory();
 
 function save(sect,key,val){external.m2_writeIni(security_id,"Combats.RU","recipes\\underground.ini",sect,key,val);}
 function load(sect,key,def_val){return external.m2_readIni(security_id,"Combats.RU","recipes\\underground.ini",sect,key,def_val);}
