@@ -91,175 +91,31 @@ var recipes = [
   {name:'tn3_door_pass', descr:'Пропуск в жилую часть', comp:['tn3_slimemeat',5], location:6, possible:0, accepted:0},
   {name:'tn3_door_pass', descr:'Пропуск в жилую часть', comp:['tn3_larvameat',5], location:6, possible:0, accepted:0},
 
+  { name:'dispell1', descr:'Снять Проклятье', comp: ['mater294',1,'mater298',5], location:6, possible:0, accepted:0 },
+
+  {name:'2/amulet1044', descr:'Амулет Быстрой Расплаты', comp:['sp_mat48', 1, 'mater301', 1, 'mater294', 3, 'mater299', 7, 'mater293', 4, 'mater296', 12, 'mater298', 12, 'mater292', 11], location:6, possible:0, accepted:0},
+  {name:'11/hands1043', descr:'Перчатки Быстрой Расплаты', comp:['sp_mat41', 1, 'mater294', 2,'mater300', 5,'mater295', 6,'mater296', 6,'mater298', 8], location:6, possible:0, accepted:0},
+  {name:'12/boots1043', descr:'Сапоги Быстрой Расплаты', comp:['sp_mat40', 1, 'mater299', 4,'mater300', 5,'mater295', 14,'mater296', 8], location:6, possible:0, accepted:0},
+  {name:'9/head1042', descr:'Шлем Неотвратимого Возмездия', comp:['sp_mat43', 1, 'mater301', 1, 'mater294', 6, 'mater299', 4, 'mater300', 7, 'mater296', 13, 'mater298', 8], location:6, possible:0, accepted:0},
+  {name:'13/arms1043', descr:'Наручи Неотвратимого Возмездия', comp:['sp_mat44', 1, 'mater300', 5,'mater299', 3,'mater296', 6,'mater298', 7,'mater295', 8], location:6, possible:0, accepted:0},
+  {name:'1/clips1041', descr:'Сереги Неотвратимого Возмездия', comp:['sp_mat47', 1, 'mater294', 5,'mater299', 5,'mater293', 5,'mater296', 6,'mater292', 8,'mater297', 9], location:6, possible:0, accepted:0},
+  {name:'13/arms1042', descr:'Браслеты Неуловимой Мощи', comp:['sp_mat44', 1, 'mater296', 9,'mater294', 7,'mater293', 3,'mater295', 8], location:6, possible:0, accepted:0},
+  {name:'11/hands1042', descr:'Перчатки Неуловимой Мощи', comp:['sp_mat41', 1, 'mater301', 1, 'mater300', 4,'mater294', 6,'mater295', 13,'mater298', 8], location:6, possible:0, accepted:0},
+  {name:'12/boots1042', descr:'Сапоги Неуловимой Мощи', comp:['sp_mat40', 1, 'mater300', 7,'mater299', 3,'mater295', 5,'mater298', 15], location:6, possible:0, accepted:0},
+  {name:'4/body1043', descr:'Броня Свистящей Смерти', comp:['sp_mat42', 1, 'mater301', 1, 'mater294', 12,'mater300', 12,'mater292', 7,'mater296', 15,'mater295', 15,'mater297', 10], location:6, possible:0, accepted:0},
+  {name:'11/hands1044', descr:'Перчатки Свистящей Смерти', comp:['sp_mat41', 1, 'mater299', 3,'mater300', 6,'mater295', 5,'mater296', 5,'mater298', 10], location:6, possible:0, accepted:0},
+  {name:'5/belt1043', descr:'Пояс Свистящей Смерти', comp:['sp_mat45', 1, 'mater294', 4,'mater293', 3,'mater295', 7,'mater296', 5,'mater298', 12], location:6, possible:0, accepted:0},
+  {name:'1/clips1042', descr:'Серьги Расколотых Черепов', comp:['sp_mat47', 1, 'mater300', 7,'mater299', 5,'mater297', 5,'mater296', 6,'mater293', 8,'mater295', 12], location:6, possible:0, accepted:0},
+  {name:'9/head1043', descr:'Шлем Расколотых Черепов', comp:['sp_mat43', 1, 'mater301', 1, 'mater292', 6,'mater299', 4,'mater294', 7,'mater295', 10,'mater298', 8], location:6, possible:0, accepted:0},
+  {name:'13/arms1044', descr:'Наручи Расколотых Черепов', comp:['sp_mat44', 1, 'mater300', 5, 'mater294', 3, 'mater296', 8, 'mater292', 7, 'mater295', 7], location:6, possible:0, accepted:0},
+  {name:'4/body1042', descr:'Броня Неприступного Утеса', comp:['sp_mat42', 1, 'mater301', 1, 'mater299', 10,'mater300', 12,'mater293', 8,'mater296', 20,'mater295', 10,'mater297', 10], location:6, possible:0, accepted:0},
+  {name:'5/belt1042', descr:'Пояс Неприступного Утеса', comp:['sp_mat45', 1, 'mater294', 4,'mater299', 3,'mater300', 4,'mater296', 5,'mater298', 10], location:6, possible:0, accepted:0},
+  {name:'10/shield1042', descr:'Щит Неприступного Утеса', comp:['sp_mat46', 1, 'mater294', 7,'mater300', 7,'mater296', 11,'mater295', 6,'mater298', 6], location:6, possible:0, accepted:0},
+  {name:'9/head1044', descr:'Шлем Гиблой Стрелы', comp:['sp_mat43', 1, 'mater293', 5,'mater299', 7,'mater295', 9,'mater296', 15,'mater298', 5], location:6, possible:0, accepted:0},
+  {name:'2/amulet1045', descr:'Амулет Гиблой Стрелы', comp:['sp_mat48', 1, 'mater301', 1, 'mater294', 5,'mater299', 8,'mater293', 5,'mater300', 10,'mater298', 12,'mater292', 5], location:6, possible:0, accepted:0},
+  {name:'12/boots1044', descr:'Сапоги Гиблой Стрелы', comp:['sp_mat40', 1, 'mater300', 8,'mater294', 5,'mater295', 9,'mater297', 10], location:6, possible:0, accepted:0},
 
 
-/*  
-//Для сбора Черной Метки у вас должны быть: Сталь, Глубинный камень, Плод змеиного дерева, Тысячелетний камень, Лучистый рубин, Лучистый топаз.  
-//Для сбора Красной Метки у вас должны быть: Лучистое серебро, Сгусток эфира (3 шт.), Кристалл голоса предков, Камень затаенного солнца, Шепот гор, Эссенция праведного гнева, Стихиалия.
-//Для сбора свитка "Проклятье Умирающей Земли" у вас должны быть: Кристалл голоса предков, Кристалл стабильности.
-//Для сбора свитка "Проклятье Стихающего Ветра" у вас должны быть: Сталь, Сгусток астрала, Плод змеиного дерева, Тысячелетний камень, Шепот гор.
-//Для сбора свитка "Проклятье Замерзающей Воды" у вас должны быть: Кожа змеиного дерева, Глубинный камень, Тысячелетний камень, Кристалл времен, Камень затаенного солнца.
-//Для сбора свитка "Проклятье Угасающего Огня" у вас должны быть: Кожа Общего Врага, Сгусток эфира, Плод змеиного дерева, Тысячелетний камень, Лучистый топаз.
-//Для сбора свитка "Проклятье Легкого Отупления" у вас должны быть: Кристалл стабильности, Лучистый рубин, Стихиалия.
-//Для сбора свитка "Проклятье Уязвимости" у вас должны быть: Кристалл стабильности, Лучистый рубин, Стихиалия.
-//Для сбора свитка "Зачаровать кольцо: Вытягивание души [1]" у вас должны быть: Кристалл тысячи ответов, Сгусток эфира, Сгусток астрала.
-//Для сбора свитка "Зачаровать кольцо: Вытягивание души [2]" у вас должны быть: свиток "Зачаровать кольцо: Вытягивание души [1]", Топливо для Големов, Смазка для Големов, Ускоритель для Големов.
-
-  
-  {name:'spell_ug_undam4c', descr:'Проклятье Умирающей Земли', comp:['mater25', 1, 'mater26', 1], location:1, possible:0, accepted:0},
-  {name:'spell_ug_undam1c', descr:'Проклятье Угасающего Огня', comp:['mater11', 1, 'mater14', 1, 'mater17', 1, 'mater18', 1, 'mater29', 1], location:1, possible:0, accepted:0}, // проверено
-  {name:'spell_ug_undam2c', descr:'Проклятье Замерзающей Воды', comp:['mater10', 1, 'mater16', 1, 'mater18', 1, 'mater19', 1, 'mater27', 1], location:1, possible:0, accepted:0},
-  {name:'spell_ug_undam3c', descr:'Проклятье Стихающего Ветра', comp:['mater12', 1, 'mater15', 1, 'mater17', 1, 'mater18', 1, 'mater30', 1], location:1, possible:0, accepted:0},
-  {name:'spell_ug_unp10c', descr:'Проклятье Уязвимости', comp:['mater26', 1, 'mater28', 1, 'mater24', 1], location:1, possible:0, accepted:0},
-  {name:'spell_ug_unexprc', descr:'Проклятье Легкого Отупения', comp:['mater28', 1, 'mater26', 1, 'mater24', 1], location:1, possible:0, accepted:0},
-  {name:'spell_curse', descr:'Черная Метка', comp:['mater12', 1, 'mater28', 1, 'mater16', 1, 'mater17', 1, 'mater18', 1, 'mater29', 1], location:1, possible:0, accepted:0},
-//  {name:'spell_curseb', descr:'Красная Метка', comp:['mater14', 1, 'mater4', 1, 'mater25', 1, 'mater11', 1], location:1, possible:0, accepted:0}, // не работает
-
-//  {name:'spell_repare_1', descr:'Свиток починки 1', comp:['mater17', 2, 'mater10', 1, 'mater1', 1, 'mater3', 1], location:1, possible:0, accepted:0},
-//  {name:'spell_repare_3', descr:'Свиток починки 3', comp:['mater8', 1, 'mater15', 1, 'mater1', 1, 'mater4', 1], location:1, possible:0, accepted:0},
-//  {name:'spell_repare_5', descr:'Свиток починки 5', comp:['mater12', 1, 'mater15', 1, 'mater7', 2], location:1, possible:0, accepted:0},
-//  {name:'spell_repare_7', descr:'Свиток починки 7', comp:['mater17', 1, 'mater7', 1, 'mater8', 1], location:1, possible:0, accepted:0},
-//  {name:'spell_repare_10', descr:'Свиток починки 10', comp:['mater4', 1, 'mater17', 1, 'mater7', 1, 'mater28', 1, 'mater9', 1], location:1, possible:0, accepted:0},
-
-//  {name:'ring116', descr:'Кольцо Кровавой Луны', comp:['mater25', 1, 'mater21', 3], location:1, possible:0, accepted:0},
-//  {name:'ring116_1', descr:'Кольцо Кровавой Луны [10]', comp:['sp_mat3', 1, 'mater27', 1, 'mater16', 3, 'mater4', 1], location:4, possible:0, accepted:0},
-
-//  {name:'ring110', descr:'Кольцо Паука', comp:['mater30', 1, 'mater23', 3], location:1, possible:0, accepted:0},
-//  {name:'ring110_1', descr:'Кольцо Паука [10]', comp:['mater30', 1, 'mater23', 3, 'sp_mat3', 1, 'mater25', 1, 'mater17', 3, 'mater12', 1], location:4, possible:0, accepted:0},
-
-//  {name:'ring117', descr:'Кольцо Забытых Времен', comp:['mater25', 1, 'mater21', 3], location:1, possible:0, accepted:0},
-//  {name:'ring117_1', descr:'Кольцо Забытых Времен [10]', comp:['sp_mat3', 1, 'mater27', 1, 'mater16', 3, 'mater4', 1], location:4, possible:0, accepted:0},
-
-//  {name:'ring83', descr:'Кольцо Интуиции', comp:['mater2', 5, 'mater11', 2, 'mater14', 1, 'mater15', 2], location:1, possible:0, accepted:0},
-//  {name:'ring83', descr:'Кольцо Интуиции', comp:['mater1', 2, 'mater6', 5, 'mater19', 1], location:1, possible:0, accepted:0},  // не работает
-
-//  {name:'ring85', descr:'Кольцо ловкости', comp:['mater3',5,'mater10',2,'mater17',1,'mater18',1,'mater19',1], location:1, possible:0, accepted:0}, // проверено
-//  {name:'ring85', descr:'Кольцо ловкости', comp:['mater3',5,'mater7',2,'mater18',1], location:1, possible:0, accepted:0}, // не работает
-
-//  {name:'ring106', descr:'Рубиновое Кольцо', comp:['mater4', 3, 'mater7', 2, 'mater8', 4, 'mater13', 3], location:1, possible:0, accepted:0}, // проверено
-//  {name:'ring106', descr:'Рубиновое Кольцо', comp:['mater1', 3, 'mater8', 2, 'mater11', 2, 'mater14', 1], location:1, possible:0, accepted:0}, // не работает
-//  {name:'ring106', descr:'Рубиновое Кольцо', comp:['mater4', 3, 'mater7', 3, 'mater8', 4], location:1, possible:0, accepted:0}, // не работает
-
-//  {name:'ring207', descr:'Simplicity Ring', comp:['mater12', 2, 'mater13', 3, 'mater28', 1, 'mater29', 1], location:1, possible:0, accepted:0},
-//  {name:'ring104', descr:'Кольцо силы', comp:['mater1',4,'mater5',4,'mater9',3,'mater16',2,'mater19',1], location:1, possible:0, accepted:0}, // проверено
-//  {name:'ring99', descr:'Синее кольцо учителя', comp:['mater6',5,'mater15',2,'mater26',2,'mater22',1], location:1, possible:0, accepted:0}, // проверено
-
-  {name:'boots22', descr:'Ботинки Кровавой Луны [10]', comp:['sp_mat1', 1, 'mater30', 3], location:4, possible:0, accepted:0},
-  {name:'boots21', descr:'Сапоги Паука [10]', comp:['sp_mat1', 1, 'mater29', 3], location:4, possible:0, accepted:0},
-  {name:'shield82', descr:'Щит Паука [10]', comp:['sp_mat17', 1, 'mater21', 1, 'mater14', 2], location:4, possible:0, accepted:0},
-  {name:'shield84_1', descr:'Щит Забытых Времен [10]', comp:['sp_mat17', 1, 'mater13', 2, 'mater31', 1], location:4, possible:0, accepted:0},
-
-//  {name:'', descr:'', comp:['mater',0,'mater',0,'mater',0,'mater',0,'mater',0], location:4, possible:0, accepted:0},
-
-  {name:'enhp_6_revamp10', descr:'', comp:[], location:2, possible:0, accepted:0},
-  {name:'enhp_6_revamp10_2', descr:'', comp:[], location:2, possible:0, accepted:0},
-//  {name:'pot_base_200_bot4', descr:'Снадобье разума', comp:['mater30',1], location:2, possible:0, accepted:0},
-
-  {name:'axe88', descr:'Топор Кровавой Луны', comp:['mater15',8,'mater5',8], location:0, possible:0, accepted:0},
-  {name:'mace67', descr:'Булава Кровавой Луны', comp:['mater28',2,'mater5',5], location:0, possible:0, accepted:0},
-  {name:'hammer70', descr:'Молот Кровавой Луны', comp:['mater15',9,'mater5',10], location:0, possible:0, accepted:0},
-  {name:'armor106', descr:'Броня Кровавой Луны', comp:['mater20',1,'mater5',8], location:0, possible:0, accepted:0},
-  {name:'knife72', descr:'Кинжал Кровавой Луны', comp:['mater28',1,'mater5',12], location:0, possible:0, accepted:0},
-  {name:'sword103', descr:'Меч Кровавой Луны', comp:['mater28',1,'mater5',12], location:0, possible:0, accepted:0},
-  {name:'naruchi77', descr:'Перчатки Кровавой Луны', comp:['mater28',1,'mater5',3], location:0, possible:0, accepted:0},
-  {name:'helmet80', descr:'Шлем Кровавой Луны', comp:['mater15',5,'mater5',6], location:0, possible:0, accepted:0},
-  {name:'shield83', descr:'Щит Кровавой Луны', comp:['mater28',1,'mater5',3], location:0, possible:0, accepted:0},
-  {name:'amulet80', descr:'Амулет Кровавой Луны', comp:['mater28',2], location:0, possible:0, accepted:0},
-  {name:'ring116', descr:'Кольцо Кровавой Луны', comp:['mater28',1], location:0, possible:0, accepted:0},
-  {name:'braslet24', descr:'Браслет Кровавой Луны', comp:['mater28',1,'mater5',3], location:0, possible:0, accepted:0},
-  {name:'clip80', descr:'Серьги Кровавой Луны', comp:['mater28',2], location:0, possible:0, accepted:0},
-  {name:'boots22', descr:'Ботинки Кровавой Луны', comp:['mater28',1,'mater5',5], location:0, possible:0, accepted:0},
-  {name:'belt36', descr:'Пояс Кровавой Луны', comp:['mater28',1,'mater5',4], location:0, possible:0, accepted:0},
-//!!!  {name:'leg12', descr:'Поножи Кровавой Луны', comp:['mater28',1,'mater5',5], location:0, possible:0, accepted:0},
-  
-  {name:'knife71', descr:'Кинжал Паука', comp:['mater30',1,'mater12',12], location:0, possible:0, accepted:0},
-  {name:'axe87', descr:'Топор Паука', comp:['mater18',9,'mater12',8], location:0, possible:0, accepted:0},
-  {name:'mace66', descr:'Булава Паука', comp:['mater30',2,'mater12',5], location:0, possible:0, accepted:0},
-  {name:'boots21', descr:'Сапоги Паука', comp:['mater30',1,'mater12',5], location:0, possible:0, accepted:0},
-  {name:'helmet79', descr:'Шлем Паука', comp:['mater18',5,'mater12',6], location:0, possible:0, accepted:0},
-  {name:'naruchi76', descr:'Наручи Паука', comp:['mater30',1,'mater12',3], location:0, possible:0, accepted:0},
-  {name:'belt35', descr:'Пояс Паука', comp:['mater30',1,'mater12',4], location:0, possible:0, accepted:0},
-  {name:'shield82', descr:'Щит Паука', comp:['mater30',1,'mater18',3], location:0, possible:0, accepted:0},
-  {name:'clip76', descr:'Серьги Паука', comp:['mater30',2], location:0, possible:0, accepted:0},
-  {name:'amulet75', descr:'Амулет Паука', comp:['mater30',2], location:0, possible:0, accepted:0},
-  {name:'ring110', descr:'Кольцо Паука', comp:['mater30',1], location:0, possible:0, accepted:0},
-  {name:'sword102', descr:'Меч Паука', comp:['mater30',1,'mater12',12], location:0, possible:0, accepted:0},
-  {name:'naruchi78', descr:'Перчатки Паука', comp:['mater30',1,'mater12',3], location:0, possible:0, accepted:0},
-  {name:'armor105', descr:'Броня Паука', comp:['mater22',1,'mater12',8], location:0, possible:0, accepted:0},
-//!!!  {name:'leg13', descr:'Поножи Паука', comp:['mater30',1,'mater12',5], location:0, possible:0, accepted:0},
-
-  {name:'axe89', descr:'Топор Забытых Времен', comp:['mater19',9,'mater6',8], location:0, possible:0, accepted:0},
-  {name:'clip81', descr:'Серьги Забытых Времен', comp:['mater25',2], location:0, possible:0, accepted:0},
-  {name:'amulet81', descr:'Амулет Забытых Времен', comp:['mater25',2], location:0, possible:0, accepted:0},
-  {name:'ring117', descr:'Кольцо Забытых Времен', comp:['mater25',1], location:0, possible:0, accepted:0},
-  {name:'knife73', descr:'Кинжал Забытых Времен', comp:['mater25',1,'mater6',12], location:0, possible:0, accepted:0},
-  {name:'boots23', descr:'Сапоги Забытых Времен', comp:['mater25',1,'mater6',5], location:0, possible:0, accepted:0},
-  {name:'naruchi79', descr:'Перчатки Забытых Времен', comp:['mater25',1,'mater6',3], location:0, possible:0, accepted:0},
-  {name:'braslet25', descr:'Наручи Забытых Времен', comp:['mater25',1,'mater6',3], location:0, possible:0, accepted:0},
-  {name:'belt37', descr:'Пояс Забытых Времен', comp:['mater25',1,'mater6',4], location:0, possible:0, accepted:0},
-  {name:'helmet81', descr:'Шлем Забытых Времен', comp:['mater19',5,'mater6',6], location:0, possible:0, accepted:0},
-  {name:'mace68', descr:'Булава Забытых Времен', comp:['mater25',2,'mater6',5], location:0, possible:0, accepted:0},
-  {name:'hammer71', descr:'Молот Забытых Времен', comp:['mater19',9,'mater6',10], location:0, possible:0, accepted:0},
-  {name:'sword104', descr:'Меч Забытых Времен', comp:['mater25',1,'mater6',12], location:0, possible:0, accepted:0},
-  {name:'armor107', descr:'Броня Забытых Времен', comp:['mater31',1,'mater6',8], location:0, possible:0, accepted:0},
-  {name:'shield84', descr:'Щит Забытых Времен', comp:['mater25',1,'mater19',3], location:0, possible:0, accepted:0},
-//!!!  {name:'leg11', descr:'Поножи Забытых Времен', comp:['mater25',1,'mater6',5], location:0, possible:0, accepted:0},
-
-  {name:'ring129', descr:'Кольцо Скорпиона', comp:['mater30',1], location:0, possible:0, accepted:0},
-  {name:'axe90', descr:'Топор Скорпиона', comp:['mater16',9,'mater3',8], location:0, possible:0, accepted:0},
-  {name:'hammer74', descr:'Цеп Скорпиона', comp:['mater30',2,'mater3',5], location:0, possible:0, accepted:0},
-  {name:'knife77', descr:'Клинок Скорпиона', comp:['mater30',1,'mater3',12], location:0, possible:0, accepted:0},
-  {name:'sword105', descr:'Меч Скорпиона', comp:['mater30',1,'mater3',12], location:0, possible:0, accepted:0},
-  {name:'boots27', descr:'Ботинки Скорпиона', comp:['mater30',1,'mater3',5], location:0, possible:0, accepted:0},
-  {name:'naruchi86', descr:'Перчатки Скорпиона', comp:['mater30',1,'mater3',3], location:0, possible:0, accepted:0},
-  {name:'armor109', descr:'Броня Скорпиона', comp:['mater22',1,'mater3',8], location:0, possible:0, accepted:0},
-  {name:'helmet85', descr:'Шлем Скорпиона', comp:['mater16',5,'mater3',6], location:0, possible:0, accepted:0},
-  {name:'braslet32', descr:'Браслет Скорпиона', comp:['mater30',1,'mater3',3], location:0, possible:0, accepted:0},
-  {name:'belt44', descr:'Пояс Скорпиона', comp:['mater30',1,'mater3',4], location:0, possible:0, accepted:0},
-  {name:'shield86', descr:'Щит Скорпиона', comp:['mater30',1,'mater16',3], location:0, possible:0, accepted:0},
-  {name:'clip90', descr:'Серьги Скорпиона', comp:['mater30',2], location:0, possible:0, accepted:0},
-  {name:'amulet98', descr:'Амулет Скорпиона', comp:['mater30',2], location:0, possible:0, accepted:0},
-//!!!  {name:'leg16', descr:'Поножи Скорпиона', comp:['mater30',1,'mater3',5], location:0, possible:0, accepted:0},
-
-  {name:'ring128', descr:'Кольцо Злодеяний', comp:['mater29',1], location:0, possible:0, accepted:0},
-  {name:'knife76', descr:'Кинжал Злодеяний', comp:['mater29',1,'mater10',12], location:0, possible:0, accepted:0},
-  {name:'sword100', descr:'Меч Злодеяний', comp:['mater14',8,'mater10',9], location:0, possible:0, accepted:0},
-  {name:'boots26', descr:'Ботинки Злодеяний', comp:['mater29',1,'mater10',5], location:0, possible:0, accepted:0},
-  {name:'naruchi85', descr:'Перчатки Злодеяний', comp:['mater29',1,'mater10',3], location:0, possible:0, accepted:0},
-  {name:'armor108', descr:'Броня Злодеяний', comp:['mater21',1,'mater10',8], location:0, possible:0, accepted:0},
-  {name:'helmet84', descr:'Шлем Злодеяний', comp:['mater14',5,'mater10',6], location:0, possible:0, accepted:0},
-  {name:'braslet31', descr:'Наручи Злодеяний', comp:['mater29',1,'mater10',3], location:0, possible:0, accepted:0},
-  {name:'belt43', descr:'Пояс Злодеяний', comp:['mater29',1,'mater10',4], location:0, possible:0, accepted:0},
-  {name:'shield85', descr:'Щит Злодеяний', comp:['mater29',1,'mater14',3], location:0, possible:0, accepted:0},
-  {name:'clip89', descr:'Серьги Злодеяний', comp:['mater29',2], location:0, possible:0, accepted:0},
-  {name:'amulet97', descr:'Амулет Злодеяний', comp:['mater29',2], location:0, possible:0, accepted:0},
-//!!!  {name:'leg17', descr:'Поножи Злодеяний', comp:['mater29',1,'mater10',5], location:0, possible:0, accepted:0},
-
-  {name:'knife74_du2', descr:'Кинжал Утреннего Солнца', comp:['mater27',1,'mater2',11,'mater2',1], location:0, possible:0, accepted:0},
-  {name:'axe90_du2', descr:'Топор Утреннего Солнца', comp:['mater16',9,'mater2',8], location:0, possible:0, accepted:0},
-  {name:'hammer72_du2', descr:'Молот Утреннего Солнца', comp:['mater27',2,'mater2',5], location:0, possible:0, accepted:0},
-  {name:'sword105_du2', descr:'Меч Утреннего Солнца', comp:['mater27',1,'mater2',11,'mater2',1], location:0, possible:0, accepted:0},
-  {name:'boots24_du2', descr:'Сапоги Утреннего Солнца', comp:['mater27',1,'mater2',5], location:0, possible:0, accepted:0},
-  {name:'naruchi83_du2', descr:'Перчатки Утреннего Солнца', comp:['mater27',1,'mater2',3], location:0, possible:0, accepted:0},
-  {name:'armor108_du1', descr:'Броня Утреннего Солнца', comp:['mater23',1,'mater2',8], location:0, possible:0, accepted:0},
-  {name:'helmet82_du2', descr:'Шлем Утреннего Солнца', comp:['mater16',5,'mater2',6], location:0, possible:0, accepted:0},
-  {name:'braslet26_du2', descr:'Наручи Утреннего Солнца', comp:['mater27',1,'mater2',3], location:0, possible:0, accepted:0},
-  {name:'belt38_du2', descr:'Пояс Утреннего Солнца', comp:['mater27',1,'mater2',4], location:0, possible:0, accepted:0},
-  {name:'shield85_du2', descr:'Щит Утреннего Солнца', comp:['mater27',1,'mater16',3], location:0, possible:0, accepted:0},
-  {name:'clip82_du2', descr:'Серьги Утреннего Солнца', comp:['mater27',2], location:0, possible:0, accepted:0},
-  {name:'amulet83_du2', descr:'Ожерелье Утреннего Солнца', comp:['mater27',2], location:0, possible:0, accepted:0},
-  {name:'ring119_du2', descr:'Кольцо Утреннего Солнца', comp:['mater27',1], location:0, possible:0, accepted:0},
-//!!!  {name:'leg14', descr:'Поножи Утреннего Солнца', comp:['mater27',1,'mater2',5], location:0, possible:0, accepted:0},
-
-  {name:'belt39', descr:'Пояс Решимости', comp:['mater26',1,'mater1',4], location:0, possible:0, accepted:0},
-  {name:'roba51', descr:'Мантия Решимости', comp:['mater24',1,'mater1',8], location:0, possible:0, accepted:0},
-  {name:'braslet27', descr:'Наручи Решимости', comp:['mater26',1,'mater1',3], location:0, possible:0, accepted:0},
-  {name:'helmet83', descr:'Маска Решимости', comp:['mater17',5,'mater1',6], location:0, possible:0, accepted:0},
-  {name:'staff52', descr:'Посох Решимости', comp:['mater24',1,'mater17',2], location:0, possible:0, accepted:0},
-  {name:'naruchi84', descr:'Перчатки Решимости', comp:['mater26',1,'mater1',6], location:0, possible:0, accepted:0},
-  {name:'boots25', descr:'Сапоги Решимости', comp:['mater26',1,'mater1',5], location:0, possible:0, accepted:0},
-  {name:'leg15', descr:'Штаны Решимости', comp:['mater26',1,'mater1',5], location:0, possible:0, accepted:0},
-*/
   
 //  {name:'', descr:'', comp:['mater',0,'mater',0,'mater',0,'mater',0,'mater',0], location:4, possible:0, accepted:0},
 
@@ -305,7 +161,6 @@ var recipes = [
   
 // Разное
 /*
-  { name:'dispell1', descr:'Снять Проклятье', comp: ['mater294',1,'mater298',5], location:6, possible:0, accepted:0 },
   { name:'naruchi41', descr:'Наручи Неотвратимого Возмездия', comp:['mater300',5, 'mater299',3, 'mater296',6, 'mater298',7, 'mater295',8], location:6, possible:0, accepted:0 }
 */
 ];

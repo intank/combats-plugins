@@ -232,8 +232,8 @@ function showCode() {
       }
     map.push('['+row.join(',')+']');
   }
-  var code = '['+map.join(',\n')+']';
-  document.getElementById('code').value = code;
+  var code = '[\n'+map.join(',\n')+'\n]';
+  document.getElementById('code').innerText = code;
   document.getElementById('code').parentNode.style.left = ''+Math.round(document.body.offsetWidth/2-320)+'px';
   document.getElementById('code').parentNode.style.top = ''+Math.round(document.body.offsetHeight/2-220)+'px';
   document.getElementById('code').parentNode.style.display = '';
@@ -246,7 +246,7 @@ function hideCode() {
 function applyCode(map) {
   if (!map) {
     try {
-      map = eval('(function(){ return '+document.getElementById('code').value+' })()');
+      map = eval('(function(){ return '+document.getElementById('code').innerText+' })()');
     } catch(e) {
       return alert("Заданный текст не является допустимым двумерным массивом javascript");
     }
