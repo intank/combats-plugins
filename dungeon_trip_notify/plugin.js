@@ -17,6 +17,8 @@
             timespan += (match[2]==''?0:parseInt(match[2]));
             if (/<H3>Гора Легиона<\/H3>/.test(eventObj.window.document.body.innerHTML)) {
               notify_handler.add_notification('legionMount_trip','До посещения Горы Легиона',parseInt((new Date()).getTime()/60000)+timespan);
+            } else if (/<H3>Потеряный Вход<\/H3>/.test(eventObj.window.document.body.innerHTML)) {
+              notify_handler.add_notification('lostEntrance_trip','До посещения Потеряного Входа',parseInt((new Date()).getTime()/60000)+timespan);
             } else {
               notify_handler.add_notification('dungeon_trip','До посещения подземелья',parseInt((new Date()).getTime()/60000)+timespan);
             }

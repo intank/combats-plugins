@@ -6,8 +6,8 @@
     onloadHandler: function() {
       var d = top.combats_plugins_manager.getMainFrame().document;
 		if (d.location.href.match(/\/main\.pl\?move_dialog=/)) {
-			if ($('font[color=#ff0000]',combats_plugins_manager.getMainFrame().document).text()=='Вы получили новое задание.') {
-				var botName = $('script:not([src]):last',combats_plugins_manager.getMainFrame().document).html().match(/drwfl\("(.*?)",/)[1];
+			if ($('font[color=#ff0000],font[color=red]',combats_plugins_manager.getMainFrame().document).text()=='Вы получили новое задание.') {
+				var botName = $('body script[src=""],body script:not([src])',combats_plugins_manager.getMainFrame().document).last().html().match(/drwfl\("(.*?)",/)[1];
 				this.notify_handler.add_notification('mission','До получения задания у персонажа '+botName,parseInt((new Date()).getTime()/60000)+3*60);
 			}
 			return;
