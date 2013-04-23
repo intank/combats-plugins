@@ -43,26 +43,28 @@
       this.config = CPM.createConfigurationElement('check_updates');
       this.period = parseInt(this.config.loadIni('period', '2')) || 2;
       this.lastCheck = this.config.loadIni('lastCheck', '');
-      switch (this.period) {
-      case 1:
-        this.checkUpdates();
-        break;
-      case 2:
-        if (!this.lastCheck || (new Date().valueOf() - new Date().valueOf(this.lastCheck) > 24*60*60*1000)) {
+      setTimeout(CPM.get_binded_method(this,function(){
+        switch (this.period) {
+        case 1:
           this.checkUpdates();
+          break;
+        case 2:
+          if (!this.lastCheck || (new Date().valueOf() - new Date().valueOf(this.lastCheck) > 24*60*60*1000)) {
+            this.checkUpdates();
+          }
+          break;
+        case 3:
+          if (!this.lastCheck || (new Date().valueOf() - new Date().valueOf(this.lastCheck) > 7*24*60*60*1000)) {
+            this.checkUpdates();
+          }
+          break;
+        case 4:
+          if (!this.lastCheck || (new Date().valueOf() - new Date().valueOf(this.lastCheck) > 30*24*60*60*1000)) {
+            this.checkUpdates();
+          }
+          break;
         }
-        break;
-      case 3:
-        if (!this.lastCheck || (new Date().valueOf() - new Date().valueOf(this.lastCheck) > 7*24*60*60*1000)) {
-          this.checkUpdates();
-        }
-        break;
-      case 4:
-        if (!this.lastCheck || (new Date().valueOf() - new Date().valueOf(this.lastCheck) > 30*24*60*60*1000)) {
-          this.checkUpdates();
-        }
-        break;
-      }
+      }),500);
       return this;
     }
   }.Init();
