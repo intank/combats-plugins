@@ -49,14 +49,163 @@ function assignCell(e) {
   if (obj.nodeName!='TD')
     return;
 
-  
+  var x = obj.cellIndex;
+  var y = obj.parentNode.rowIndex;
+
+  function getRelative(dx,dy){
+    var table = obj.parentNode.parentNode.parentNode;
+    var x = obj.cellIndex;
+    var y = obj.parentNode.rowIndex;
+    if ((y+dy<0) || (y+dy>table.rows.length-1))
+      return null;
+    if ((x+dx<0) || (x+dx>table.rows[y+dy].cells.length-1))
+      return null;
+    return table.rows[y+dy].cells[x+dx];
+  }
+
   if (selectedClass=='unavailable')
     obj.innerText = 'X';
   else if (selectedClass=='object')
     obj.innerText = '+';
   else if (selectedClass=='danger')
     obj.innerText = '!';
-  else {
+  else if (selectedClass=='simple'){
+    obj.innerText = '';
+    var objRt = getRelative(1,0);
+    var objLt = getRelative(-1,0);
+    var objUp = getRelative(0,-1);
+    var objDn = getRelative(0,1);
+    if (obj.className=='empty'){
+      var className = 'd';
+      if (objUp){
+        var classNameUp = objUp.className;
+        if (classNameUp=='empty'){
+          className += '1';
+        } else {
+          objUp.className = classNameUp.replace(/5/,'');
+        }
+      } else {
+        className += '1';
+      }
+      if (objRt){
+        var classNameRight = objRt.className;
+        if (classNameRight=='empty'){
+          className += '3';
+        } else {
+          objRt.className = classNameRight.replace(/7/,'');
+        }
+      } else {
+        className += '3';
+      }
+      if (objDn){
+        var classNameDown = objDn.className;
+        if (classNameDown=='empty'){
+          className += '5';
+        } else {
+          objDn.className = classNameDown.replace(/1/,'');
+        }
+      } else {
+        className += '5';
+      }
+      if (objLt){
+        var classNameLeft = objLt.className;
+        if (classNameLeft=='empty'){
+          className += '7';
+        } else {
+          objLt.className = classNameLeft.replace(/3/,'');
+        }
+      } else {
+        className += '7';
+      }
+      obj.className = className;
+    } else {
+      if (objUp){
+        objUp.className = {
+          'empty':'empty',
+          'd':'d5',
+          'd1357':'d1357',
+          'd15':'d15',
+          'd37':'d357',
+          'd1':'d15',
+          'd3':'d35',
+          'd5':'d5',
+          'd7':'d57',
+          'd13':'d135',
+          'd35':'d35',
+          'd57':'d57',
+          'd17':'d157',
+          'd135':'d135',
+          'd357':'d357',
+          'd157':'d157',
+          'd137':'d1357'
+        }[objUp.className];
+      }
+      if (objRt){
+        objRt.className = {
+          'empty':'empty',
+          'd':'d7',
+          'd1357':'d1357',
+          'd15':'d157',
+          'd37':'d37',
+          'd1':'d17',
+          'd3':'d37',
+          'd5':'d57',
+          'd7':'d7',
+          'd13':'d137',
+          'd35':'d357',
+          'd57':'d57',
+          'd17':'d17',
+          'd135':'d1357',
+          'd357':'d357',
+          'd157':'d157',
+          'd137':'d137'
+        }[objRt.className];
+      }
+      if (objDn){
+        objDn.className = {
+          'empty':'empty',
+          'd':'d1',
+          'd1357':'d1357',
+          'd15':'d15',
+          'd37':'d137',
+          'd1':'d1',
+          'd3':'d13',
+          'd5':'d15',
+          'd7':'d17',
+          'd13':'d13',
+          'd35':'d135',
+          'd57':'d157',
+          'd17':'d17',
+          'd135':'d135',
+          'd357':'d1357',
+          'd157':'d157',
+          'd137':'d137'
+        }[objDn.className];
+      }
+      if (objLt){
+        objLt.className = {
+          'empty':'empty',
+          'd':'d3',
+          'd1357':'d1357',
+          'd15':'d135',
+          'd37':'d37',
+          'd1':'d13',
+          'd3':'d3',
+          'd5':'d35',
+          'd7':'d37',
+          'd13':'d13',
+          'd35':'d35',
+          'd57':'d357',
+          'd17':'d137',
+          'd135':'d135',
+          'd357':'d357',
+          'd157':'d1357',
+          'd137':'d137'
+        }[objLt.className];
+      }
+      obj.className = 'empty';
+    }
+  } else {
     obj.innerText = '';
     obj.className = selectedClass;
   }

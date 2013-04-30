@@ -83,6 +83,7 @@ DIV.danger {
 <div style="float:left; margin:0 2em 0 0" onclick="selectClass()">
 <select id="modeSelector" onchange="selectMode()"><option selected>стены</option><option>доступность</option><option>объекты</option><option>ловушки</option></select><br/>
 <span id="mode0" style="display:none">
+<button id="classSimple" title="Простой режим"><div class="simple"/></button>
 <button title="Пустая ячейка"><div class="empty"/></button>
 <button><div class="d"/></button>
 <button><div class="d1357"/></button>
@@ -167,5 +168,8 @@ DIV.danger {
 <div id="code" contenteditable="true" style="text-align:left; font-family:Courier,serif; background:#fff; width:600px; height:430px; border:2px solid #333; white-space:pre; word-wrap:break-word; overflow:scroll"></div>
 <button onclick="applyCode()">Применить</button> <button onclick="hideCode()">Закрыть</button>
 </div>
+<script type="text/javascript">
+  document.getElementById('classSimple').click();
+</script>
 </body>
 </html>
