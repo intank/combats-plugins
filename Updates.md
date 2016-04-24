@@ -1,0 +1,1 @@
+<wiki:gadget url="http://google-code-project-hosting-gadgets.googlecode.com/svn/build/prod/changes/gcChanges.xml" height="200" border="0" up\_projectName="combats-plugins" />

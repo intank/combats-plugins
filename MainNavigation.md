@@ -1,0 +1,5 @@
+  * [Быстрый старт](FastStart.md)
+  * [Список плагинов](PluginsList.md)
+  * [Управление плагинами](PluginsManagement.md)
+  * [Как создать свой плагин](HowToCreateNewPlugin.md)
+  * [Загрузки](http://code.google.com/p/combats-plugins/downloads/list)
